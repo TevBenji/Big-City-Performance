@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Game;
 using Game.Buildings;
 using Game.Citizens;
-using Game.City;
 using Game.Common;
 using Game.Creatures;
 using Game.Serialization;
@@ -27,26 +26,19 @@ namespace BigCityPerformance.People
     /// Anyone riding or waiting for transport keeps the household awake, so no vehicle or stop waits for someone who isn't
     /// there. Everyone wakes before a save (saves stay ordinary, and load without the mod) and sleeps again after.
     ///
-    /// What sleeping households would do in bulk is added back: their residential tax goes into the city budget each day.
+    /// The game's own counts, wages and residential tax still cover sleepers (<see cref="SleeperBookkeeping"/>).
     /// </summary>
     public sealed partial class DormancySystem : GameSystemBase
     {
         /// <summary>Rendered frames between top-ups: each is one batch of tag changes (a sync point), so not every frame.</summary>
         private const int TopUpFrames = 120;
 
-        // 262,144 simulation frames a day.
-        private const uint FramesPerDay = 262144u;
-
         private readonly List<Entity> sleepingHouseholds = new List<Entity>();
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private readonly List<Entity> sleepingEntities = new List<Entity>();
-        private int sleepingCitizens, frames, rawPopulation = -1;
-        private uint lastDay = uint.MaxValue;
+        private int sleepingCitizens, frames;
         private float lastAwakeShare = 1f;
         private EntityQuery households;
-        private SimulationSystem simulation;
-        private CitySystem citySystem;
-        private CityServiceBudgetSystem budget;
         private SaveGameSystem saveGame;
         private EndFrameBarrier endFrame;
 
@@ -62,13 +54,11 @@ namespace BigCityPerformance.People
         {
             base.OnCreate();
             Instance = this;
-            simulation = World.GetOrCreateSystemManaged<SimulationSystem>();
-            citySystem = World.GetOrCreateSystemManaged<CitySystem>();
-            budget = World.GetOrCreateSystemManaged<CityServiceBudgetSystem>();
             saveGame = World.GetOrCreateSystemManaged<SaveGameSystem>();
             endFrame = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
+            SleeperBookkeeping.Apply(World);
         }
 
         /// <summary>The share of households simulated in detail (1 = everyone, the game as it is).</summary>
@@ -93,7 +83,6 @@ namespace BigCityPerformance.People
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
             if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
-            AddTaxes();
         }
 
         private void Sleep(int count)
@@ -165,47 +154,6 @@ namespace BigCityPerformance.People
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
             sleepingCitizens = 0;
-            RestorePopulation();
-        }
-
-        /// <summary>
-        /// The game recounts the population (CountHouseholdDataSystem) without the sleepers; add them back, so the display and
-        /// the game's rules for a city this size still see everyone.
-        /// </summary>
-        private void KeepPopulation()
-        {
-            var city = citySystem.City;
-            if (city == Entity.Null || !EntityManager.HasComponent<Game.City.Population>(city)) return;
-            var population = EntityManager.GetComponentData<Game.City.Population>(city);
-            int counted = population.m_Population;
-            // Already added since the game's last count.
-            if (rawPopulation >= 0 && counted == rawPopulation + sleepingCitizens) return;
-            rawPopulation = counted;
-            if (sleepingCitizens == 0) return;
-            population.m_Population = counted + sleepingCitizens;
-            population.m_PopulationWithMoveIn += sleepingCitizens;
-            EntityManager.SetComponentData(city, population);
-        }
-
-        private void RestorePopulation() => rawPopulation = -1;
-
-        /// <summary>Once a game day: the sleeping households' residential tax, at the awake households' rate per household.</summary>
-        private void AddTaxes()
-        {
-            uint day = simulation.frameIndex / FramesPerDay;
-            if (day == lastDay) return;
-            bool first = lastDay == uint.MaxValue;
-            lastDay = day;
-            int awake = households.CalculateEntityCount();
-            if (first || awake == 0 || sleepingHouseholds.Count == 0) return;
-            var city = citySystem.City;
-            if (city == Entity.Null || !EntityManager.HasComponent<PlayerMoney>(city)) return;
-            long monthly = budget.GetIncome(IncomeSource.TaxResidential);
-            if (monthly <= 0) return;
-            long owed = monthly * sleepingHouseholds.Count / awake;
-            var money = EntityManager.GetComponentData<PlayerMoney>(city);
-            money.Add((int)System.Math.Min(owed, int.MaxValue));
-            EntityManager.SetComponentData(city, money);
         }
 
         [Preserve]
@@ -217,8 +165,6 @@ namespace BigCityPerformance.People
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
             sleepingCitizens = 0;
-            rawPopulation = -1;
-            lastDay = uint.MaxValue;
             lastAwakeShare = 1f;
             frames = 0;
         }
