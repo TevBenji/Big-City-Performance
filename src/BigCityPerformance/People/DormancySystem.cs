@@ -14,7 +14,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine.Scripting;
 
-namespace BigCityPerformance.Population
+namespace BigCityPerformance.People
 {
     /// <summary>
     /// Simulates only a share of the city's households in detail; the rest sleep. A sleeping household (and its members) carries

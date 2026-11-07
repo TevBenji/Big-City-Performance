@@ -42,8 +42,8 @@ namespace BigCityPerformance
             });
             Register("people simulated in detail", () =>
             {
-                updateSystem.UpdateAt<Population.DormancySystem>(SystemUpdatePhase.UIUpdate);
-                harmony.CreateClassProcessor(typeof(Population.SaveWakePatch)).Patch();
+                updateSystem.UpdateAt<People.DormancySystem>(SystemUpdatePhase.UIUpdate);
+                harmony.CreateClassProcessor(typeof(People.SaveWakePatch)).Patch();
             });
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));
@@ -52,7 +52,7 @@ namespace BigCityPerformance
 
         public void OnDispose()
         {
-            Register("waking everyone", () => Population.DormancySystem.Instance?.WakeAll());
+            Register("waking everyone", () => People.DormancySystem.Instance?.WakeAll());
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
             Settings = null;
