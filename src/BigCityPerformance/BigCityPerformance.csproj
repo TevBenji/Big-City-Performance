@@ -1,0 +1,63 @@
+<!-- Adapted from Placemaker (jackwrichards, GPL-3.0). Modified by TevBenji, 2026-11: standalone game references, without toolchain, versioning, UI or deployment targets. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\GameReferences.props" />
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Version>0.0.1</Version>
+    <Nullable>disable</Nullable>
+    <OutputType>Library</OutputType>
+    <AssemblyName>BigCityPerformance</AssemblyName>
+    <RootNamespace>BigCityPerformance</RootNamespace>
+    <NoStdLib>true</NoStdLib>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- The owner's local test runner: its own build configuration, so it can never reach bin\Release. Its folder isn't in the public repo. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Dev'">
+    <DefineConstants>$(DefineConstants);BCP_DEV</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)' != 'Dev'">
+    <Compile Remove="Dev\**" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Dev'">
+    <DevReference Include="UnityEngine.ScreenCaptureModule;UnityEngine.ImageConversionModule;Colossal.AssetPipeline" />
+    <Reference Include="@(DevReference)">
+      <HintPath>$(ManagedPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(ManagedPath)\mscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(ManagedPath)\System.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(ManagedPath)\System.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(ManagedPath)\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <GameReference Include="Game;Colossal.Logging;Colossal.Core;Colossal.Collections;Colossal.Mathematics;Colossal.IO.AssetDatabase;Colossal.Localization;Colossal.UI;Colossal.UI.Binding;Unity.Entities;Unity.Collections;Unity.Mathematics;Unity.Burst;UnityEngine.CoreModule;Unity.InputSystem" />
+    <Reference Include="@(GameReference)">
+      <HintPath>$(ManagedPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <ProjectReference Include="..\BigCityPerformance.Core\BigCityPerformance.Core.csproj" />
+    <!-- The same Harmony other CS2 mods ship (2.2.2); its 0Harmony.dll goes out with the mod. -->
+    <PackageReference Include="Lib.Harmony" Version="2.2.2" />
+    <!-- Compile-time access to the route-finder's private queue (the route cache reads and fills it); changes nothing at runtime. -->
+    <PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all" />
+    <Publicize Include="Game" IncludeVirtualMembers="false" />
+    <None Include="..\..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\CREDITS.md" Link="CREDITS.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

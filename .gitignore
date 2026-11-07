@@ -1,0 +1,20 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+TestResults/
+*.trx
+.dotnet/
+.nuget/
+.tmp/
+node_modules/
+reference/
+
+# Kept locally, not published: design notes, the test suite and the dev-only game runner
+CLAUDE.md
+docs/
+tests/
+tools/dev/
+src/BigCityPerformance/Dev/
