@@ -40,6 +40,11 @@ namespace BigCityPerformance
                 RouteCache.Patch(harmony);
                 harmony.CreateClassProcessor(typeof(RouteGuide)).Patch();
             });
+            Register("people simulated in detail", () =>
+            {
+                updateSystem.UpdateAt<Population.DormancySystem>(SystemUpdatePhase.UIUpdate);
+                harmony.CreateClassProcessor(typeof(Population.SaveWakePatch)).Patch();
+            });
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));
 #endif
@@ -47,6 +52,7 @@ namespace BigCityPerformance
 
         public void OnDispose()
         {
+            Register("waking everyone", () => Population.DormancySystem.Instance?.WakeAll());
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
             Settings = null;

@@ -82,8 +82,34 @@ namespace BigCityPerformance.Routes
                 for (int index = waiting.m_NextIndex; index < waiting.m_Items.Count && DumpWanted > 0; index++, DumpWanted--) DumpLines.Add(Describe(waiting.m_Items[index]));
             }
 #endif
+#if BCP_DEV
+            CountRerouteReasons(queueSystem);
+#endif
             QueuePrefix(queueSystem);
         }
+
+#if BCP_DEV
+        /// <summary>Why travellers ask for a new route: their route state (PathOwner flags) when the request is made (test runner only).</summary>
+        internal static readonly Dictionary<string, long> RerouteReasons = new Dictionary<string, long>();
+
+        private static void CountRerouteReasons(PathfindQueueSystem queue)
+        {
+            if (!entities.HasValue) entities = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
+            var manager = entities.Value;
+            var waiting = queue.m_PathfindActions;
+            for (int index = waiting.m_NextIndex; index < waiting.m_Items.Count; index++)
+            {
+                var item = waiting.m_Items[index];
+                string system = item.m_System?.GetType().Name;
+                if (system != "ResidentAISystem" && system != "PersonalCarAISystem") continue;
+                var owner = item.m_Owner;
+                string reason = manager.Exists(owner) && manager.HasComponent<PathOwner>(owner) ? manager.GetComponentData<PathOwner>(owner).m_State.ToString() : "no route state";
+                string key = system + ": " + reason;
+                RerouteReasons.TryGetValue(key, out long count);
+                RerouteReasons[key] = count + 1;
+            }
+        }
+#endif
 
         private static void QueuePrefix(PathfindQueueSystem __instance)
         {
