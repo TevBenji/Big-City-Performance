@@ -27,8 +27,7 @@ namespace BigCityPerformance.People
     /// Anyone riding or waiting for transport keeps the household awake, so no vehicle or stop waits for someone who isn't
     /// there. Everyone wakes before a save (saves stay ordinary, and load without the mod) and sleeps again after.
     ///
-    /// What sleeping households would do in bulk is added back: they still count in the city's population (the display, and
-    /// the game's own big-city rules that read it), and their residential tax goes into the city budget each day.
+    /// What sleeping households would do in bulk is added back: their residential tax goes into the city budget each day.
     /// </summary>
     public sealed partial class DormancySystem : GameSystemBase
     {
@@ -43,11 +42,13 @@ namespace BigCityPerformance.People
         private readonly List<Entity> sleepingEntities = new List<Entity>();
         private int sleepingCitizens, frames, rawPopulation = -1;
         private uint lastDay = uint.MaxValue;
+        private float lastAwakeShare = 1f;
         private EntityQuery households;
         private SimulationSystem simulation;
         private CitySystem citySystem;
         private CityServiceBudgetSystem budget;
         private SaveGameSystem saveGame;
+        private EndFrameBarrier endFrame;
 
         /// <summary>Set by the save patch: everyone is awake until the save is written.</summary>
         internal static bool SaveInProgress;
@@ -65,6 +66,7 @@ namespace BigCityPerformance.People
             citySystem = World.GetOrCreateSystemManaged<CitySystem>();
             budget = World.GetOrCreateSystemManaged<CityServiceBudgetSystem>();
             saveGame = World.GetOrCreateSystemManaged<SaveGameSystem>();
+            endFrame = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
         }
@@ -81,14 +83,16 @@ namespace BigCityPerformance.People
                 if (saveGame.Enabled) return;
                 SaveInProgress = false;
             }
-            KeepPopulation();
             if (++frames < TopUpFrames) return;
             frames = 0;
             float awake = AwakeShare;
+            // Wake people only when the setting goes up. The target also drifts down a little whenever awake households move
+            // away; waking everyone for that (then putting them back to sleep) churned the whole city (test run, 7 November 2026).
+            if (awake > lastAwakeShare && sleepingHouseholds.Count > 0) WakeAll();
+            lastAwakeShare = awake;
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
-            if (wanted < sleepingHouseholds.Count) WakeAll();
-            else if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
+            if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
             AddTaxes();
         }
 
@@ -119,7 +123,10 @@ namespace BigCityPerformance.People
             }
             if (batch.Count == 0) return;
             sleepingEntities.AddRange(batch);
-            using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) EntityManager.AddComponent<Disabled>(array);
+            // Through the game's end-of-frame command buffer, as its own systems change entities: never in the middle of a frame,
+            // while its jobs may still be reading them (doing it directly crashed the game, test run 7 November 2026).
+            var commands = endFrame.CreateCommandBuffer();
+            using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) commands.AddComponent<Disabled>(array);
         }
 
         /// <summary>True when every member is home or out on foot (their walkers listed); false if anyone rides or waits for transport.</summary>
@@ -146,7 +153,14 @@ namespace BigCityPerformance.People
             if (sleepingEntities.Count == 0) return;
             var alive = new List<Entity>(sleepingEntities.Count);
             foreach (var entity in sleepingEntities) if (EntityManager.Exists(entity)) alive.Add(entity);
-            using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) EntityManager.RemoveComponent<Disabled>(array);
+            if (SaveInProgress)
+                // The save starts now, in this frame: wake them at once, before anything is written.
+                using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) EntityManager.RemoveComponent<Disabled>(array);
+            else
+            {
+                var commands = endFrame.CreateCommandBuffer();
+                using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) commands.RemoveComponent<Disabled>(array);
+            }
             sleepingEntities.Clear();
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
@@ -205,6 +219,7 @@ namespace BigCityPerformance.People
             sleepingCitizens = 0;
             rawPopulation = -1;
             lastDay = uint.MaxValue;
+            lastAwakeShare = 1f;
             frames = 0;
         }
     }
