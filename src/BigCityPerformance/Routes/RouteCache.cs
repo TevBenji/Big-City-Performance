@@ -151,9 +151,75 @@ namespace BigCityPerformance.Routes
             if (count > 0) Mod.Logger.Warn($"Big City Performance route cache: {count} answered requests had no ticket in the queue");
         }
 
+#if BCP_DEV
+        /// <summary>Per system: requests finished, how many failed, and the search effort spent on each kind (test runner only).</summary>
+        internal static readonly Dictionary<string, (long Count, long Failed, double SuccessWork, double FailedWork)> Effort = new Dictionary<string, (long, long, double, double)>();
+
+        // Would-be failure prediction by area: (start square, end square, travel modes, requester system) -> outcomes so far.
+        internal static readonly Dictionary<ulong, (int Successes, int Failures)> AreaOutcomes = new Dictionary<ulong, (int, int)>();
+        internal static long Predicted, PredictedRight, PredictedWrong, PredictableFailures, PredictedWork;
+        private static EntityManager? entities;
+
+        private static Unity.Mathematics.float3? Where(Entity entity)
+        {
+            var manager = entities.Value;
+            if (entity == Entity.Null || !manager.Exists(entity)) return null;
+            if (manager.HasComponent<Game.Net.Curve>(entity)) return manager.GetComponentData<Game.Net.Curve>(entity).m_Bezier.a;
+            if (manager.HasComponent<Game.Objects.Transform>(entity)) return manager.GetComponentData<Game.Objects.Transform>(entity).m_Position;
+            return null;
+        }
+
+        private static void Predict(PathfindQueueSystem.ActionListItem<PathfindAction> item, ref PathfindActionData data, bool failed, double work)
+        {
+            if (data.m_StartTargets.Length == 0 || data.m_EndTargets.Length == 0) return;
+            var from = Where(data.m_StartTargets[0].m_Entity);
+            var to = Where(data.m_EndTargets[0].m_Entity);
+            if (!from.HasValue || !to.HasValue) return;
+            const float Square = 250f;
+            ulong key = 14695981039346656037UL;
+            void Mix(ulong value) { key ^= value; key *= 1099511628211UL; }
+            Mix((ulong)(long)Unity.Mathematics.math.floor(from.Value.x / Square)); Mix((ulong)(long)Unity.Mathematics.math.floor(from.Value.z / Square));
+            Mix((ulong)(long)Unity.Mathematics.math.floor(to.Value.x / Square)); Mix((ulong)(long)Unity.Mathematics.math.floor(to.Value.z / Square));
+            Mix((ulong)data.m_Parameters.m_Methods);
+            Mix((ulong)(item.m_System?.GetType().GetHashCode() ?? 0));
+            AreaOutcomes.TryGetValue(key, out var seen);
+            // The rule under test: at least 3 tries between these areas, and none got through.
+            if (seen.Failures >= 3 && seen.Successes == 0)
+            {
+                Predicted++;
+                if (failed) { PredictedRight++; PredictedWork += (long)work; } else PredictedWrong++;
+            }
+            if (failed) PredictableFailures++;
+            AreaOutcomes[key] = (seen.Successes + (failed ? 0 : 1), seen.Failures + (failed ? 1 : 0));
+        }
+
+        private static void CountEffort(PathfindQueueSystem.ActionList<PathfindAction> list)
+        {
+            if (!entities.HasValue) entities = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
+            var items = list.m_Items;
+            for (int index = 0; index < items.Count; index++)
+            {
+                var item = items[index];
+                if ((item.m_Flags & PathFlags.Scheduled) == 0) continue;
+                ref var data = ref item.m_Action.data;
+                if (data.m_State != PathfindActionState.Completed || data.m_Result.Length == 0) continue;
+                bool failed = data.m_Path.Length == 0 || data.m_Result[0].m_ErrorCode != 0;
+                double work = data.m_Result[data.m_Result.Length - 1].m_GraphTraversal;
+                string name = (item.m_System?.GetType().Name ?? "?") + " " + data.m_OriginType + "->" + data.m_DestinationType;
+                // Only real routes (trips and re-routes) can fail this way; searches for a job, school or home return a place, not a path.
+                if (data.m_OriginType == SetupTargetType.CurrentLocation && data.m_DestinationType == SetupTargetType.CurrentLocation) Predict(item, ref data, failed, work);
+                Effort.TryGetValue(name, out var row);
+                Effort[name] = (row.Count + 1, row.Failed + (failed ? 1 : 0), row.SuccessWork + (failed ? 0 : work), row.FailedWork + (failed ? work : 0));
+            }
+        }
+#endif
+
         /// <summary>Before the game delivers finished routes: remember each one (the route-finder's, not ours).</summary>
         private static void ResultsPrefix(PathfindQueueSystem.ActionList<PathfindAction> list)
         {
+#if BCP_DEV
+            CountEffort(list);
+#endif
             if (Current == Mode.Off) return;
             uint frame = RouteDeadlineSystem.FrameIndex;
             var items = list.m_Items;

@@ -38,6 +38,7 @@ namespace BigCityPerformance
                 harmony.CreateClassProcessor(typeof(GetQueuePatch)).Patch();
                 SearchThrottle.Patch(harmony);
                 RouteCache.Patch(harmony);
+                harmony.CreateClassProcessor(typeof(RouteGuide)).Patch();
             });
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));
