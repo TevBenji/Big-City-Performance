@@ -1,0 +1,256 @@
+// Big City Performance. Original work by TevBenji, 2026-11. GPL-3.0.
+using System.Collections.Generic;
+
+namespace BigCityPerformance.Settings
+{
+    /// <summary>
+    /// The Options page's words, in English and the game's other languages. Each language falls back to English for any text
+    /// it lacks, so an English edit never leaves a blank. Numbers on the page carry no words, so they need none.
+    /// </summary>
+    internal static class Translations
+    {
+        internal static readonly string[] Locales = { "en-US", "de-DE", "es-ES", "fr-FR", "it-IT", "ja-JP", "ko-KR", "pl-PL", "pt-BR", "ru-RU", "zh-HANS", "zh-HANT" };
+
+        private static readonly Dictionary<string, string> English = new Dictionary<string, string>
+        {
+            ["Group"] = "Simulation",
+            ["StatusGroup"] = "Right now",
+            ["KeepClockRunning"] = "Keep the clock running",
+            ["KeepClockRunning.Desc"] = "When the game's route-finder falls behind, route requests get more time instead of the simulation stopping to wait. Job hunting and empty taxis search a few at a time, rush hour spreads over a few minutes, and service coverage updates about once a minute.",
+            ["LimitPeople"] = "Limit the people simulated in detail",
+            ["LimitPeople.Desc"] = "In a city bigger than the limit, the game simulates that many people one by one and the rest stay at home: they keep their homes and jobs, count in the population, earn wages, pay taxes and shop, but make no trips. Households take turns. Big cities run much faster; smaller cities are not changed. Works best with autosave every 10 minutes or more: each save wakes everyone for a moment.",
+            ["AutoLimit"] = "Choose the limit automatically",
+            ["AutoLimit.Desc"] = "The mod sets the limit from how your computer keeps up: fewer people when the clock falls behind, more when there is room. Turn it off to pick the number yourself.",
+            ["PeopleInDetail"] = "Most people simulated in detail (thousands)",
+            ["PeopleInDetail.Desc"] = "Used when the automatic limit is off. Lower runs faster; higher puts more people on the streets.",
+            ["StatusPeople"] = "People in detail / population",
+            ["StatusPeople.Desc"] = "How many people the game simulates one by one right now, out of the whole city.",
+            ["StatusSpeed"] = "Game speed (1 = normal)",
+            ["StatusSpeed.Desc"] = "How fast the game's clock ran over the last few seconds.",
+            ["StatusStops"] = "Waiting asleep at crowded stops",
+            ["StatusStops.Desc"] = "People past the first hundred at an overloaded stop, waiting asleep for their turn.",
+        };
+
+        private static readonly Dictionary<string, Dictionary<string, string>> Others = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["de-DE"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Simulation",
+                ["StatusGroup"] = "Gerade jetzt",
+                ["KeepClockRunning"] = "Die Uhr am Laufen halten",
+                ["KeepClockRunning.Desc"] = "Wenn die Routenberechnung des Spiels nicht hinterherkommt, bekommen Routenanfragen mehr Zeit, statt dass die Simulation anhält und wartet. Jobsuche und leere Taxis suchen nach und nach, der Berufsverkehr verteilt sich über einige Minuten, und die Abdeckung der Dienste wird etwa einmal pro Minute aktualisiert.",
+                ["LimitPeople"] = "Im Detail simulierte Personen begrenzen",
+                ["LimitPeople.Desc"] = "In einer Stadt über dem Limit simuliert das Spiel so viele Personen einzeln, der Rest bleibt zu Hause: Sie behalten Wohnung und Arbeit, zählen zur Bevölkerung, verdienen Lohn, zahlen Steuern und kaufen ein, machen aber keine Wege. Die Haushalte wechseln sich ab. Große Städte laufen viel schneller, kleinere bleiben unverändert. Am besten mit automatischem Speichern alle 10 Minuten oder seltener: Jedes Speichern weckt kurz alle auf.",
+                ["AutoLimit"] = "Limit automatisch wählen",
+                ["AutoLimit.Desc"] = "Die Mod setzt das Limit danach, wie gut dein Computer mithält: weniger Personen, wenn die Uhr zurückfällt, mehr, wenn Luft ist. Schalte es aus, um die Zahl selbst zu wählen.",
+                ["PeopleInDetail"] = "Höchstens im Detail simulierte Personen (Tausend)",
+                ["PeopleInDetail.Desc"] = "Gilt, wenn das automatische Limit aus ist. Niedriger läuft schneller, höher bringt mehr Leute auf die Straßen.",
+                ["StatusPeople"] = "Personen im Detail / Bevölkerung",
+                ["StatusPeople.Desc"] = "Wie viele Personen das Spiel gerade einzeln simuliert, von der ganzen Stadt.",
+                ["StatusSpeed"] = "Spielgeschwindigkeit (1 = normal)",
+                ["StatusSpeed.Desc"] = "Wie schnell die Uhr des Spiels in den letzten Sekunden lief.",
+                ["StatusStops"] = "Schlafend an vollen Haltestellen",
+                ["StatusStops.Desc"] = "Personen nach den ersten hundert an einer überfüllten Haltestelle, die schlafend warten, bis sie dran sind.",
+            },
+            ["es-ES"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Simulación",
+                ["StatusGroup"] = "Ahora mismo",
+                ["KeepClockRunning"] = "Mantener el reloj en marcha",
+                ["KeepClockRunning.Desc"] = "Cuando el cálculo de rutas del juego se retrasa, las solicitudes de ruta reciben más tiempo en lugar de que la simulación se detenga a esperar. La búsqueda de empleo y los taxis vacíos buscan poco a poco, la hora punta se reparte en unos minutos y la cobertura de los servicios se actualiza más o menos una vez por minuto.",
+                ["LimitPeople"] = "Limitar las personas simuladas en detalle",
+                ["LimitPeople.Desc"] = "En una ciudad por encima del límite, el juego simula esa cantidad de personas una a una y el resto se queda en casa: conservan su vivienda y su empleo, cuentan en la población, cobran su sueldo, pagan impuestos y compran, pero no hacen viajes. Los hogares se turnan. Las ciudades grandes van mucho más rápido; las más pequeñas no cambian. Funciona mejor con el guardado automático cada 10 minutos o más: cada guardado despierta a todos un momento.",
+                ["AutoLimit"] = "Elegir el límite automáticamente",
+                ["AutoLimit.Desc"] = "El mod fija el límite según cómo rinde tu ordenador: menos personas cuando el reloj se retrasa, más cuando hay margen. Desactívalo para elegir el número tú mismo.",
+                ["PeopleInDetail"] = "Máximo de personas simuladas en detalle (miles)",
+                ["PeopleInDetail.Desc"] = "Se usa cuando el límite automático está desactivado. Más bajo va más rápido; más alto pone más gente en las calles.",
+                ["StatusPeople"] = "Personas en detalle / población",
+                ["StatusPeople.Desc"] = "Cuántas personas simula el juego una a una ahora mismo, de toda la ciudad.",
+                ["StatusSpeed"] = "Velocidad del juego (1 = normal)",
+                ["StatusSpeed.Desc"] = "Lo rápido que ha ido el reloj del juego en los últimos segundos.",
+                ["StatusStops"] = "Dormidos en paradas llenas",
+                ["StatusStops.Desc"] = "Personas más allá de las cien primeras en una parada saturada, esperando dormidas su turno.",
+            },
+            ["fr-FR"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Simulation",
+                ["StatusGroup"] = "En ce moment",
+                ["KeepClockRunning"] = "Garder l'horloge en marche",
+                ["KeepClockRunning.Desc"] = "Quand le calcul d'itinéraires du jeu prend du retard, les demandes d'itinéraire reçoivent plus de temps au lieu que la simulation s'arrête pour attendre. La recherche d'emploi et les taxis vides cherchent peu à peu, l'heure de pointe s'étale sur quelques minutes, et la couverture des services se met à jour environ une fois par minute.",
+                ["LimitPeople"] = "Limiter les habitants simulés en détail",
+                ["LimitPeople.Desc"] = "Dans une ville au-delà de la limite, le jeu simule ce nombre d'habitants un par un et les autres restent chez eux : ils gardent leur logement et leur emploi, comptent dans la population, touchent leur salaire, paient leurs impôts et font leurs achats, mais ne se déplacent pas. Les ménages se relaient. Les grandes villes tournent bien plus vite ; les plus petites ne changent pas. Fonctionne mieux avec une sauvegarde automatique toutes les 10 minutes ou plus : chaque sauvegarde réveille tout le monde un instant.",
+                ["AutoLimit"] = "Choisir la limite automatiquement",
+                ["AutoLimit.Desc"] = "Le mod règle la limite selon ce que suit votre ordinateur : moins d'habitants quand l'horloge prend du retard, plus quand il reste de la marge. Désactivez-le pour choisir le nombre vous-même.",
+                ["PeopleInDetail"] = "Habitants simulés en détail au maximum (milliers)",
+                ["PeopleInDetail.Desc"] = "Utilisé quand la limite automatique est désactivée. Plus bas va plus vite ; plus haut met plus de monde dans les rues.",
+                ["StatusPeople"] = "Habitants en détail / population",
+                ["StatusPeople.Desc"] = "Combien d'habitants le jeu simule un par un en ce moment, sur toute la ville.",
+                ["StatusSpeed"] = "Vitesse du jeu (1 = normale)",
+                ["StatusSpeed.Desc"] = "La vitesse de l'horloge du jeu ces dernières secondes.",
+                ["StatusStops"] = "Endormis aux arrêts bondés",
+                ["StatusStops.Desc"] = "Les personnes au-delà des cent premières à un arrêt surchargé, qui attendent leur tour endormies.",
+            },
+            ["it-IT"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Simulazione",
+                ["StatusGroup"] = "In questo momento",
+                ["KeepClockRunning"] = "Mantieni l'orologio in marcia",
+                ["KeepClockRunning.Desc"] = "Quando il calcolo dei percorsi del gioco resta indietro, le richieste di percorso ricevono più tempo invece di fermare la simulazione ad aspettare. La ricerca di lavoro e i taxi vuoti cercano un po' alla volta, l'ora di punta si distribuisce su qualche minuto e la copertura dei servizi si aggiorna circa una volta al minuto.",
+                ["LimitPeople"] = "Limita le persone simulate nel dettaglio",
+                ["LimitPeople.Desc"] = "In una città oltre il limite, il gioco simula quel numero di persone una per una e gli altri restano a casa: mantengono casa e lavoro, contano nella popolazione, ricevono lo stipendio, pagano le tasse e fanno acquisti, ma non si spostano. Le famiglie si danno il cambio. Le grandi città girano molto più veloci; quelle più piccole non cambiano. Funziona meglio con il salvataggio automatico ogni 10 minuti o più: ogni salvataggio sveglia tutti per un attimo.",
+                ["AutoLimit"] = "Scegli il limite automaticamente",
+                ["AutoLimit.Desc"] = "La mod imposta il limite in base a quanto il tuo computer tiene il passo: meno persone quando l'orologio resta indietro, di più quando c'è margine. Disattivala per scegliere tu il numero.",
+                ["PeopleInDetail"] = "Massimo di persone simulate nel dettaglio (migliaia)",
+                ["PeopleInDetail.Desc"] = "Usato quando il limite automatico è disattivato. Più basso va più veloce; più alto mette più gente per strada.",
+                ["StatusPeople"] = "Persone nel dettaglio / popolazione",
+                ["StatusPeople.Desc"] = "Quante persone il gioco simula una per una adesso, su tutta la città.",
+                ["StatusSpeed"] = "Velocità di gioco (1 = normale)",
+                ["StatusSpeed.Desc"] = "Quanto è andato veloce l'orologio del gioco negli ultimi secondi.",
+                ["StatusStops"] = "Addormentati alle fermate affollate",
+                ["StatusStops.Desc"] = "Le persone oltre le prime cento a una fermata sovraffollata, che aspettano il loro turno dormendo.",
+            },
+            ["ja-JP"] = new Dictionary<string, string>
+            {
+                ["Group"] = "シミュレーション",
+                ["StatusGroup"] = "現在の状態",
+                ["KeepClockRunning"] = "時計を止めない",
+                ["KeepClockRunning.Desc"] = "ゲームの経路探索が追いつかないとき、シミュレーションを止めて待つ代わりに経路リクエストにより長い時間を与えます。求職と空車のタクシーは少しずつ探し、ラッシュアワーは数分に分散し、サービスの範囲は約1分ごとに更新されます。",
+                ["LimitPeople"] = "詳細にシミュレートする人数を制限",
+                ["LimitPeople.Desc"] = "人口が上限を超える都市では、その人数だけを一人ずつシミュレートし、残りは家にとどまります。住まいと仕事はそのままで、人口に数えられ、給料を受け取り、税金を払い、買い物もしますが、移動はしません。世帯は交代で活動します。大都市がずっと速く動き、小さな都市は変わりません。オートセーブは10分以上の間隔がおすすめです。セーブのたびに全員が一瞬起きるためです。",
+                ["AutoLimit"] = "上限を自動で選ぶ",
+                ["AutoLimit.Desc"] = "パソコンの処理が追いつくかどうかでMODが上限を決めます。時計が遅れると人数を減らし、余裕があれば増やします。オフにすると人数を自分で選べます。",
+                ["PeopleInDetail"] = "詳細にシミュレートする最大人数（千人）",
+                ["PeopleInDetail.Desc"] = "自動の上限がオフのときに使います。低いほど速く、高いほど街に人が増えます。",
+                ["StatusPeople"] = "詳細な人数 / 人口",
+                ["StatusPeople.Desc"] = "ゲームが今一人ずつシミュレートしている人数と、都市全体の人口です。",
+                ["StatusSpeed"] = "ゲーム速度（1 = 通常）",
+                ["StatusSpeed.Desc"] = "直近数秒のゲーム時計の進む速さです。",
+                ["StatusStops"] = "混雑した停留所で眠って待つ人",
+                ["StatusStops.Desc"] = "満員の停留所で先頭の100人より後ろにいて、眠ったまま順番を待っている人です。",
+            },
+            ["ko-KR"] = new Dictionary<string, string>
+            {
+                ["Group"] = "시뮬레이션",
+                ["StatusGroup"] = "현재 상태",
+                ["KeepClockRunning"] = "시계 멈추지 않기",
+                ["KeepClockRunning.Desc"] = "게임의 경로 탐색이 따라가지 못할 때 시뮬레이션을 멈춰 기다리는 대신 경로 요청에 더 많은 시간을 줍니다. 구직과 빈 택시는 조금씩 탐색하고, 출퇴근 시간은 몇 분에 걸쳐 분산되며, 서비스 범위는 약 1분마다 갱신됩니다.",
+                ["LimitPeople"] = "자세히 시뮬레이션할 인원 제한",
+                ["LimitPeople.Desc"] = "인구가 한도를 넘는 도시에서는 그만큼의 사람만 한 명씩 시뮬레이션하고 나머지는 집에 머뭅니다. 집과 직장은 그대로이고 인구에 포함되며 급여를 받고 세금을 내고 쇼핑도 하지만 이동하지 않습니다. 가구들이 번갈아 활동합니다. 큰 도시가 훨씬 빨라지고 작은 도시는 바뀌지 않습니다. 자동 저장은 10분 이상 간격이 가장 좋습니다. 저장할 때마다 모두가 잠깐 깨어나기 때문입니다.",
+                ["AutoLimit"] = "한도 자동 선택",
+                ["AutoLimit.Desc"] = "컴퓨터가 얼마나 따라가는지에 따라 모드가 한도를 정합니다. 시계가 뒤처지면 인원을 줄이고 여유가 있으면 늘립니다. 끄면 직접 숫자를 고를 수 있습니다.",
+                ["PeopleInDetail"] = "자세히 시뮬레이션할 최대 인원(천 명)",
+                ["PeopleInDetail.Desc"] = "자동 한도가 꺼져 있을 때 사용합니다. 낮을수록 빠르고, 높을수록 거리에 사람이 많아집니다.",
+                ["StatusPeople"] = "자세히 시뮬레이션 중 / 인구",
+                ["StatusPeople.Desc"] = "게임이 지금 한 명씩 시뮬레이션하는 인원과 도시 전체 인구입니다.",
+                ["StatusSpeed"] = "게임 속도(1 = 보통)",
+                ["StatusSpeed.Desc"] = "최근 몇 초 동안 게임 시계가 흐른 속도입니다.",
+                ["StatusStops"] = "붐비는 정류장에서 잠든 채 대기",
+                ["StatusStops.Desc"] = "만원인 정류장에서 앞의 100명 뒤에 있으며 잠든 채 차례를 기다리는 사람입니다.",
+            },
+            ["pl-PL"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Symulacja",
+                ["StatusGroup"] = "W tej chwili",
+                ["KeepClockRunning"] = "Nie zatrzymuj zegara",
+                ["KeepClockRunning.Desc"] = "Gdy wyznaczanie tras w grze nie nadąża, prośby o trasę dostają więcej czasu, zamiast zatrzymywać symulację w oczekiwaniu. Szukanie pracy i puste taksówki szukają po trochu, godzina szczytu rozkłada się na kilka minut, a zasięg usług odświeża się mniej więcej raz na minutę.",
+                ["LimitPeople"] = "Ogranicz liczbę osób symulowanych szczegółowo",
+                ["LimitPeople.Desc"] = "W mieście większym niż limit gra symuluje tyle osób pojedynczo, a reszta zostaje w domu: zachowują mieszkanie i pracę, liczą się do populacji, zarabiają, płacą podatki i robią zakupy, ale nie podróżują. Gospodarstwa domowe zmieniają się kolejno. Duże miasta działają dużo szybciej; mniejsze się nie zmieniają. Działa najlepiej z autozapisem co 10 minut lub rzadziej: każdy zapis na chwilę budzi wszystkich.",
+                ["AutoLimit"] = "Dobieraj limit automatycznie",
+                ["AutoLimit.Desc"] = "Mod ustala limit według tego, jak radzi sobie twój komputer: mniej osób, gdy zegar się spóźnia, więcej, gdy jest zapas. Wyłącz, aby samemu wybrać liczbę.",
+                ["PeopleInDetail"] = "Najwięcej osób symulowanych szczegółowo (tysiące)",
+                ["PeopleInDetail.Desc"] = "Używane, gdy automatyczny limit jest wyłączony. Mniej działa szybciej; więcej to więcej ludzi na ulicach.",
+                ["StatusPeople"] = "Osoby szczegółowo / populacja",
+                ["StatusPeople.Desc"] = "Ile osób gra symuluje teraz pojedynczo, z całego miasta.",
+                ["StatusSpeed"] = "Prędkość gry (1 = normalna)",
+                ["StatusSpeed.Desc"] = "Jak szybko szedł zegar gry przez ostatnie sekundy.",
+                ["StatusStops"] = "Uśpieni na zatłoczonych przystankach",
+                ["StatusStops.Desc"] = "Osoby ponad pierwszą setkę na przepełnionym przystanku, czekające uśpione na swoją kolej.",
+            },
+            ["pt-BR"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Simulação",
+                ["StatusGroup"] = "Agora mesmo",
+                ["KeepClockRunning"] = "Manter o relógio andando",
+                ["KeepClockRunning.Desc"] = "Quando o cálculo de rotas do jogo fica para trás, os pedidos de rota ganham mais tempo em vez de a simulação parar para esperar. A busca de emprego e os táxis vazios procuram aos poucos, o horário de pico se espalha por alguns minutos e a cobertura dos serviços é atualizada cerca de uma vez por minuto.",
+                ["LimitPeople"] = "Limitar as pessoas simuladas em detalhe",
+                ["LimitPeople.Desc"] = "Numa cidade acima do limite, o jogo simula essa quantidade de pessoas uma a uma e o resto fica em casa: mantêm a moradia e o emprego, contam na população, recebem salário, pagam impostos e fazem compras, mas não viajam. As famílias se revezam. Cidades grandes rodam muito mais rápido; as menores não mudam. Funciona melhor com o salvamento automático a cada 10 minutos ou mais: cada salvamento acorda todo mundo por um instante.",
+                ["AutoLimit"] = "Escolher o limite automaticamente",
+                ["AutoLimit.Desc"] = "O mod define o limite conforme o seu computador acompanha: menos pessoas quando o relógio fica para trás, mais quando há folga. Desligue para escolher o número você mesmo.",
+                ["PeopleInDetail"] = "Máximo de pessoas simuladas em detalhe (milhares)",
+                ["PeopleInDetail.Desc"] = "Usado quando o limite automático está desligado. Mais baixo roda mais rápido; mais alto põe mais gente nas ruas.",
+                ["StatusPeople"] = "Pessoas em detalhe / população",
+                ["StatusPeople.Desc"] = "Quantas pessoas o jogo simula uma a uma agora, da cidade inteira.",
+                ["StatusSpeed"] = "Velocidade do jogo (1 = normal)",
+                ["StatusSpeed.Desc"] = "A velocidade do relógio do jogo nos últimos segundos.",
+                ["StatusStops"] = "Dormindo em paradas lotadas",
+                ["StatusStops.Desc"] = "Pessoas além das cem primeiras numa parada lotada, esperando a vez dormindo.",
+            },
+            ["ru-RU"] = new Dictionary<string, string>
+            {
+                ["Group"] = "Симуляция",
+                ["StatusGroup"] = "Прямо сейчас",
+                ["KeepClockRunning"] = "Не останавливать часы",
+                ["KeepClockRunning.Desc"] = "Когда поиск маршрутов в игре не успевает, запросы маршрутов получают больше времени, а не останавливают симуляцию в ожидании. Поиск работы и пустые такси ищут понемногу, час пик растягивается на несколько минут, а охват служб обновляется примерно раз в минуту.",
+                ["LimitPeople"] = "Ограничить число подробно моделируемых жителей",
+                ["LimitPeople.Desc"] = "В городе больше лимита игра моделирует столько жителей по отдельности, а остальные остаются дома: они сохраняют жильё и работу, учитываются в населении, получают зарплату, платят налоги и делают покупки, но никуда не ездят. Семьи сменяют друг друга. Большие города работают намного быстрее; меньшие не меняются. Лучше всего с автосохранением раз в 10 минут или реже: каждое сохранение на мгновение будит всех.",
+                ["AutoLimit"] = "Выбирать лимит автоматически",
+                ["AutoLimit.Desc"] = "Мод подбирает лимит по тому, как справляется ваш компьютер: меньше жителей, когда часы отстают, больше, когда есть запас. Выключите, чтобы задать число самостоятельно.",
+                ["PeopleInDetail"] = "Максимум подробно моделируемых жителей (тыс.)",
+                ["PeopleInDetail.Desc"] = "Используется, когда автоматический лимит выключен. Меньше — быстрее; больше — больше людей на улицах.",
+                ["StatusPeople"] = "Подробно моделируемые / население",
+                ["StatusPeople.Desc"] = "Сколько жителей игра сейчас моделирует по отдельности, из всего города.",
+                ["StatusSpeed"] = "Скорость игры (1 = обычная)",
+                ["StatusSpeed.Desc"] = "Насколько быстро шли часы игры за последние секунды.",
+                ["StatusStops"] = "Спят на переполненных остановках",
+                ["StatusStops.Desc"] = "Люди после первой сотни на переполненной остановке, ожидающие своей очереди во сне.",
+            },
+            ["zh-HANS"] = new Dictionary<string, string>
+            {
+                ["Group"] = "模拟",
+                ["StatusGroup"] = "当前状态",
+                ["KeepClockRunning"] = "保持时钟运行",
+                ["KeepClockRunning.Desc"] = "当游戏的寻路跟不上时，寻路请求会获得更多时间，而不是让模拟停下来等待。求职和空出租车会逐步搜索，高峰期分散到几分钟内，服务覆盖范围约每分钟更新一次。",
+                ["LimitPeople"] = "限制精细模拟的人数",
+                ["LimitPeople.Desc"] = "城市人口超过上限时，游戏只逐个模拟这么多人，其余的人留在家中：他们保留住房和工作，计入人口，领取工资、缴税和购物，但不出行。各家庭轮流活动。大城市运行快得多；较小的城市不受影响。自动存档间隔设为 10 分钟或更长效果最好：每次存档都会短暂唤醒所有人。",
+                ["AutoLimit"] = "自动选择上限",
+                ["AutoLimit.Desc"] = "模组根据你的电脑能否跟上来设定上限：时钟落后时减少人数，有余力时增加。关闭后可自己选择人数。",
+                ["PeopleInDetail"] = "精细模拟人数上限（千人）",
+                ["PeopleInDetail.Desc"] = "自动上限关闭时使用。越低越快；越高街上的人越多。",
+                ["StatusPeople"] = "精细模拟人数 / 人口",
+                ["StatusPeople.Desc"] = "游戏当前逐个模拟的人数，与全城人口的对比。",
+                ["StatusSpeed"] = "游戏速度（1 = 正常）",
+                ["StatusSpeed.Desc"] = "最近几秒游戏时钟运行的速度。",
+                ["StatusStops"] = "在拥挤车站睡着等待的人",
+                ["StatusStops.Desc"] = "超载车站前一百人之后的人，正在睡着等待轮到自己。",
+            },
+            ["zh-HANT"] = new Dictionary<string, string>
+            {
+                ["Group"] = "模擬",
+                ["StatusGroup"] = "目前狀態",
+                ["KeepClockRunning"] = "保持時鐘運行",
+                ["KeepClockRunning.Desc"] = "當遊戲的尋路跟不上時，尋路請求會獲得更多時間，而不是讓模擬停下來等待。求職和空計程車會逐步搜尋，尖峰時段分散到幾分鐘內，服務涵蓋範圍約每分鐘更新一次。",
+                ["LimitPeople"] = "限制精細模擬的人數",
+                ["LimitPeople.Desc"] = "城市人口超過上限時，遊戲只逐一模擬這麼多人，其餘的人留在家中：他們保留住所和工作，計入人口，領取薪資、繳稅和購物，但不出行。各家庭輪流活動。大城市執行快得多；較小的城市不受影響。自動存檔間隔設為 10 分鐘或更長效果最好：每次存檔都會短暫喚醒所有人。",
+                ["AutoLimit"] = "自動選擇上限",
+                ["AutoLimit.Desc"] = "模組根據你的電腦能否跟上來設定上限：時鐘落後時減少人數，有餘力時增加。關閉後可自行選擇人數。",
+                ["PeopleInDetail"] = "精細模擬人數上限（千人）",
+                ["PeopleInDetail.Desc"] = "自動上限關閉時使用。越低越快；越高街上的人越多。",
+                ["StatusPeople"] = "精細模擬人數 / 人口",
+                ["StatusPeople.Desc"] = "遊戲目前逐一模擬的人數，與全城人口的對比。",
+                ["StatusSpeed"] = "遊戲速度（1 = 正常）",
+                ["StatusSpeed.Desc"] = "最近幾秒遊戲時鐘運行的速度。",
+                ["StatusStops"] = "在擁擠車站睡著等待的人",
+                ["StatusStops.Desc"] = "超載車站前一百人之後的人，正在睡著等待輪到自己。",
+            },
+        };
+
+        /// <summary>Every text for <paramref name="locale"/>, English where it has none.</summary>
+        internal static Dictionary<string, string> For(string locale)
+        {
+            var words = new Dictionary<string, string>(English);
+            if (Others.TryGetValue(locale, out var translated))
+                foreach (var pair in translated) words[pair.Key] = pair.Value;
+            return words;
+        }
+    }
+}

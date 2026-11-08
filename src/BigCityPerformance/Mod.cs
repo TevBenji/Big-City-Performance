@@ -29,7 +29,7 @@ namespace BigCityPerformance
                 Settings = new BigCitySettings(this);
                 AssetDatabase.global.LoadSettings(nameof(BigCityPerformance), Settings, new BigCitySettings(this));
                 Settings.RegisterInOptionsUI();
-                GameManager.instance.localizationManager.AddSource("en-US", Settings.Labels());
+                foreach (string locale in Translations.Locales) GameManager.instance.localizationManager.AddSource(locale, Settings.Labels(locale));
             });
             Register("route deadlines", () =>
             {
@@ -46,8 +46,10 @@ namespace BigCityPerformance
             Register("people simulated in detail", () =>
             {
                 updateSystem.UpdateAt<People.DormancySystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<People.ClockWatch>(SystemUpdatePhase.UIUpdate);
                 harmony.CreateClassProcessor(typeof(People.SaveWakePatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.SaveHoldPatch)).Patch();
+                harmony.CreateClassProcessor(typeof(People.LoadHoldPatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
                 harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
             });
