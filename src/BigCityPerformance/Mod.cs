@@ -34,6 +34,7 @@ namespace BigCityPerformance
             Register("route deadlines", () =>
             {
                 updateSystem.UpdateAt<RouteDeadlineSystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<CommuteSpread>(SystemUpdatePhase.UIUpdate);
                 harmony = new Harmony(HarmonyId);
                 harmony.CreateClassProcessor(typeof(GetQueuePatch)).Patch();
                 SearchThrottle.Patch(harmony);

@@ -20,6 +20,9 @@ namespace BigCityPerformance.Routes
     internal static class StepBudget
     {
         internal static bool Applied;
+
+        /// <summary>The last multiplier handed to the game, for the test runner.</summary>
+        internal static float Last = 2f;
         internal static bool DevOff = false;
         private static float smoothedFps = 60f;
 
@@ -46,10 +49,10 @@ namespace BigCityPerformance.Routes
         {
             float seconds = Time.unscaledDeltaTime;
             if (seconds > 0f) smoothedFps = math.lerp(smoothedFps, 1f / seconds, 0.1f);
-            if (DevOff || Mod.Settings == null || !Mod.Settings.KeepClockRunning || smoothedFps >= 30f) return 2f;
             // The steps a frame needs at 1x (60 a second), plus a half so the game's rounding gives the whole step (it rounds 2.5
             // down to 2, which held a city at 0.85x at 24 fps; test run, 7 November 2026).
-            return math.min(60f / smoothedFps + 0.5f, 4f);
+            Last = DevOff || Mod.Settings == null || !Mod.Settings.KeepClockRunning || smoothedFps >= 30f ? 2f : math.min(60f / smoothedFps + 0.5f, 4f);
+            return Last;
         }
     }
 }

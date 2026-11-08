@@ -88,9 +88,17 @@ namespace BigCityPerformance.Routes
     [HarmonyPatch(typeof(PathfindSetupSystem), nameof(PathfindSetupSystem.GetQueue))]
     internal static class GetQueuePatch
     {
-        private static void Prefix(ref int maxDelayFrames)
+        /// <summary>People's own trips, which come in waves (commutes at each hour); everyone else keeps a shorter limit.</summary>
+        private static readonly System.Collections.Generic.HashSet<System.Type> PeopleTrips = new System.Collections.Generic.HashSet<System.Type>
+        {
+            typeof(TripNeededSystem), typeof(ResidentAISystem), typeof(PersonalCarAISystem), typeof(LeisureSystem), typeof(TouristFindTargetSystem),
+            typeof(FindJobSystem), typeof(FindSchoolSystem), typeof(HouseholdFindPropertySystem), typeof(ResourceBuyerSystem),
+        };
+
+        private static void Prefix(object system, ref int maxDelayFrames)
         {
             int stretch = RouteDeadlineSystem.Stretch;
+            if (stretch > DeadlinePolicy.OthersMost && (system == null || !PeopleTrips.Contains(system.GetType()))) stretch = DeadlinePolicy.OthersMost;
             if (stretch > 1) maxDelayFrames *= stretch;
         }
     }
