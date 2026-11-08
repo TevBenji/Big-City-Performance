@@ -48,6 +48,8 @@ namespace BigCityPerformance.Routes
         protected override void OnUpdate()
         {
             if (Mod.Settings == null || !Mod.Settings.KeepClockRunning || ++frames < CheckFrames) return;
+            var game = Game.SceneFlow.GameManager.instance;
+            if (game == null || game.isGameLoading || game.gameMode != GameMode.Game) return;
             frames = 0;
             EntityCommandBuffer commands = default;
             bool started = false;

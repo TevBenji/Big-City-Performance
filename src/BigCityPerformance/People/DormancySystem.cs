@@ -35,10 +35,13 @@ namespace BigCityPerformance.People
 
         private readonly List<Entity> sleepingHouseholds = new List<Entity>();
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
-        private readonly List<Entity> sleepingEntities = new List<Entity>();
         private int sleepingCitizens, frames;
         private int lastLimit = -1;
-        private EntityQuery households, waiting;
+        private EntityQuery households, waiting, asleep;
+
+        // Only in a fully loaded city in play: sleeping people while a city loads lost track of them when loading finished
+        // (test run, 7 November 2026).
+        private bool ready;
         private readonly StopCrowds crowds = new StopCrowds();
         private SaveGameSystem saveGame;
         private CitySystem citySystem;
@@ -71,6 +74,12 @@ namespace BigCityPerformance.People
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
             waiting = GetEntityQuery(ComponentType.ReadOnly<Human>(), ComponentType.ReadOnly<Resident>(), ComponentType.ReadOnly<HumanCurrentLane>(),
                 ComponentType.Exclude<CurrentVehicle>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
+            asleep = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[] { ComponentType.ReadOnly<Disabled>() },
+                Any = new[] { ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Citizen>(), ComponentType.ReadOnly<Human>() },
+                Options = EntityQueryOptions.IncludeDisabledEntities,
+            });
             SleeperBookkeeping.Apply(World);
         }
 
@@ -93,7 +102,7 @@ namespace BigCityPerformance.People
                 if (saveGame.Enabled) return;
                 SaveInProgress = false;
             }
-            if (++frames < TopUpFrames) return;
+            if (!ready || ++frames < TopUpFrames) return;
             frames = 0;
             int limit = Limit;
             // Everyone wakes when the setting changes, and the next top-up sleeps the right number. Drift as the city grows or
@@ -135,7 +144,6 @@ namespace BigCityPerformance.People
                     }
             }
             if (batch.Count == 0) return;
-            sleepingEntities.AddRange(batch);
             // Through the game's end-of-frame command buffer, as its own systems change entities: never in the middle of a frame,
             // while its jobs may still be reading them (doing it directly crashed the game, test run 7 November 2026).
             var commands = endFrame.CreateCommandBuffer();
@@ -163,34 +171,40 @@ namespace BigCityPerformance.People
         /// <summary>Everyone awake: before a save, when the setting goes back up, or when the mod unloads.</summary>
         internal void WakeAll()
         {
-            sleepingEntities.AddRange(crowds.TakeAll());
-            if (sleepingEntities.Count == 0) return;
-            var alive = new List<Entity>(sleepingEntities.Count);
-            foreach (var entity in sleepingEntities) if (EntityManager.Exists(entity)) alive.Add(entity);
-            // At the end of the frame, like every other tag change: changing them mid-frame crashed the game (test run,
-            // 7 November 2026). A save waits for it (SaveHoldPatch).
-            var commands = endFrame.CreateCommandBuffer();
-            using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) commands.RemoveComponent<Disabled>(array);
-            wakeProbe = alive.Count > 0 ? alive[alive.Count - 1] : Entity.Null;
-            Mod.Logger.Info($"Woke {sleepingHouseholds.Count} households ({alive.Count} entities){(SaveInProgress ? " for a save" : "")}.");
-            sleepingEntities.Clear();
+            crowds.TakeAll();
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
             sleepingCitizens = 0;
+            // Everyone with the tag, not only the ones this system remembers: the game never disables anything itself, so
+            // nobody can be left asleep by a slip in the bookkeeping.
+            using (var everyone = asleep.ToEntityArray(Allocator.Temp))
+            {
+                if (everyone.Length == 0) return;
+                // At the end of the frame, like every other tag change: changing them mid-frame crashed the game (test run,
+                // 7 November 2026). A save waits for it (SaveHoldPatch).
+                endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(everyone);
+                wakeProbe = everyone[everyone.Length - 1];
+                Mod.Logger.Info($"Woke {everyone.Length} people and households{(SaveInProgress ? " for a save" : "")}.");
+            }
         }
 
         [Preserve]
         protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
-            // A freshly loaded city has nobody asleep (saves are written awake).
-            sleepingEntities.Clear();
-            crowds.TakeAll();
-            sleepingHouseholds.Clear();
-            sleepingSet.Clear();
-            sleepingCitizens = 0;
             lastLimit = -1;
             frames = 0;
+            ready = mode == GameMode.Game;
+            // A freshly loaded city has nobody asleep (saves are written awake); this also wakes anyone a save might still
+            // hold asleep.
+            WakeAll();
+        }
+
+        [Preserve]
+        protected override void OnGamePreload(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
+        {
+            base.OnGamePreload(purpose, mode);
+            ready = false;
         }
     }
 
