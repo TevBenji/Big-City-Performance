@@ -38,7 +38,8 @@ namespace BigCityPerformance.People
         private readonly List<Entity> sleepingEntities = new List<Entity>();
         private int sleepingCitizens, frames;
         private float lastAwakeShare = 1f;
-        private EntityQuery households;
+        private EntityQuery households, waiting;
+        private readonly StopCrowds crowds = new StopCrowds();
         private SaveGameSystem saveGame;
         private EndFrameBarrier endFrame;
 
@@ -48,6 +49,7 @@ namespace BigCityPerformance.People
 
         internal int SleepingHouseholds => sleepingHouseholds.Count;
         internal int SleepingCitizens => sleepingCitizens;
+        internal int SleepingAtStops => crowds.Asleep;
 
         [Preserve]
         protected override void OnCreate()
@@ -58,6 +60,8 @@ namespace BigCityPerformance.People
             endFrame = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
+            waiting = GetEntityQuery(ComponentType.ReadOnly<Human>(), ComponentType.ReadOnly<Resident>(), ComponentType.ReadOnly<HumanCurrentLane>(),
+                ComponentType.Exclude<CurrentVehicle>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
             SleeperBookkeeping.Apply(World);
         }
 
@@ -83,6 +87,7 @@ namespace BigCityPerformance.People
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
             if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
+            if (awake < 1f) crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
         }
 
         private void Sleep(int count)
@@ -139,6 +144,7 @@ namespace BigCityPerformance.People
         /// <summary>Everyone awake: before a save, when the setting goes back up, or when the mod unloads.</summary>
         internal void WakeAll()
         {
+            sleepingEntities.AddRange(crowds.TakeAll());
             if (sleepingEntities.Count == 0) return;
             var alive = new List<Entity>(sleepingEntities.Count);
             foreach (var entity in sleepingEntities) if (EntityManager.Exists(entity)) alive.Add(entity);
@@ -162,6 +168,7 @@ namespace BigCityPerformance.People
             base.OnGameLoadingComplete(purpose, mode);
             // A freshly loaded city has nobody asleep (saves are written awake).
             sleepingEntities.Clear();
+            crowds.TakeAll();
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
             sleepingCitizens = 0;
