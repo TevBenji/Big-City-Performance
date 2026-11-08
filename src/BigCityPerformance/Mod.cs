@@ -34,10 +34,22 @@ namespace BigCityPerformance
             Register("route deadlines", () =>
             {
                 updateSystem.UpdateAt<RouteDeadlineSystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<CommuteSpread>(SystemUpdatePhase.UIUpdate);
                 harmony = new Harmony(HarmonyId);
                 harmony.CreateClassProcessor(typeof(GetQueuePatch)).Patch();
                 SearchThrottle.Patch(harmony);
                 RouteCache.Patch(harmony);
+                harmony.CreateClassProcessor(typeof(RouteGuide)).Patch();
+                harmony.CreateClassProcessor(typeof(StepBudget)).Patch();
+                harmony.CreateClassProcessor(typeof(CoveragePace)).Patch();
+            });
+            Register("people simulated in detail", () =>
+            {
+                updateSystem.UpdateAt<People.DormancySystem>(SystemUpdatePhase.UIUpdate);
+                harmony.CreateClassProcessor(typeof(People.SaveWakePatch)).Patch();
+                harmony.CreateClassProcessor(typeof(People.SaveHoldPatch)).Patch();
+                harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
+                harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
             });
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));
@@ -46,6 +58,7 @@ namespace BigCityPerformance
 
         public void OnDispose()
         {
+            Register("waking everyone", () => People.DormancySystem.Instance?.WakeAll());
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
             Settings = null;

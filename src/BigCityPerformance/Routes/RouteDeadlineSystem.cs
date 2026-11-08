@@ -40,10 +40,34 @@ namespace BigCityPerformance.Routes
             setup = World.GetOrCreateSystemManaged<PathfindSetupSystem>();
         }
 
+        // A status line in the log every five minutes of play, so a session can be looked back on.
+        private const float StatusSeconds = 300f;
+        private float statusStart = -1f;
+        private uint statusFrame;
+        private int statusFrames;
+
+        private void Status()
+        {
+            float now = UnityEngine.Time.realtimeSinceStartup;
+            statusFrames++;
+            if (statusStart < 0f || simulation.frameIndex < statusFrame) { statusStart = now; statusFrame = simulation.frameIndex; statusFrames = 0; return; }
+            float seconds = now - statusStart;
+            if (seconds < StatusSeconds) return;
+            var dormancy = People.DormancySystem.Instance;
+            Mod.Logger.Info($"Status: game speed {(simulation.frameIndex - statusFrame) / 60f / seconds:F2}x of normal (speed button {simulation.selectedSpeed}), {statusFrames / seconds:F0} fps; "
+                + $"route requests waiting {results.pendingRequestCount + setup.pendingRequestCount}, deadline stretch {Stretch}, search throttle {Throttle.Level}; "
+                + (dormancy == null ? "" : $"asleep {dormancy.SleepingHouseholds} households ({dormancy.SleepingCitizens} people), {dormancy.SleepingAtStops} at stops; ")
+                + $"sleepers' shopping last game hour {People.ShopTwin.LastSales} sales ({People.ShopTwin.LastSpent} money).");
+            statusStart = now;
+            statusFrame = simulation.frameIndex;
+            statusFrames = 0;
+        }
+
         [Preserve]
         protected override void OnUpdate()
         {
             FrameIndex = simulation.frameIndex;
+            Status();
             if (Mod.Settings == null || !Mod.Settings.KeepClockRunning)
             {
                 Reset();
@@ -78,6 +102,7 @@ namespace BigCityPerformance.Routes
         {
             base.OnGameLoadingComplete(purpose, mode);
             Reset();
+            statusStart = -1f;
         }
     }
 
@@ -88,26 +113,34 @@ namespace BigCityPerformance.Routes
     [HarmonyPatch(typeof(PathfindSetupSystem), nameof(PathfindSetupSystem.GetQueue))]
     internal static class GetQueuePatch
     {
-        private static void Prefix(ref int maxDelayFrames)
+        /// <summary>People's own trips, which come in waves (commutes at each hour); everyone else keeps a shorter limit.</summary>
+        private static readonly System.Collections.Generic.HashSet<System.Type> PeopleTrips = new System.Collections.Generic.HashSet<System.Type>
+        {
+            typeof(TripNeededSystem), typeof(ResidentAISystem), typeof(PersonalCarAISystem), typeof(LeisureSystem), typeof(TouristFindTargetSystem),
+            typeof(FindJobSystem), typeof(FindSchoolSystem), typeof(HouseholdFindPropertySystem), typeof(ResourceBuyerSystem),
+        };
+
+        private static void Prefix(object system, ref int maxDelayFrames)
         {
             int stretch = RouteDeadlineSystem.Stretch;
+            if (stretch > DeadlinePolicy.OthersMost && (system == null || !PeopleTrips.Contains(system.GetType()))) stretch = DeadlinePolicy.OthersMost;
             if (stretch > 1) maxDelayFrames *= stretch;
         }
     }
 
     /// <summary>
-    /// Lets the systems that start optional searches run only the rounds the throttle allows:
+    /// Lets the systems that start optional searches run only the updates the throttle allows:
     /// - CitizenFindJobSystem turns citizens into job seekers, each a wide route search (two thirds of the route-finder's work
     ///   in a million-person city);
     /// - TaxiDispatchSystem sends empty taxis looking for passengers across the map (about a fifth once job hunting is throttled).
-    /// A round is a system's full pass (16 updates, one slice each), so nobody is skipped more than anyone else: everyone just
-    /// looks less often while the route-finder is behind.
+    /// Single updates run, spread out (<see cref="ThrottlePolicy.Stride"/>), each serving one slice of citizens, and every slice
+    /// gets its turn: nobody is skipped more than anyone else, everyone just looks less often while the route-finder is behind.
     /// </summary>
     internal static class SearchThrottle
     {
         internal static readonly System.Type[] Systems = { typeof(CitizenFindJobSystem), typeof(TaxiDispatchSystem) };
 
-        private static readonly System.Collections.Generic.Dictionary<System.Type, uint> RoundFrames = new System.Collections.Generic.Dictionary<System.Type, uint>();
+        private static readonly System.Collections.Generic.Dictionary<System.Type, uint> Intervals = new System.Collections.Generic.Dictionary<System.Type, uint>();
 
         internal static void Patch(Harmony harmony)
         {
@@ -120,8 +153,8 @@ namespace BigCityPerformance.Routes
             var throttle = RouteDeadlineSystem.Throttle;
             if (throttle.Level == 0) return true;
             var type = __instance.GetType();
-            if (!RoundFrames.TryGetValue(type, out uint frames))
-                RoundFrames[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation)) * 16u;
+            if (!Intervals.TryGetValue(type, out uint frames))
+                Intervals[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation));
             return throttle.Runs(RouteDeadlineSystem.FrameIndex / frames);
         }
     }

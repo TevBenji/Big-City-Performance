@@ -9,7 +9,14 @@ namespace BigCityPerformance.Core
     /// </summary>
     public sealed class DeadlinePolicy
     {
-        public const int Most = 16;
+        /// <summary>
+        /// For people's own trips. At 16 the clock still stalled at each hour's wave of commuters (test runs, 7 November 2026);
+        /// at 64 the wave is spread over a few game minutes instead.
+        /// </summary>
+        public const int Most = 64;
+
+        /// <summary>For everything else (emergencies, transit, service vehicles): never more than this.</summary>
+        public const int OthersMost = 16;
 
         /// <summary>The game slows its clock this many frames ahead of a route deadline (SimulationSystem).</summary>
         public const int ThrottleFrames = 48;

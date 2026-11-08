@@ -13,7 +13,6 @@ node_modules/
 reference/
 
 # Kept locally, not published: design notes, the test suite and the dev-only game runner
-CLAUDE.md
 docs/
 tests/
 tools/dev/

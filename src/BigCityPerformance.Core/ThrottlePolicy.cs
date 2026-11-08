@@ -4,7 +4,10 @@ namespace BigCityPerformance.Core
     /// <summary>
     /// How often optional searches (job hunting, taxis looking for passengers) may start while the route-finder holds up the
     /// simulation clock.
-    /// Level n lets one round in n + 1 run: a round is a system's full pass over all its citizens, so everyone is slowed alike.
+    /// Level n lets one update in <see cref="Stride"/> run (n + 1, made odd). The game's systems serve one slice of their
+    /// citizens per update, sixteen slices in turn; an odd stride lands on every slice in turn, so everyone is slowed alike,
+    /// and the updates that run are spread out. Letting whole passes through instead released every slice's job seekers in
+    /// one burst, the biggest cause of the clock's remaining stalls (test run, 8 November 2026).
     /// While the clock keeps waiting on route deadlines the level rises (at most once a second, up to <see cref="Most"/>); after
     /// a calm spell it falls back. In a million-person city job searches were two thirds of all route requests, and with none
     /// the clock ran 5.4 times faster (test runs, 7 November 2026).
@@ -51,8 +54,11 @@ namespace BigCityPerformance.Core
             if (Level > 0) Level--;
         }
 
-        /// <summary>Whether the round numbered <paramref name="round"/> may run at the current level.</summary>
-        public bool Runs(long round) => Level == 0 || round % (Level + 1) == 0;
+        /// <summary>Updates between those that run: Level + 1, made odd so it walks through all sixteen slices.</summary>
+        public int Stride => (Level + 1) | 1;
+
+        /// <summary>Whether the update numbered <paramref name="update"/> may run at the current level.</summary>
+        public bool Runs(long update) => Level == 0 || update % Stride == 0;
 
         public void Reset()
         {
