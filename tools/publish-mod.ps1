@@ -34,8 +34,13 @@ if (-not $DryRun) {
 }
 
 Write-Host '== Building Release'
+# Without node_modules the build skips the population box bundle with only a warning, so an old one could ship with new
+# assemblies: clear it first and insist the build made it again.
+$bundle = 'BigCityPerformance.mjs', 'BigCityPerformance.css' | ForEach-Object { Join-Path $release $_ }
+Remove-Item $bundle -ErrorAction SilentlyContinue
 dotnet build (Join-Path $root 'BigCityPerformance.sln') -c Release -nologo -v quiet
 if ($LASTEXITCODE -ne 0) { throw 'The build failed.' }
+if ($bundle | Where-Object { -not (Test-Path $_) }) { throw 'The population box bundle was not built: run npm ci in src\BigCityPerformance.UI, then publish again.' }
 
 # The test runner builds into bin\Dev; this catches it if it ever reaches Release.
 if ([IO.File]::ReadAllText((Join-Path $release 'BigCityPerformance.dll'), [Text.Encoding]::Latin1).Contains('DevHarness')) { throw 'The Release build contains the dev harness.' }
@@ -44,8 +49,8 @@ Write-Host '== Staging the mod files'
 $content = Join-Path ([IO.Path]::GetTempPath()) 'BigCityPerformancePublish'
 Remove-Item $content -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory $content | Out-Null
-# A code mod: its two assemblies, Harmony with its licence, and the texts.
-foreach ($file in 'BigCityPerformance.dll', 'BigCityPerformance.Core.dll', '0Harmony.dll', '0Harmony-LICENSE.txt', 'LICENSE', 'CREDITS.md', 'README.md') {
+# Its two assemblies, the population box bundle, Harmony with its licence, and the texts.
+foreach ($file in 'BigCityPerformance.dll', 'BigCityPerformance.Core.dll', 'BigCityPerformance.mjs', 'BigCityPerformance.css', '0Harmony.dll', '0Harmony-LICENSE.txt', 'LICENSE', 'CREDITS.md', 'README.md') {
     Copy-Item (Join-Path $release $file) $content
 }
 Get-ChildItem $content -Recurse -File | ForEach-Object { '   ' + $_.FullName.Substring($content.Length + 1) }

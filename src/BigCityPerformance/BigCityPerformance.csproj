@@ -61,4 +61,13 @@
     <None Include="..\..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\0Harmony-LICENSE.txt" Link="0Harmony-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- The count in the population box: a small UI bundle built into the output folder (as in Footbridge Builder). -->
+  <Target Name="BuildUserInterface" BeforeTargets="Build">
+    <Warning Condition="'$(SkipUI)' == 'true' Or !Exists('$(MSBuildProjectDirectory)\..\BigCityPerformance.UI\node_modules')"
+             Text="UI bundle skipped: run npm ci in src/BigCityPerformance.UI" />
+    <Exec Condition="'$(SkipUI)' != 'true' And Exists('$(MSBuildProjectDirectory)\..\BigCityPerformance.UI\node_modules')"
+          WorkingDirectory="$(MSBuildProjectDirectory)\..\BigCityPerformance.UI"
+          EnvironmentVariables="BIG_CITY_PERFORMANCE_UI_OUT=$(TargetDir)"
+          Command="npm run build" />
+  </Target>
 </Project>

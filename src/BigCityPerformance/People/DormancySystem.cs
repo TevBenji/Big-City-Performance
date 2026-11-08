@@ -46,7 +46,6 @@ namespace BigCityPerformance.People
         private readonly List<Entity> sleepingHouseholds = new List<Entity>();
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private int sleepingCitizens, frames;
-        private int lastLimit = -1;
         private bool afterSave;
         private EntityQuery households, waiting, asleep;
 
@@ -67,13 +66,35 @@ namespace BigCityPerformance.People
         // The last entity woken; once it's awake, the whole batch is (one command buffer).
         private Entity wakeProbe;
 
+        /// <summary>
+        /// Set while the clock waits after a city loads: everyone loads awake, and in the first moments they asked for 15,000
+        /// routes at once (test run, 8 November 2026). The clock starts once the first sleepers are asleep, or after
+        /// <see cref="MostHoldFrames"/> frames whatever happens.
+        /// </summary>
+        internal static bool HoldClock;
+        private const int MostHoldFrames = 90;
+        private int heldFrames;
+        private Entity sleepProbe;
+
         /// <summary>True once everyone woken has had the tag taken off.</summary>
         internal bool Awake => wakeProbe == Entity.Null || !EntityManager.Exists(wakeProbe) || !EntityManager.HasComponent<Disabled>(wakeProbe);
         internal static DormancySystem Instance;
 
         internal int SleepingHouseholds => sleepingHouseholds.Count;
         internal int SleepingCitizens => sleepingCitizens;
+
+        /// <summary>
+        /// The population's share in awake households. Counting sleepers' members against the game's population can go below
+        /// zero: the game's count leaves some members out (test run, 8 November 2026); household counts are exact on both sides.
+        /// </summary>
+        internal int PeopleInDetail(int population)
+        {
+            int awake = households.CalculateEntityCount();
+            int total = awake + sleepingHouseholds.Count;
+            return total == 0 ? population : (int)((long)population * awake / total);
+        }
         internal int SleepingAtStops => crowds.Asleep;
+        internal bool Ready => ready;
         internal IReadOnlyList<Entity> SleepingHouseholdList => sleepingHouseholds;
 
         [Preserve]
@@ -99,10 +120,11 @@ namespace BigCityPerformance.People
         }
 
         /// <summary>The most people simulated in detail; 0 = everyone (the game as it is).</summary>
-        private static int Limit => Mod.Settings == null || !Mod.Settings.LimitPeople ? 0 : Mod.Settings.PeopleInDetail * 1000;
+        private static int Limit => Mod.Settings == null || !Mod.Settings.LimitPeople ? 0
+            : Mod.Settings.AutoLimit ? ClockWatch.Auto.Limit : Mod.Settings.PeopleInDetail * 1000;
 
         /// <summary>The city's population as the game counts it, sleepers included (see <see cref="SleeperBookkeeping"/>).</summary>
-        private int Population()
+        internal int Population()
         {
             var city = citySystem.City;
             return city != Entity.Null && EntityManager.HasComponent<Game.City.Population>(city) ? EntityManager.GetComponentData<Game.City.Population>(city).m_Population : 0;
@@ -119,21 +141,17 @@ namespace BigCityPerformance.People
                 frames = TopUpFrames;
                 afterSave = true;
             }
+            if (HoldClock) ReleaseClockOnceAsleep();
             if (!ready || ++frames < TopUpFrames) return;
             frames = 0;
             bool justSaved = afterSave;
             afterSave = false;
             int limit = Limit;
-            // Everyone wakes when the setting changes, and the next top-up sleeps the right number. Drift as the city grows or
-            // shrinks only ever adds sleepers: waking everyone for it churned the whole city (test run, 7 November 2026).
-            // People asleep at stops count too: they can be the only sleepers (code review, 8 November 2026).
-            bool anyAsleep = sleepingHouseholds.Count > 0 || crowds.Asleep > 0;
-            if (limit != lastLimit && anyAsleep) WakeAll();
-            lastLimit = limit;
             int people = Population();
             if (limit == 0 || people <= limit)
             {
-                // No limit, or a city under it: nobody sleeps, at stops included (counted afresh: a wake above emptied both).
+                // No limit, or a city under it: nobody sleeps, at stops included (code review, 8 November 2026: they can be
+                // the only sleepers).
                 if (sleepingHouseholds.Count > 0 || crowds.Asleep > 0) WakeAll();
                 return;
             }
@@ -141,7 +159,12 @@ namespace BigCityPerformance.People
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
             Rotate();
-            if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
+            // A higher limit (the setting, or the automatic limit finding room) wakes only the difference, longest asleep first:
+            // waking everyone for every change churned the whole city (test run, 7 November 2026). A little slack, so drift in the
+            // counts doesn't wake and re-sleep the same few households.
+            int over = sleepingHouseholds.Count - wanted;
+            if (over > System.Math.Max(10, wanted / 50)) WakeLongestAsleep(over);
+            else if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
             if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleepingHouseholds.Count} households ({sleepingCitizens} people).");
             crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
         }
@@ -176,6 +199,19 @@ namespace BigCityPerformance.People
             // while its jobs may still be reading them (doing it directly crashed the game, test run 7 November 2026).
             var commands = endFrame.CreateCommandBuffer();
             using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) commands.AddComponent<Disabled>(array);
+            sleepProbe = batch[batch.Count - 1];
+        }
+
+        /// <summary>Lets the clock go once the first sleepers after loading are asleep (their tag lands at the end of a frame).</summary>
+        private void ReleaseClockOnceAsleep()
+        {
+            heldFrames++;
+            bool asleepNow = sleepProbe != Entity.Null && EntityManager.Exists(sleepProbe) && EntityManager.HasComponent<Disabled>(sleepProbe);
+            // Nobody to put to sleep (a city under the limit): no reason to wait past the first top-up.
+            bool nobody = heldFrames > 1 && sleepProbe == Entity.Null;
+            if (!asleepNow && !nobody && heldFrames <= MostHoldFrames) return;
+            HoldClock = false;
+            Mod.Logger.Info($"The clock waited {heldFrames} frames after loading, while {sleepingHouseholds.Count:N0} households went to sleep.");
         }
 
         /// <summary>
@@ -194,6 +230,13 @@ namespace BigCityPerformance.People
             int count = System.Math.Min((int)rotationDue, sleepingHouseholds.Count);
             if (count == 0) return;
             rotationDue -= count;
+            WakeLongestAsleep(count);
+        }
+
+        /// <summary>Wakes the <paramref name="count"/> households asleep longest, with their members and walkers.</summary>
+        private void WakeLongestAsleep(int count)
+        {
+            count = System.Math.Min(count, sleepingHouseholds.Count);
             var batch = new List<Entity>();
             for (int index = 0; index < count; index++)
             {
@@ -260,13 +303,15 @@ namespace BigCityPerformance.People
         protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
-            lastLimit = -1;
             // The first top-up on the first frame: a city loads with everyone awake, and in the 120 frames of waiting they asked
             // for 15,000 routes at once (test run, 8 November 2026).
             frames = TopUpFrames;
             lastRotation = simulation.frameIndex;
             rotationDue = 0;
             ready = mode == GameMode.Game;
+            HoldClock = ready && Limit > 0;
+            heldFrames = 0;
+            sleepProbe = Entity.Null;
             // A freshly loaded city has nobody asleep (saves are written awake); this also wakes anyone a save might still
             // hold asleep.
             WakeAll();
@@ -300,6 +345,16 @@ namespace BigCityPerformance.People
             }
             return false;
         }
+    }
+
+    /// <summary>
+    /// While <see cref="DormancySystem.HoldClock"/> is set after a city loads, the simulation doesn't step (drawing goes on): a
+    /// moment at the very start of play, while the first sleepers go to sleep.
+    /// </summary>
+    [HarmonyPatch(typeof(SimulationSystem), "OnUpdate")]
+    internal static class LoadHoldPatch
+    {
+        private static bool Prefix(SimulationSystem __instance) => !DormancySystem.HoldClock || __instance.m_IsLoading;
     }
 
     /// <summary>Everyone wakes as a save starts, so the save holds the city as the game knows it.</summary>

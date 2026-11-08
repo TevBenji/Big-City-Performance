@@ -18,11 +18,14 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - Service coverage is recalculated about once a minute instead of every few seconds.
 - Below 30 fps the game may run up to twice as many simulation steps per frame, so normal speed stays normal speed.
 
-**Limit the people simulated in detail** (50,000 by default)
+**Limit the people simulated in detail** (on by default, the limit chosen for you)
 
 - In a city bigger than the limit, that many people are simulated one by one. The rest stay at home, asleep: they keep their homes and jobs, count in the population, earn wages, pay rent and taxes, and still buy from the shops. They just make no trips.
 - Households take turns, so everyone gets time awake about once every two game days.
 - At overloaded stops only the first hundred people stay awake; the rest wake in turn as the ones in front board.
+- **The limit picks itself**: fewer people when the clock falls behind and fewer would help, more when there's room. A slow graphics card alone doesn't lower it. Turn it off to choose the number yourself.
+- Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking for routes at once.
+- **A count in the population box**: while the city is bigger than the limit, the population box at the bottom of the screen also shows how many people are simulated in detail (959,129 | 48k AUTO). Hover it for the details, click it for the settings.
 - Cities smaller than the limit are not changed at all.
 
 ### Measured
@@ -37,11 +40,22 @@ In a city this size the frame rate is mostly the graphics card: the mod simulate
 
 ### Settings
 
-In Options, Big City Performance: **Keep the clock running** (on), **Limit the people simulated in detail** (on) and **Most people simulated in detail** (50 thousand: lower runs faster, higher puts more people on the streets).
+In Options, Big City Performance:
+
+- **Keep the clock running** (on)
+- **Limit the people simulated in detail** (on)
+- **Choose the limit automatically** (on)
+- **Most people simulated in detail**, in thousands, for when the automatic limit is off (lower runs faster, higher puts more people on the streets)
+- **Show it in the population box** (on)
+
+Under **Right now** the page shows what the mod is doing as you play: people simulated in detail out of the population, the game speed reached (1 = normal), and how many wait asleep at crowded stops.
+
+The settings are in English, German, Spanish, French, Italian, Japanese, Korean, Polish, Brazilian Portuguese, Russian and Chinese.
 
 ### Good to know
 
 - Fewer people on the streets of a city over the limit: they're at home.
+- **Autosave every 10 minutes or more works best.** Every save wakes everyone for a moment, so the save stays ordinary, and they go back to sleep straight after.
 - Rush hour is gentler, and coverage maps update about once a minute.
 - **Saves are ordinary saves.** Everyone wakes up before the game saves, and a save loads without the mod. Removing the mod is safe.
 - Other mods that change simulation speed, commute times or route-finding haven't been tested alongside it.
@@ -62,9 +76,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.1.0" />
+	<ModVersion Value="0.2.0" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- First release." />
+	<ChangeLog Value="- The limit picks itself: fewer people when the clock falls behind, more when there's room (Options: Choose the limit automatically, on by default).&#10;- Options shows what the mod is doing right now: people in detail, game speed, people waiting asleep at crowded stops.&#10;- A smoother start: the clock waits a moment after loading while the first households go to sleep.&#10;- Changing the limit wakes only the difference, not the whole city.&#10;- A count in the population box at the bottom of the screen: people simulated in detail, AUTO when the limit picks itself; hover for details, click for the settings.&#10;- Settings in 11 more languages.&#10;- Tip: autosave every 10 minutes or more works best." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

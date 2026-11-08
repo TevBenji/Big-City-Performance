@@ -1,6 +1,7 @@
 // Big City Performance. Original work by TevBenji, 2026-11. GPL-3.0.
 using System.Collections.Generic;
 using Colossal.IO.AssetDatabase;
+using Colossal.Json;
 using Colossal.Localization;
 using Game.Modding;
 using Game.Settings;
@@ -13,6 +14,7 @@ namespace BigCityPerformance.Settings
     {
         private const string Section = "Main";
         private const string Group = "Simulation";
+        private const string StatusGroup = "Status";
 
         public BigCitySettings(IMod mod) : base(mod)
         {
@@ -25,39 +27,67 @@ namespace BigCityPerformance.Settings
         [SettingsUISection(Section, Group)]
         public bool LimitPeople { get; set; }
 
-        /// <summary>In thousands.</summary>
-        [SettingsUISlider(min = 10, max = 500, step = 10, unit = Game.UI.Unit.kInteger)]
         [SettingsUISection(Section, Group)]
         [SettingsUIDisableByCondition(typeof(BigCitySettings), nameof(PeopleUnlimited))]
+        public bool AutoLimit { get; set; }
+
+        /// <summary>In thousands; used when <see cref="AutoLimit"/> is off.</summary>
+        [SettingsUISlider(min = 10, max = 500, step = 10, unit = Game.UI.Unit.kInteger)]
+        [SettingsUISection(Section, Group)]
+        [SettingsUIDisableByCondition(typeof(BigCitySettings), nameof(LimitChosenForYou))]
         public int PeopleInDetail { get; set; }
 
+        /// <summary>The count beside the population at the bottom of the screen.</summary>
+        [SettingsUISection(Section, StatusGroup)]
+        public bool ShowOnScreen { get; set; }
+
+        [Exclude]
+        [SettingsUISection(Section, StatusGroup)]
+        [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
+        public string StatusPeople => LiveStatus.People;
+
+        [Exclude]
+        [SettingsUISection(Section, StatusGroup)]
+        [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
+        public string StatusSpeed => LiveStatus.Speed;
+
+        [Exclude]
+        [SettingsUISection(Section, StatusGroup)]
+        [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
+        public string StatusStops => LiveStatus.Stops;
+
         public bool PeopleUnlimited() => !LimitPeople;
+
+        public bool LimitChosenForYou() => !LimitPeople || AutoLimit;
+
+        public int StatusVersion() => LiveStatus.Version;
 
         public override void SetDefaults()
         {
             KeepClockRunning = true;
             LimitPeople = true;
+            AutoLimit = true;
             PeopleInDetail = 50;
+            ShowOnScreen = true;
         }
 
-        /// <summary>English labels for the Options page; without them the page shows the raw ids.</summary>
-        public MemorySource Labels()
+        /// <summary>The Options page's words in one language (English for any it doesn't have): without them it shows raw ids.</summary>
+        public MemorySource Labels(string locale)
         {
-            return new MemorySource(new Dictionary<string, string>
+            var words = Translations.For(locale);
+            var labels = new Dictionary<string, string>
             {
                 [GetSettingsLocaleID()] = "Big City Performance",
                 [GetOptionTabLocaleID(Section)] = "Big City Performance",
-                [GetOptionGroupLocaleID(Group)] = "Simulation",
-                [GetOptionLabelLocaleID(nameof(KeepClockRunning))] = "Keep the clock running",
-                [GetOptionDescLocaleID(nameof(KeepClockRunning))] =
-                    "When the game's route-finder falls behind, route requests get more time instead of the simulation pausing to wait, and citizens look for new jobs (and empty taxis for passengers) less often until it catches up. Citizens set off a moment later.",
-                [GetOptionLabelLocaleID(nameof(LimitPeople))] = "Limit the people simulated in detail",
-                [GetOptionDescLocaleID(nameof(LimitPeople))] =
-                    "In a city bigger than the limit below, the game simulates that many people one by one and the rest stay at home: they keep their homes and jobs, count in the population, earn wages and pay taxes, but make no trips. Big cities run much faster. Smaller cities are not changed.",
-                [GetOptionLabelLocaleID(nameof(PeopleInDetail))] = "Most people simulated in detail (thousands)",
-                [GetOptionDescLocaleID(nameof(PeopleInDetail))] =
-                    "How many people the game simulates one by one in a big city. Lower runs faster.",
-            });
+                [GetOptionGroupLocaleID(Group)] = words[nameof(Group)],
+                [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
+            };
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops) })
+            {
+                labels[GetOptionLabelLocaleID(name)] = words[name];
+                labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];
+            }
+            return new MemorySource(labels);
         }
     }
 }
