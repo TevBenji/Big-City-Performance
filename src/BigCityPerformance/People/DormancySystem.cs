@@ -126,10 +126,17 @@ namespace BigCityPerformance.People
             int limit = Limit;
             // Everyone wakes when the setting changes, and the next top-up sleeps the right number. Drift as the city grows or
             // shrinks only ever adds sleepers: waking everyone for it churned the whole city (test run, 7 November 2026).
-            if (limit != lastLimit && sleepingHouseholds.Count > 0) WakeAll();
+            // People asleep at stops count too: they can be the only sleepers (code review, 8 November 2026).
+            bool anyAsleep = sleepingHouseholds.Count > 0 || crowds.Asleep > 0;
+            if (limit != lastLimit && anyAsleep) WakeAll();
             lastLimit = limit;
             int people = Population();
-            if (limit == 0 || people <= limit) return;
+            if (limit == 0 || people <= limit)
+            {
+                // No limit, or a city under it: nobody sleeps, at stops included (counted afresh: a wake above emptied both).
+                if (sleepingHouseholds.Count > 0 || crowds.Asleep > 0) WakeAll();
+                return;
+            }
             float awake = (float)limit / people;
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));

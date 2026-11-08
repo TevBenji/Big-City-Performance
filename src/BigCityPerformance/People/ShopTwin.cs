@@ -8,6 +8,7 @@ using Game.Economy;
 using Game.Prefabs;
 using Game.Simulation;
 using Game.Tools;
+using BigCityPerformance.Core;
 using HarmonyLib;
 using Unity.Collections;
 using Unity.Entities;
@@ -19,7 +20,8 @@ namespace BigCityPerformance.People
     /// <summary>
     /// Sleeping households still shop, so shops keep their customers. Each game hour they spend what the awake households
     /// spent per household on their last full day (the game keeps that figure for each one), and the money goes to the shops in
-    /// proportion to their real customers this month: shops awake people like get the sleepers' custom too. Each purchase goes
+    /// proportion to their real customers this month: shops awake people like get the sleepers' custom too. It's paid in many
+    /// smaller sales, each by the next sleeping household in turn, so every household pays its share over time. Each purchase goes
     /// into the game's own sales queue as a sale with no trip, so the game itself moves the money and the goods, counts the
     /// customer and uses up the shop's service, as for any other sale. Never vehicles: a household buying one gets a new car.
     /// </summary>
@@ -31,7 +33,12 @@ namespace BigCityPerformance.People
 
         private static readonly System.Reflection.MethodInfo DependencyGetter = AccessTools.PropertyGetter(typeof(SystemBase), "Dependency");
 
+        /// <summary>At most this many sales an hour, and none smaller than <see cref="SmallestSale"/> money.</summary>
+        private const int MaxSalesPerHour = 4096;
+        private const long SmallestSale = 200;
+
         private static uint lastHour = uint.MaxValue;
+        private static int nextBuyer;
         private static EntityQuery awakeHouseholds, shops;
         private static bool queriesMade;
 
@@ -69,25 +76,40 @@ namespace BigCityPerformance.People
             ((JobHandle)DependencyGetter.Invoke(__instance, null)).Complete();
             var prefabs = __instance.m_ResourceSystem.GetPrefabs();
             var sleepers = dormancy.SleepingHouseholdList;
-            int buyer = 0, sales = 0;
+            // Many smaller sales, each charged to the next sleeping household in turn (the turn carries over from hour to hour), so
+            // every household pays its share over time. One sale per shop put each shop's whole share on one household, the same
+            // few households every hour (code review, 8 November 2026).
+            int saleCount = (int)System.Math.Max(1L, System.Math.Min(System.Math.Min(sleepers.Count, MaxSalesPerHour), budget / SmallestSale));
+            var weights = new long[found.Count];
+            for (int index = 0; index < found.Count; index++) weights[index] = found[index].Weight;
+            var counts = ShareOut.Counts(weights, saleCount);
+            long perSale = budget / saleCount;
+            int sales = 0;
             long spent = 0;
-            foreach (var shop in found)
+            for (int index = 0; index < found.Count; index++)
             {
+                if (counts[index] == 0) continue;
+                var shop = found[index];
                 float price = EconomyUtils.GetMarketPrice(shop.Resource, prefabs, entities);
                 if (price <= 0f) continue;
-                long share = budget * shop.Weight / totalWeight;
-                int amount = (int)math.min(shop.Stock, share / price);
-                if (amount <= 0) continue;
-                __instance.m_SalesQueue.Enqueue(new ResourceBuyerSystem.SalesEvent
+                int stock = shop.Stock;
+                for (int sale = 0; sale < counts[index] && stock > 0; sale++)
                 {
-                    m_Flags = ResourceBuyerSystem.SaleFlags.CommercialSeller | ResourceBuyerSystem.SaleFlags.Virtual,
-                    m_Buyer = sleepers[buyer++ % sleepers.Count],
-                    m_Seller = shop.Entity,
-                    m_Resource = shop.Resource,
-                    m_Amount = amount,
-                });
-                sales++;
-                spent += (long)(amount * price);
+                    int amount = (int)math.min(stock, perSale / price);
+                    if (amount <= 0) break;
+                    stock -= amount;
+                    nextBuyer = (nextBuyer + 1) % sleepers.Count;
+                    __instance.m_SalesQueue.Enqueue(new ResourceBuyerSystem.SalesEvent
+                    {
+                        m_Flags = ResourceBuyerSystem.SaleFlags.CommercialSeller | ResourceBuyerSystem.SaleFlags.Virtual,
+                        m_Buyer = sleepers[nextBuyer],
+                        m_Seller = shop.Entity,
+                        m_Resource = shop.Resource,
+                        m_Amount = amount,
+                    });
+                    sales++;
+                    spent += (long)(amount * price);
+                }
             }
             LastSales = sales;
             LastSpent = spent;
