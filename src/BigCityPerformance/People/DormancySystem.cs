@@ -37,10 +37,11 @@ namespace BigCityPerformance.People
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private readonly List<Entity> sleepingEntities = new List<Entity>();
         private int sleepingCitizens, frames;
-        private float lastAwakeShare = 1f;
+        private int lastLimit = -1;
         private EntityQuery households, waiting;
         private readonly StopCrowds crowds = new StopCrowds();
         private SaveGameSystem saveGame;
+        private CitySystem citySystem;
         private EndFrameBarrier endFrame;
 
         /// <summary>Set by the save patch: everyone is awake until the save is written.</summary>
@@ -58,6 +59,7 @@ namespace BigCityPerformance.People
             Instance = this;
             saveGame = World.GetOrCreateSystemManaged<SaveGameSystem>();
             endFrame = World.GetOrCreateSystemManaged<EndFrameBarrier>();
+            citySystem = World.GetOrCreateSystemManaged<CitySystem>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
             waiting = GetEntityQuery(ComponentType.ReadOnly<Human>(), ComponentType.ReadOnly<Resident>(), ComponentType.ReadOnly<HumanCurrentLane>(),
@@ -65,8 +67,15 @@ namespace BigCityPerformance.People
             SleeperBookkeeping.Apply(World);
         }
 
-        /// <summary>The share of households simulated in detail (1 = everyone, the game as it is).</summary>
-        private static float AwakeShare => Mod.Settings == null ? 1f : Unity.Mathematics.math.clamp(Mod.Settings.SimulatedPercent / 100f, 0.05f, 1f);
+        /// <summary>The most people simulated in detail; 0 = everyone (the game as it is).</summary>
+        private static int Limit => Mod.Settings == null || !Mod.Settings.LimitPeople ? 0 : Mod.Settings.PeopleInDetail * 1000;
+
+        /// <summary>The city's population as the game counts it, sleepers included (see <see cref="SleeperBookkeeping"/>).</summary>
+        private int Population()
+        {
+            var city = citySystem.City;
+            return city != Entity.Null && EntityManager.HasComponent<Game.City.Population>(city) ? EntityManager.GetComponentData<Game.City.Population>(city).m_Population : 0;
+        }
 
         [Preserve]
         protected override void OnUpdate()
@@ -79,15 +88,18 @@ namespace BigCityPerformance.People
             }
             if (++frames < TopUpFrames) return;
             frames = 0;
-            float awake = AwakeShare;
-            // Wake people only when the setting goes up. The target also drifts down a little whenever awake households move
-            // away; waking everyone for that (then putting them back to sleep) churned the whole city (test run, 7 November 2026).
-            if (awake > lastAwakeShare && sleepingHouseholds.Count > 0) WakeAll();
-            lastAwakeShare = awake;
+            int limit = Limit;
+            // Everyone wakes when the setting changes, and the next top-up sleeps the right number. Drift as the city grows or
+            // shrinks only ever adds sleepers: waking everyone for it churned the whole city (test run, 7 November 2026).
+            if (limit != lastLimit && sleepingHouseholds.Count > 0) WakeAll();
+            lastLimit = limit;
+            int people = Population();
+            if (limit == 0 || people <= limit) return;
+            float awake = (float)limit / people;
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
             if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
-            if (awake < 1f) crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
+            crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
         }
 
         private void Sleep(int count)
@@ -172,7 +184,7 @@ namespace BigCityPerformance.People
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
             sleepingCitizens = 0;
-            lastAwakeShare = 1f;
+            lastLimit = -1;
             frames = 0;
         }
     }

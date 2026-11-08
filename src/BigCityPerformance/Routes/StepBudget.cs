@@ -13,7 +13,7 @@ namespace BigCityPerformance.Routes
     /// The game runs at most two simulation steps per frame for each step of speed (two at 1x, four at 2x), so below 30 frames a
     /// second the clock can't keep up however little each step costs: at 22 fps a city ran at 0.64x on normal speed (test run,
     /// 7 November 2026). Below 30 fps this lets it run as many as keep the clock on time, up to twice the game's own number (so
-    /// 1x holds down to 15 fps). Big cities spend most of a frame waiting for the graphics card, so the extra steps mostly use
+    /// 1x holds down to about 17 fps). Big cities spend most of a frame waiting for the graphics card, so the extra steps mostly use
     /// time the processor would have spent idle.
     /// </summary>
     [HarmonyPatch(typeof(SimulationSystem), "OnUpdate")]
@@ -46,8 +46,10 @@ namespace BigCityPerformance.Routes
         {
             float seconds = Time.unscaledDeltaTime;
             if (seconds > 0f) smoothedFps = math.lerp(smoothedFps, 1f / seconds, 0.1f);
-            if (DevOff || Mod.Settings == null || !Mod.Settings.KeepClockRunning) return 2f;
-            return 2f * math.clamp(30f / smoothedFps, 1f, 2f);
+            if (DevOff || Mod.Settings == null || !Mod.Settings.KeepClockRunning || smoothedFps >= 30f) return 2f;
+            // The steps a frame needs at 1x (60 a second), plus a half so the game's rounding gives the whole step (it rounds 2.5
+            // down to 2, which held a city at 0.85x at 24 fps; test run, 7 November 2026).
+            return math.min(60f / smoothedFps + 0.5f, 4f);
         }
     }
 }
