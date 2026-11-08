@@ -111,6 +111,12 @@ without the mod. Removing the mod is safe at any time.
 - Every five minutes of play the mod writes a status line to `Logs\BigCityPerformance.log`: game speed, frame rate, route
   requests waiting, how many people are asleep and what they bought.
 
+## Found a bug?
+
+[Open an issue](https://github.com/TevBenji/Big-City-Performance/issues) with a screenshot and the log at
+`%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Logs\BigCityPerformance.log`. The mod writes a status
+line there every five minutes, so the log shows how the city was running.
+
 ## Building from source
 
 **Requirements:** Windows, Cities: Skylines II, and the .NET SDK 9 or later. The mod targets .NET Framework 4.8 with C# 9
