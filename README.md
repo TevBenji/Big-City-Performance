@@ -60,6 +60,9 @@ Two things, and neither is the frame rate.
   faster. Turn it off to pick the number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking
   for routes at once.
+- **A count in the population box.** While the city is bigger than the limit, the population box at the bottom of the
+  screen also shows how many people are simulated in detail, like `959,129 | 48k AUTO`. Hover it for the details (the
+  limit, the game speed, people waiting at stops); click it to open the settings.
 - Cities smaller than the limit are not changed at all.
 
 ## Measured
@@ -87,6 +90,7 @@ Options → Big City Performance:
 | Limit the people simulated in detail | On | Everything in the second list above |
 | Choose the limit automatically | On | The limit follows how your computer keeps up |
 | Most people simulated in detail (thousands) | 50 | When the automatic limit is off: lower runs faster, higher puts more people on the streets |
+| Show it in the population box | On | The count of people in detail beside the population at the bottom of the screen |
 
 Under **Right now** the page shows what the mod is doing as you play: people simulated in detail out of the whole
 population, the game speed reached over the last few seconds (1 = normal), and how many people wait asleep at crowded
@@ -139,14 +143,18 @@ line there every five minutes, so the log shows how the city was running.
 
 ## Building from source
 
-**Requirements:** Windows, Cities: Skylines II, and the .NET SDK 9 or later. The mod targets .NET Framework 4.8 with C# 9
-and compiles against the game's own assemblies.
+**Requirements:** Windows, Cities: Skylines II, the .NET SDK 9 or later, and Node.js 18 or later. The mod targets .NET
+Framework 4.8 with C# 9 and compiles against the game's own assemblies.
 
 ```powershell
 git clone https://github.com/TevBenji/Big-City-Performance.git
-cd Big-City-Performance
+cd Big-City-Performance/src/BigCityPerformance.UI
+npm ci
+cd ../..
 dotnet build BigCityPerformance.sln -c Release
 ```
+
+Without `npm ci` the build skips the population box bundle with a warning.
 
 The build writes the mod to `src/BigCityPerformance/bin/Release`. If the game is not installed under `D:\Steam`, point the
 build at it: `-p:ManagedPath="<Steam library>\steamapps\common\Cities Skylines II\Cities2_Data\Managed"`. Building never
@@ -157,6 +165,7 @@ into `%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Mods\BigC
 |---|---|
 | `src/BigCityPerformance.Core` | The deadline and throttle rules and the commute marker: pure C#, tested outside the game |
 | `src/BigCityPerformance` | The mod: the clock, the sleeping, the bookkeeping and the settings |
+| `src/BigCityPerformance.UI` | The count in the population box: React and TypeScript, bundled for the game's UI |
 
 ## Credits
 
