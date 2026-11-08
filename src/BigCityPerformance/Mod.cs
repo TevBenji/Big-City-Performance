@@ -40,6 +40,7 @@ namespace BigCityPerformance
                 RouteCache.Patch(harmony);
                 harmony.CreateClassProcessor(typeof(RouteGuide)).Patch();
                 harmony.CreateClassProcessor(typeof(StepBudget)).Patch();
+                harmony.CreateClassProcessor(typeof(CoveragePace)).Patch();
             });
             Register("people simulated in detail", () =>
             {
