@@ -2,7 +2,8 @@
 	<!--Empty for the first upload. The publisher prints "Mod published with Id=NNNNNN": it goes here, or the next upload makes a second listing-->
 	<ModId Value="" />
 	<DisplayName Value="Big City Performance" />
-	<ShortDescription Value="Million-person cities at full speed. The clock stops waiting for the route-finder, rush hour spreads out, and above a limit you set most people stay home: still counted, working, paying taxes and shopping." />
+	<!--At most 200 characters: Paradox Mods refuses a longer one-->
+	<ShortDescription Value="Million-person cities at full speed: the clock stops waiting for routes, rush hour spreads out, and above a limit you set most people stay home, still counted, working and paying taxes." />
 	<!--Every upload sends exactly this page: change it here, not on the website, or the next upload overwrites the website-->
 	<LongDescription>
 A city of a million people in the base game runs at about a twentieth of normal speed: vehicles and cims crawl, and a game day takes hours. With Big City Performance the same city runs at about normal speed on the first speed button and faster on the second, on a four-core laptop.
@@ -28,15 +29,15 @@ A city of a million people in the base game runs at about a twentieth of normal 
 
 The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card:
 
-- Base game: **0.05×** normal speed
-- First speed button: **about 0.95×**, 17–25 fps
-- Second speed button: **1.4–1.6×**
+- Base game: **0.05x** normal speed
+- First speed button: **about 0.95x**, 17 to 25 fps
+- Second speed button: **1.4 to 1.6x**
 
 In a city this size the frame rate is mostly the graphics card: the mod simulates a big city faster, it can't draw it faster.
 
 ### Settings
 
-Options → Big City Performance: **Keep the clock running** (on), **Limit the people simulated in detail** (on) and **Most people simulated in detail** (50 thousand: lower runs faster, higher puts more people on the streets).
+In Options, Big City Performance: **Keep the clock running** (on), **Limit the people simulated in detail** (on) and **Most people simulated in detail** (50 thousand: lower runs faster, higher puts more people on the streets).
 
 ### Good to know
 
