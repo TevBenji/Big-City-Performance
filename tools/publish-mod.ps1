@@ -10,8 +10,7 @@
 param(
     [switch]$Update,
     [switch]$PageOnly,
-    [switch]$DryRun,
-    [string]$Email
+    [switch]$DryRun
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -76,23 +75,21 @@ if ($visibility -ne 'PUBLIC') {
 Write-Host '== Uploading to Paradox Mods'
 # The publisher targets .NET 6; a newer runtime runs it.
 $env:DOTNET_ROLL_FORWARD = 'Major'
+# Only the login the game has saved: the publisher takes a typed password only on its command line, where other programs
+# can read it, so this script never passes one.
 $arguments = @($command, $page, '-c', $content, '-v')
-# Asked at a hidden prompt, so the password never lands in the shell's history.
-if ($Email) {
-    $secure = Read-Host -AsSecureString "Paradox password for $Email"
-    $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
-    $arguments += @('--noAutoLogin', '-e', $Email, '-p', $password)
-}
 Push-Location $project  # the page file names its pictures relative to the project
 try { & $publisher @arguments 2>&1 | Tee-Object -Variable log } finally { Pop-Location }
-if ($LASTEXITCODE -ne 0) { throw 'The upload failed: the lines above say why (if it could not log in, add -Email and type the password when asked).' }
+if ($LASTEXITCODE -ne 0) { throw 'The upload failed: the lines above say why. If it could not log in, start the game once and sign in to Paradox there, then try again.' }
 
 $found = [regex]::Match(($log -join "`n"), 'Id\s*=\s*(\d+)')
 if ($command -eq 'Publish' -and $found.Success) {
     $id = $found.Groups[1].Value
     (Get-Content $page -Raw) -replace '<ModId Value="" />', "<ModId Value=`"$id`" />" | Set-Content $page -NoNewline
     git -C $root commit -q -m "Paradox Mods: mod id $id" -- $page
+    if ($LASTEXITCODE -ne 0) { throw "The upload worked (mod ${id}), but committing its id failed: put $id in the page file's ModId and commit it before publishing again." }
     git -C $root push origin master
+    if ($LASTEXITCODE -ne 0) { throw "The upload worked (mod ${id}), but pushing its id to GitHub failed: push master before publishing from anywhere else." }
     Write-Host "== Published as mod ${id}: https://mods.paradoxplaza.com/mods/$id/Windows"
 }
 Write-Host '== Done'
