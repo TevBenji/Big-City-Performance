@@ -1,0 +1,70 @@
+<Publish>
+	<!--Empty for the first upload. The publisher prints "Mod published with Id=NNNNNN": it goes here, or the next upload makes a second listing-->
+	<ModId Value="" />
+	<DisplayName Value="Big City Performance" />
+	<ShortDescription Value="Million-person cities at full speed. The clock stops waiting for the route-finder, rush hour spreads out, and above a limit you set most people stay home: still counted, working, paying taxes and shopping." />
+	<!--Every upload sends exactly this page: change it here, not on the website, or the next upload overwrites the website-->
+	<LongDescription>
+A city of a million people in the base game runs at about a twentieth of normal speed: vehicles and cims crawl, and a game day takes hours. With Big City Performance the same city runs at about normal speed on the first speed button and faster on the second, on a four-core laptop.
+
+### What it does
+
+**Keep the clock running**
+
+- When the route-finder falls behind, new route requests get more time instead of the game's clock stopping. Emergency services, transit and service vehicles keep the game's own deadlines.
+- Job hunting and empty taxis search a few at a time while it's busy, everyone in turn.
+- **Rush hour is spread out**: workers leave across a few minutes instead of all in the same second. Nobody arrives later.
+- Service coverage is recalculated about once a minute instead of every few seconds.
+- Below 30 fps the game may run up to twice as many simulation steps per frame, so normal speed stays normal speed.
+
+**Limit the people simulated in detail** (50,000 by default)
+
+- In a city bigger than the limit, that many people are simulated one by one. The rest stay at home, asleep: they keep their homes and jobs, count in the population, earn wages, pay rent and taxes, and still buy from the shops. They just make no trips.
+- Households take turns, so everyone gets time awake about once every two game days.
+- At overloaded stops only the first hundred people stay awake; the rest wake in turn as the ones in front board.
+- Cities smaller than the limit are not changed at all.
+
+### Measured
+
+The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card:
+
+- Base game: **0.05×** normal speed
+- First speed button: **about 0.95×**, 17–25 fps
+- Second speed button: **1.4–1.6×**
+
+In a city this size the frame rate is mostly the graphics card: the mod simulates a big city faster, it can't draw it faster.
+
+### Settings
+
+Options → Big City Performance: **Keep the clock running** (on), **Limit the people simulated in detail** (on) and **Most people simulated in detail** (50 thousand: lower runs faster, higher puts more people on the streets).
+
+### Good to know
+
+- Fewer people on the streets of a city over the limit: they're at home.
+- Rush hour is gentler, and coverage maps update about once a minute.
+- **Saves are ordinary saves.** Everyone wakes up before the game saves, and a save loads without the mod. Removing the mod is safe.
+- Other mods that change simulation speed, commute times or route-finding haven't been tested alongside it.
+- Early release: expect rough edges and tell me what you find.
+
+Built for game version **1.6.***.
+
+### Found a bug?
+
+Open an issue on GitHub (link on this page) with a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
+
+### Credits
+
+Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout started from my mods Stepped Streets and Footbridge Builder, and before that from **Placemaker** by jackwrichards (GPL-3.0). Big City Performance is GPL-3.0 too; the full source is on GitHub (link on this page).
+	</LongDescription>
+	<!--A missing picture is silently replaced by a default one-->
+	<Thumbnail Value="Properties/Thumbnail.png" />
+	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
+	<Screenshot Value="Properties/Screenshots/01.png" />
+	<Tag Value="Code Mod" />
+	<ModVersion Value="0.1.0" />
+	<GameVersion Value="1.6.*" />
+	<ChangeLog Value="- First release." />
+	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
+	<!--Public, Unlisted or Private, exactly as written-->
+	<AccessLevel Value="Public" />
+</Publish>
