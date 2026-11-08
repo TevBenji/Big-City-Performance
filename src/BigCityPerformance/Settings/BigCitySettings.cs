@@ -36,7 +36,7 @@ namespace BigCityPerformance.Settings
         public override void SetDefaults()
         {
             KeepClockRunning = true;
-            LimitPeople = false;
+            LimitPeople = true;
             PeopleInDetail = 50;
         }
 

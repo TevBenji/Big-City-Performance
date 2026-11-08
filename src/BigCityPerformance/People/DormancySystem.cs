@@ -46,6 +46,12 @@ namespace BigCityPerformance.People
 
         /// <summary>Set by the save patch: everyone is awake until the save is written.</summary>
         internal static bool SaveInProgress;
+
+        // The last entity woken; once it's awake, the whole batch is (one command buffer).
+        private Entity wakeProbe;
+
+        /// <summary>True once everyone woken has had the tag taken off.</summary>
+        internal bool Awake => wakeProbe == Entity.Null || !EntityManager.Exists(wakeProbe) || !EntityManager.HasComponent<Disabled>(wakeProbe);
         internal static DormancySystem Instance;
 
         internal int SleepingHouseholds => sleepingHouseholds.Count;
@@ -161,14 +167,12 @@ namespace BigCityPerformance.People
             if (sleepingEntities.Count == 0) return;
             var alive = new List<Entity>(sleepingEntities.Count);
             foreach (var entity in sleepingEntities) if (EntityManager.Exists(entity)) alive.Add(entity);
-            if (SaveInProgress)
-                // The save starts now, in this frame: wake them at once, before anything is written.
-                using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) EntityManager.RemoveComponent<Disabled>(array);
-            else
-            {
-                var commands = endFrame.CreateCommandBuffer();
-                using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) commands.RemoveComponent<Disabled>(array);
-            }
+            // At the end of the frame, like every other tag change: changing them mid-frame crashed the game (test run,
+            // 7 November 2026). A save waits for it (SaveHoldPatch).
+            var commands = endFrame.CreateCommandBuffer();
+            using (var array = new NativeArray<Entity>(alive.ToArray(), Allocator.Temp)) commands.RemoveComponent<Disabled>(array);
+            wakeProbe = alive.Count > 0 ? alive[alive.Count - 1] : Entity.Null;
+            Mod.Logger.Info($"Woke {sleepingHouseholds.Count} households ({alive.Count} entities){(SaveInProgress ? " for a save" : "")}.");
             sleepingEntities.Clear();
             sleepingHouseholds.Clear();
             sleepingSet.Clear();
@@ -187,6 +191,28 @@ namespace BigCityPerformance.People
             sleepingCitizens = 0;
             lastLimit = -1;
             frames = 0;
+        }
+    }
+
+    /// <summary>
+    /// The game writes a save in SaveGameSystem's update, a frame or more after RunOnce asks for it. Until the sleepers woken for
+    /// it are awake (the tag comes off at the end of a frame), the writing waits; at most 30 frames, so a save never hangs.
+    /// </summary>
+    [HarmonyPatch(typeof(SaveGameSystem), "OnUpdate")]
+    internal static class SaveHoldPatch
+    {
+        private static int held;
+
+        private static bool Prefix(SaveGameSystem __instance)
+        {
+            var dormancy = DormancySystem.Instance;
+            if (__instance.m_Writing || dormancy == null || dormancy.Awake || ++held > 30)
+            {
+                if (held > 30) Mod.Logger.Warn("A save went ahead before everyone was awake.");
+                held = 0;
+                return true;
+            }
+            return false;
         }
     }
 

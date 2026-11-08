@@ -40,10 +40,34 @@ namespace BigCityPerformance.Routes
             setup = World.GetOrCreateSystemManaged<PathfindSetupSystem>();
         }
 
+        // A status line in the log every five minutes of play, so a session can be looked back on.
+        private const float StatusSeconds = 300f;
+        private float statusStart = -1f;
+        private uint statusFrame;
+        private int statusFrames;
+
+        private void Status()
+        {
+            float now = UnityEngine.Time.realtimeSinceStartup;
+            statusFrames++;
+            if (statusStart < 0f || simulation.frameIndex < statusFrame) { statusStart = now; statusFrame = simulation.frameIndex; statusFrames = 0; return; }
+            float seconds = now - statusStart;
+            if (seconds < StatusSeconds) return;
+            var dormancy = People.DormancySystem.Instance;
+            Mod.Logger.Info($"Status: game speed {(simulation.frameIndex - statusFrame) / 60f / seconds:F2}x of normal (speed button {simulation.selectedSpeed}), {statusFrames / seconds:F0} fps; "
+                + $"route requests waiting {results.pendingRequestCount + setup.pendingRequestCount}, deadline stretch {Stretch}, search throttle {Throttle.Level}; "
+                + (dormancy == null ? "" : $"asleep {dormancy.SleepingHouseholds} households ({dormancy.SleepingCitizens} people), {dormancy.SleepingAtStops} at stops; ")
+                + $"sleepers' shopping last game hour {People.ShopTwin.LastSales} sales ({People.ShopTwin.LastSpent} money).");
+            statusStart = now;
+            statusFrame = simulation.frameIndex;
+            statusFrames = 0;
+        }
+
         [Preserve]
         protected override void OnUpdate()
         {
             FrameIndex = simulation.frameIndex;
+            Status();
             if (Mod.Settings == null || !Mod.Settings.KeepClockRunning)
             {
                 Reset();
