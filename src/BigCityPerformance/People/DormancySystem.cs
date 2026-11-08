@@ -51,6 +51,7 @@ namespace BigCityPerformance.People
         internal int SleepingHouseholds => sleepingHouseholds.Count;
         internal int SleepingCitizens => sleepingCitizens;
         internal int SleepingAtStops => crowds.Asleep;
+        internal IReadOnlyList<Entity> SleepingHouseholdList => sleepingHouseholds;
 
         [Preserve]
         protected override void OnCreate()
