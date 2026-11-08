@@ -254,7 +254,9 @@ namespace BigCityPerformance.People
         {
             base.OnGameLoadingComplete(purpose, mode);
             lastLimit = -1;
-            frames = 0;
+            // The first top-up on the first frame: a city loads with everyone awake, and in the 120 frames of waiting they asked
+            // for 15,000 routes at once (test run, 8 November 2026).
+            frames = TopUpFrames;
             lastRotation = simulation.frameIndex;
             rotationDue = 0;
             ready = mode == GameMode.Game;
