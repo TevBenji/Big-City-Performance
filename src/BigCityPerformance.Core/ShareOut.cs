@@ -7,8 +7,10 @@ namespace BigCityPerformance.Core
         /// <summary>
         /// How many of <paramref name="total"/> items each weight gets: evenly spaced picks along the weights laid end to end,
         /// so every count is within one of its exact share and the counts add up to <paramref name="total"/>.
+        /// <paramref name="offset"/> (0 to 1) is where in its slot each pick lands: moving it between calls lets items fewer than
+        /// the weights reach every weight in turn, instead of the same ones every time.
         /// </summary>
-        public static int[] Counts(long[] weights, int total)
+        public static int[] Counts(long[] weights, int total, double offset = 0.5)
         {
             var counts = new int[weights.Length];
             long sum = 0;
@@ -18,8 +20,7 @@ namespace BigCityPerformance.Core
             long reached = weights.Length > 0 ? weights[0] : 0;
             for (int pick = 0; pick < total; pick++)
             {
-                // The middle of the pick's slot, in weight units (doubled to stay whole).
-                long at = (2L * pick + 1) * sum / (2L * total);
+                long at = (long)((pick + offset) * sum / total);
                 while (at >= reached && index < weights.Length - 1) reached += weights[++index];
                 counts[index]++;
             }

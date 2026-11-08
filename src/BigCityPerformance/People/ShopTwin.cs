@@ -39,6 +39,7 @@ namespace BigCityPerformance.People
 
         private static uint lastHour = uint.MaxValue;
         private static int nextBuyer;
+        private static double pickOffset;
         private static EntityQuery awakeHouseholds, shops;
         private static bool queriesMade;
 
@@ -82,7 +83,10 @@ namespace BigCityPerformance.People
             int saleCount = (int)System.Math.Max(1L, System.Math.Min(System.Math.Min(sleepers.Count, MaxSalesPerHour), budget / SmallestSale));
             var weights = new long[found.Count];
             for (int index = 0; index < found.Count; index++) weights[index] = found[index].Weight;
-            var counts = ShareOut.Counts(weights, saleCount);
+            // Where the picks land moves on each hour (by the golden ratio, which never repeats), so when there are fewer sales
+            // than shops every shop still gets its share over the hours (code review, 8 November 2026).
+            pickOffset = (pickOffset + 0.6180339887) % 1.0;
+            var counts = ShareOut.Counts(weights, saleCount, pickOffset);
             long perSale = budget / saleCount;
             int sales = 0;
             long spent = 0;
