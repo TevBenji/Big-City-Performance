@@ -47,6 +47,7 @@ namespace BigCityPerformance
             {
                 updateSystem.UpdateAt<People.DormancySystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<People.ClockWatch>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<UI.IndicatorUISystem>(SystemUpdatePhase.UIUpdate);
                 harmony.CreateClassProcessor(typeof(People.SaveWakePatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.SaveHoldPatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.LoadHoldPatch)).Patch();

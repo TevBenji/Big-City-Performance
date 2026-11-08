@@ -44,8 +44,8 @@ Write-Host '== Staging the mod files'
 $content = Join-Path ([IO.Path]::GetTempPath()) 'BigCityPerformancePublish'
 Remove-Item $content -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory $content | Out-Null
-# A code mod: its two assemblies, Harmony with its licence, and the texts.
-foreach ($file in 'BigCityPerformance.dll', 'BigCityPerformance.Core.dll', '0Harmony.dll', '0Harmony-LICENSE.txt', 'LICENSE', 'CREDITS.md', 'README.md') {
+# Its two assemblies, the population box bundle, Harmony with its licence, and the texts.
+foreach ($file in 'BigCityPerformance.dll', 'BigCityPerformance.Core.dll', 'BigCityPerformance.mjs', 'BigCityPerformance.css', '0Harmony.dll', '0Harmony-LICENSE.txt', 'LICENSE', 'CREDITS.md', 'README.md') {
     Copy-Item (Join-Path $release $file) $content
 }
 Get-ChildItem $content -Recurse -File | ForEach-Object { '   ' + $_.FullName.Substring($content.Length + 1) }

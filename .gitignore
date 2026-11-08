@@ -17,3 +17,6 @@ docs/
 tests/
 tools/dev/
 src/BigCityPerformance/Dev/
+
+# The UI bundle is built into the mod output; its own build folder stays local.
+src/BigCityPerformance.UI/build/

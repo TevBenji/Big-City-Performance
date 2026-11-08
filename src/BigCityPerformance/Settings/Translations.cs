@@ -29,6 +29,13 @@ namespace BigCityPerformance.Settings
             ["StatusSpeed.Desc"] = "How fast the game's clock ran over the last few seconds.",
             ["StatusStops"] = "Waiting asleep at crowded stops",
             ["StatusStops.Desc"] = "People past the first hundred at an overloaded stop, waiting asleep for their turn.",
+            ["ShowOnScreen"] = "Show it in the population box",
+            ["ShowOnScreen.Desc"] = "Adds the number of people simulated in detail to the population box at the bottom of the screen, for example 959,129 | 48k AUTO: the city's population, then how many of those people the game simulates one by one right now. AUTO means the limit is chosen automatically. Hover it for the details (the limit, the game speed and how many wait asleep at crowded stops); click it to open these settings. It only appears while your city is bigger than the limit, when the mod is actually doing something.",
+            ["Indicator.Limit"] = "Limit",
+            ["Indicator.Automatic"] = "Automatic",
+            ["Indicator.Fixed"] = "Set by you",
+            ["Indicator.AtHome"] = "{0} people at home: still counted, working and paying taxes",
+            ["Indicator.Click"] = "Click for settings",
         };
 
         private static readonly Dictionary<string, Dictionary<string, string>> Others = new Dictionary<string, Dictionary<string, string>>
@@ -51,6 +58,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "Wie schnell die Uhr des Spiels in den letzten Sekunden lief.",
                 ["StatusStops"] = "Schlafend an vollen Haltestellen",
                 ["StatusStops.Desc"] = "Personen nach den ersten hundert an einer überfüllten Haltestelle, die schlafend warten, bis sie dran sind.",
+                ["ShowOnScreen"] = "In der Bevölkerungsanzeige zeigen",
+                ["ShowOnScreen.Desc"] = "Ergänzt die Bevölkerungsanzeige unten am Bildschirm um die Zahl der im Detail simulierten Personen, zum Beispiel 959,129 | 48k AUTO: die Bevölkerung der Stadt, dann wie viele davon das Spiel gerade einzeln simuliert. AUTO heißt, das Limit wird automatisch gewählt. Fahre mit der Maus darüber für Details (das Limit, die Spielgeschwindigkeit und wie viele schlafend an vollen Haltestellen warten); klicke darauf, um diese Einstellungen zu öffnen. Es erscheint nur, solange deine Stadt größer als das Limit ist, also wenn die Mod tatsächlich etwas tut.",
+                ["Indicator.Limit"] = "Limit",
+                ["Indicator.Automatic"] = "Automatisch",
+                ["Indicator.Fixed"] = "Von dir festgelegt",
+                ["Indicator.AtHome"] = "{0} Personen zu Hause: weiterhin gezählt, arbeitend und Steuern zahlend",
+                ["Indicator.Click"] = "Klicken für die Einstellungen",
             },
             ["es-ES"] = new Dictionary<string, string>
             {
@@ -70,6 +84,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "Lo rápido que ha ido el reloj del juego en los últimos segundos.",
                 ["StatusStops"] = "Dormidos en paradas llenas",
                 ["StatusStops.Desc"] = "Personas más allá de las cien primeras en una parada saturada, esperando dormidas su turno.",
+                ["ShowOnScreen"] = "Mostrarlo en la casilla de población",
+                ["ShowOnScreen.Desc"] = "Añade a la casilla de población, abajo en la pantalla, el número de personas simuladas en detalle, por ejemplo 959,129 | 48k AUTO: la población de la ciudad y cuántas de esas personas simula el juego una a una ahora mismo. AUTO significa que el límite se elige automáticamente. Pasa el ratón por encima para ver los detalles (el límite, la velocidad del juego y cuántos esperan dormidos en paradas llenas); haz clic para abrir estos ajustes. Solo aparece mientras tu ciudad supera el límite, cuando el mod está haciendo algo de verdad.",
+                ["Indicator.Limit"] = "Límite",
+                ["Indicator.Automatic"] = "Automático",
+                ["Indicator.Fixed"] = "Elegido por ti",
+                ["Indicator.AtHome"] = "{0} personas en casa: siguen contando, trabajando y pagando impuestos",
+                ["Indicator.Click"] = "Haz clic para los ajustes",
             },
             ["fr-FR"] = new Dictionary<string, string>
             {
@@ -89,6 +110,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "La vitesse de l'horloge du jeu ces dernières secondes.",
                 ["StatusStops"] = "Endormis aux arrêts bondés",
                 ["StatusStops.Desc"] = "Les personnes au-delà des cent premières à un arrêt surchargé, qui attendent leur tour endormies.",
+                ["ShowOnScreen"] = "L'afficher dans la case population",
+                ["ShowOnScreen.Desc"] = "Ajoute à la case population, en bas de l'écran, le nombre d'habitants simulés en détail, par exemple 959,129 | 48k AUTO : la population de la ville, puis combien de ces habitants le jeu simule un par un en ce moment. AUTO signifie que la limite est choisie automatiquement. Survolez-le pour les détails (la limite, la vitesse du jeu et combien attendent endormis aux arrêts bondés) ; cliquez dessus pour ouvrir ces réglages. Il n'apparaît que lorsque votre ville dépasse la limite, quand le mod agit vraiment.",
+                ["Indicator.Limit"] = "Limite",
+                ["Indicator.Automatic"] = "Automatique",
+                ["Indicator.Fixed"] = "Choisie par vous",
+                ["Indicator.AtHome"] = "{0} habitants chez eux : toujours comptés, au travail et payant leurs impôts",
+                ["Indicator.Click"] = "Cliquez pour les réglages",
             },
             ["it-IT"] = new Dictionary<string, string>
             {
@@ -108,6 +136,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "Quanto è andato veloce l'orologio del gioco negli ultimi secondi.",
                 ["StatusStops"] = "Addormentati alle fermate affollate",
                 ["StatusStops.Desc"] = "Le persone oltre le prime cento a una fermata sovraffollata, che aspettano il loro turno dormendo.",
+                ["ShowOnScreen"] = "Mostralo nel riquadro della popolazione",
+                ["ShowOnScreen.Desc"] = "Aggiunge al riquadro della popolazione, in basso sullo schermo, il numero di persone simulate nel dettaglio, per esempio 959,129 | 48k AUTO: la popolazione della città, poi quante di queste persone il gioco simula una per una in questo momento. AUTO significa che il limite viene scelto automaticamente. Passaci sopra con il mouse per i dettagli (il limite, la velocità di gioco e quanti aspettano addormentati alle fermate affollate); cliccalo per aprire queste impostazioni. Compare solo quando la tua città supera il limite, cioè quando la mod sta davvero facendo qualcosa.",
+                ["Indicator.Limit"] = "Limite",
+                ["Indicator.Automatic"] = "Automatico",
+                ["Indicator.Fixed"] = "Scelto da te",
+                ["Indicator.AtHome"] = "{0} persone a casa: ancora contate, lavorano e pagano le tasse",
+                ["Indicator.Click"] = "Clicca per le impostazioni",
             },
             ["ja-JP"] = new Dictionary<string, string>
             {
@@ -127,6 +162,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "直近数秒のゲーム時計の進む速さです。",
                 ["StatusStops"] = "混雑した停留所で眠って待つ人",
                 ["StatusStops.Desc"] = "満員の停留所で先頭の100人より後ろにいて、眠ったまま順番を待っている人です。",
+                ["ShowOnScreen"] = "人口の欄に表示する",
+                ["ShowOnScreen.Desc"] = "画面下の人口の欄に、詳細にシミュレートしている人数を追加します。例：959,129 | 48k AUTO。都市の人口と、そのうちゲームが今一人ずつシミュレートしている人数です。AUTOは上限が自動で選ばれていることを示します。マウスを重ねると詳細（上限、ゲーム速度、混雑した停留所で眠って待つ人数）が表示され、クリックするとこの設定が開きます。都市が上限より大きく、MODが実際に働いているときだけ表示されます。",
+                ["Indicator.Limit"] = "上限",
+                ["Indicator.Automatic"] = "自動",
+                ["Indicator.Fixed"] = "手動設定",
+                ["Indicator.AtHome"] = "{0}人が在宅中：人口に数えられ、働き、税金を払っています",
+                ["Indicator.Click"] = "クリックで設定を開く",
             },
             ["ko-KR"] = new Dictionary<string, string>
             {
@@ -146,6 +188,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "최근 몇 초 동안 게임 시계가 흐른 속도입니다.",
                 ["StatusStops"] = "붐비는 정류장에서 잠든 채 대기",
                 ["StatusStops.Desc"] = "만원인 정류장에서 앞의 100명 뒤에 있으며 잠든 채 차례를 기다리는 사람입니다.",
+                ["ShowOnScreen"] = "인구 칸에 표시",
+                ["ShowOnScreen.Desc"] = "화면 아래 인구 칸에 자세히 시뮬레이션 중인 인원을 추가합니다. 예: 959,129 | 48k AUTO. 도시 인구와, 그중 게임이 지금 한 명씩 시뮬레이션하는 인원입니다. AUTO는 한도가 자동으로 선택된다는 뜻입니다. 마우스를 올리면 자세한 내용(한도, 게임 속도, 붐비는 정류장에서 잠든 채 기다리는 인원)이 보이고, 클릭하면 이 설정이 열립니다. 도시가 한도보다 클 때, 즉 모드가 실제로 작동할 때만 나타납니다.",
+                ["Indicator.Limit"] = "한도",
+                ["Indicator.Automatic"] = "자동",
+                ["Indicator.Fixed"] = "직접 설정",
+                ["Indicator.AtHome"] = "{0}명이 집에 있음: 여전히 인구에 포함되고, 일하고, 세금을 냅니다",
+                ["Indicator.Click"] = "클릭하면 설정이 열립니다",
             },
             ["pl-PL"] = new Dictionary<string, string>
             {
@@ -165,6 +214,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "Jak szybko szedł zegar gry przez ostatnie sekundy.",
                 ["StatusStops"] = "Uśpieni na zatłoczonych przystankach",
                 ["StatusStops.Desc"] = "Osoby ponad pierwszą setkę na przepełnionym przystanku, czekające uśpione na swoją kolej.",
+                ["ShowOnScreen"] = "Pokazuj w polu populacji",
+                ["ShowOnScreen.Desc"] = "Dodaje do pola populacji na dole ekranu liczbę osób symulowanych szczegółowo, na przykład 959,129 | 48k AUTO: populację miasta, a potem ile z tych osób gra symuluje teraz pojedynczo. AUTO oznacza, że limit jest dobierany automatycznie. Najedź kursorem, aby zobaczyć szczegóły (limit, prędkość gry i ile osób czeka uśpionych na zatłoczonych przystankach); kliknij, aby otworzyć te ustawienia. Pojawia się tylko wtedy, gdy miasto przekracza limit, czyli gdy mod naprawdę coś robi.",
+                ["Indicator.Limit"] = "Limit",
+                ["Indicator.Automatic"] = "Automatyczny",
+                ["Indicator.Fixed"] = "Ustawiony przez ciebie",
+                ["Indicator.AtHome"] = "{0} osób w domu: wciąż liczone, pracują i płacą podatki",
+                ["Indicator.Click"] = "Kliknij, aby otworzyć ustawienia",
             },
             ["pt-BR"] = new Dictionary<string, string>
             {
@@ -184,6 +240,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "A velocidade do relógio do jogo nos últimos segundos.",
                 ["StatusStops"] = "Dormindo em paradas lotadas",
                 ["StatusStops.Desc"] = "Pessoas além das cem primeiras numa parada lotada, esperando a vez dormindo.",
+                ["ShowOnScreen"] = "Mostrar no campo de população",
+                ["ShowOnScreen.Desc"] = "Acrescenta ao campo de população, na parte de baixo da tela, o número de pessoas simuladas em detalhe, por exemplo 959,129 | 48k AUTO: a população da cidade e quantas dessas pessoas o jogo simula uma a uma agora. AUTO quer dizer que o limite é escolhido automaticamente. Passe o mouse por cima para ver os detalhes (o limite, a velocidade do jogo e quantos esperam dormindo em paradas lotadas); clique para abrir estas configurações. Só aparece enquanto a sua cidade passa do limite, quando o mod está realmente agindo.",
+                ["Indicator.Limit"] = "Limite",
+                ["Indicator.Automatic"] = "Automático",
+                ["Indicator.Fixed"] = "Definido por você",
+                ["Indicator.AtHome"] = "{0} pessoas em casa: ainda contadas, trabalhando e pagando impostos",
+                ["Indicator.Click"] = "Clique para as configurações",
             },
             ["ru-RU"] = new Dictionary<string, string>
             {
@@ -203,6 +266,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "Насколько быстро шли часы игры за последние секунды.",
                 ["StatusStops"] = "Спят на переполненных остановках",
                 ["StatusStops.Desc"] = "Люди после первой сотни на переполненной остановке, ожидающие своей очереди во сне.",
+                ["ShowOnScreen"] = "Показывать в поле населения",
+                ["ShowOnScreen.Desc"] = "Добавляет в поле населения внизу экрана число подробно моделируемых жителей, например 959,129 | 48k AUTO: население города и сколько из этих людей игра сейчас моделирует по отдельности. AUTO означает, что лимит выбирается автоматически. Наведите курсор, чтобы увидеть подробности (лимит, скорость игры и сколько людей спят в ожидании на переполненных остановках); нажмите, чтобы открыть эти настройки. Появляется, только пока город больше лимита, то есть когда мод действительно работает.",
+                ["Indicator.Limit"] = "Лимит",
+                ["Indicator.Automatic"] = "Автоматически",
+                ["Indicator.Fixed"] = "Задан вами",
+                ["Indicator.AtHome"] = "{0} жителей дома: учитываются, работают и платят налоги",
+                ["Indicator.Click"] = "Нажмите, чтобы открыть настройки",
             },
             ["zh-HANS"] = new Dictionary<string, string>
             {
@@ -222,6 +292,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "最近几秒游戏时钟运行的速度。",
                 ["StatusStops"] = "在拥挤车站睡着等待的人",
                 ["StatusStops.Desc"] = "超载车站前一百人之后的人，正在睡着等待轮到自己。",
+                ["ShowOnScreen"] = "在人口栏中显示",
+                ["ShowOnScreen.Desc"] = "在屏幕底部的人口栏中加上精细模拟的人数，例如 959,129 | 48k AUTO：城市人口，以及游戏当前逐个模拟其中多少人。AUTO 表示上限自动选择。将鼠标悬停其上可查看详情（上限、游戏速度以及在拥挤车站睡着等待的人数）；点击可打开这些设置。只有当城市人口超过上限、模组真正发挥作用时才会显示。",
+                ["Indicator.Limit"] = "上限",
+                ["Indicator.Automatic"] = "自动",
+                ["Indicator.Fixed"] = "手动设置",
+                ["Indicator.AtHome"] = "{0} 人在家：仍计入人口、工作并缴税",
+                ["Indicator.Click"] = "点击打开设置",
             },
             ["zh-HANT"] = new Dictionary<string, string>
             {
@@ -241,6 +318,13 @@ namespace BigCityPerformance.Settings
                 ["StatusSpeed.Desc"] = "最近幾秒遊戲時鐘運行的速度。",
                 ["StatusStops"] = "在擁擠車站睡著等待的人",
                 ["StatusStops.Desc"] = "超載車站前一百人之後的人，正在睡著等待輪到自己。",
+                ["ShowOnScreen"] = "在人口欄中顯示",
+                ["ShowOnScreen.Desc"] = "在螢幕底部的人口欄中加上精細模擬的人數，例如 959,129 | 48k AUTO：城市人口，以及遊戲目前逐一模擬其中多少人。AUTO 表示上限自動選擇。將滑鼠移到上面可查看詳情（上限、遊戲速度以及在擁擠車站睡著等待的人數）；點擊可開啟這些設定。只有在城市人口超過上限、模組真正發揮作用時才會顯示。",
+                ["Indicator.Limit"] = "上限",
+                ["Indicator.Automatic"] = "自動",
+                ["Indicator.Fixed"] = "手動設定",
+                ["Indicator.AtHome"] = "{0} 人在家：仍計入人口、工作並繳稅",
+                ["Indicator.Click"] = "點擊開啟設定",
             },
         };
 

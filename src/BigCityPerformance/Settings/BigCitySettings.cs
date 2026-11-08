@@ -37,6 +37,10 @@ namespace BigCityPerformance.Settings
         [SettingsUIDisableByCondition(typeof(BigCitySettings), nameof(LimitChosenForYou))]
         public int PeopleInDetail { get; set; }
 
+        /// <summary>The count beside the population at the bottom of the screen.</summary>
+        [SettingsUISection(Section, StatusGroup)]
+        public bool ShowOnScreen { get; set; }
+
         [Exclude]
         [SettingsUISection(Section, StatusGroup)]
         [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
@@ -64,6 +68,7 @@ namespace BigCityPerformance.Settings
             LimitPeople = true;
             AutoLimit = true;
             PeopleInDetail = 50;
+            ShowOnScreen = true;
         }
 
         /// <summary>The Options page's words in one language (English for any it doesn't have): without them it shows raw ids.</summary>
@@ -77,7 +82,7 @@ namespace BigCityPerformance.Settings
                 [GetOptionGroupLocaleID(Group)] = words[nameof(Group)],
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];
