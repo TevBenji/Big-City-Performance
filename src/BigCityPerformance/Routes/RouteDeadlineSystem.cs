@@ -129,18 +129,18 @@ namespace BigCityPerformance.Routes
     }
 
     /// <summary>
-    /// Lets the systems that start optional searches run only the rounds the throttle allows:
+    /// Lets the systems that start optional searches run only the updates the throttle allows:
     /// - CitizenFindJobSystem turns citizens into job seekers, each a wide route search (two thirds of the route-finder's work
     ///   in a million-person city);
     /// - TaxiDispatchSystem sends empty taxis looking for passengers across the map (about a fifth once job hunting is throttled).
-    /// A round is a system's full pass (16 updates, one slice each), so nobody is skipped more than anyone else: everyone just
-    /// looks less often while the route-finder is behind.
+    /// Single updates run, spread out (<see cref="ThrottlePolicy.Stride"/>), each serving one slice of citizens, and every slice
+    /// gets its turn: nobody is skipped more than anyone else, everyone just looks less often while the route-finder is behind.
     /// </summary>
     internal static class SearchThrottle
     {
         internal static readonly System.Type[] Systems = { typeof(CitizenFindJobSystem), typeof(TaxiDispatchSystem) };
 
-        private static readonly System.Collections.Generic.Dictionary<System.Type, uint> RoundFrames = new System.Collections.Generic.Dictionary<System.Type, uint>();
+        private static readonly System.Collections.Generic.Dictionary<System.Type, uint> Intervals = new System.Collections.Generic.Dictionary<System.Type, uint>();
 
         internal static void Patch(Harmony harmony)
         {
@@ -153,8 +153,8 @@ namespace BigCityPerformance.Routes
             var throttle = RouteDeadlineSystem.Throttle;
             if (throttle.Level == 0) return true;
             var type = __instance.GetType();
-            if (!RoundFrames.TryGetValue(type, out uint frames))
-                RoundFrames[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation)) * 16u;
+            if (!Intervals.TryGetValue(type, out uint frames))
+                Intervals[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation));
             return throttle.Runs(RouteDeadlineSystem.FrameIndex / frames);
         }
     }
