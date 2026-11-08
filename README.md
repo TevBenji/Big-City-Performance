@@ -34,7 +34,8 @@ Two things, and neither is the frame rate.
 
 - When the route-finder falls behind, new route requests get more time instead of the clock stopping. People set off a
   moment later; the city keeps moving. Emergency services, transit and service vehicles keep the game's own deadlines.
-- While it's behind, citizens look for new jobs, and empty taxis look for passengers, less often until it catches up.
+- While it's behind, citizens look for new jobs, and empty taxis look for passengers, less often until it catches up:
+  a few at a time, everyone in turn, never all at once.
 - Rush hour is spread out. The game sends everyone who starts work at the same hour off in the same second; the mod gives
   each worker a few minutes' head start of their own, so they leave across a window instead. Nobody arrives later.
 - Service coverage (how far each school, clinic or station reaches) is recalculated about once a minute instead of every
@@ -81,8 +82,9 @@ Options → Big City Performance:
 ## What to expect
 
 - **Fewer people on the streets** of a city over the limit. That's the point: they're home.
-- **Sleepers stand still in time.** While asleep, a household doesn't age, change jobs or move. People take turns being
-  awake only when the setting or a save wakes them; a later version will rotate who is awake.
+- **Households take turns.** While asleep, a household doesn't age, change jobs or move. The ones asleep longest wake a
+  few at a time and others go to sleep in their place, so every household gets its time awake about once every two game
+  days, while the number awake stays at the limit.
 - **Rush hour is gentler.** Same trips, spread over a few minutes.
 - **Coverage maps update about once a minute** at normal speed. A new school shows its coverage a little later.
 - **Job hunting slows down** while the route-finder is busy, and catches up when it isn't.
