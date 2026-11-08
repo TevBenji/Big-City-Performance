@@ -37,6 +37,7 @@ namespace BigCityPerformance.People
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private int sleepingCitizens, frames;
         private int lastLimit = -1;
+        private bool afterSave;
         private EntityQuery households, waiting, asleep;
 
         // Only in a fully loaded city in play: sleeping people while a city loads lost track of them when loading finished
@@ -98,12 +99,16 @@ namespace BigCityPerformance.People
         {
             if (SaveInProgress)
             {
-                // The save patch woke everyone; sleep again once the game has written the save.
+                // The save patch woke everyone; sleep again once the game has written the save, at once: they're still at home.
                 if (saveGame.Enabled) return;
                 SaveInProgress = false;
+                frames = TopUpFrames;
+                afterSave = true;
             }
             if (!ready || ++frames < TopUpFrames) return;
             frames = 0;
+            bool justSaved = afterSave;
+            afterSave = false;
             int limit = Limit;
             // Everyone wakes when the setting changes, and the next top-up sleeps the right number. Drift as the city grows or
             // shrinks only ever adds sleepers: waking everyone for it churned the whole city (test run, 7 November 2026).
@@ -115,6 +120,7 @@ namespace BigCityPerformance.People
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
             if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
+            if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleepingHouseholds.Count} households ({sleepingCitizens} people).");
             crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
         }
 
