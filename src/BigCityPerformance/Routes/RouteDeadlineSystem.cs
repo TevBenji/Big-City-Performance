@@ -102,6 +102,7 @@ namespace BigCityPerformance.Routes
         {
             base.OnGameLoadingComplete(purpose, mode);
             Reset();
+            statusStart = -1f;
         }
     }
 
