@@ -36,7 +36,7 @@ namespace BigCityPerformance.Core
         private int sinceCut = QuietChecks, noCuts;
         private bool judgingCut;
         private int limitBeforeCut;
-        private float ratioBeforeCut;
+        private float ratioBeforeCut, speedAtCut;
 
         public int Limit { get; private set; } = Start;
 
@@ -54,7 +54,8 @@ namespace BigCityPerformance.Core
             if (judgingCut)
             {
                 judgingCut = false;
-                if (ratio < ratioBeforeCut * 1.05f)
+                // Judged only at the speed it was made at: after a speed change the two windows don't compare, so the cut stays.
+                if (selected == speedAtCut && ratio < ratioBeforeCut * 1.05f)
                 {
                     noCuts = QuietAfterUselessCut;
                     return Set(limitBeforeCut);
@@ -66,6 +67,7 @@ namespace BigCityPerformance.Core
                 judgingCut = true;
                 limitBeforeCut = Limit;
                 ratioBeforeCut = ratio;
+                speedAtCut = selected;
                 sinceCut = 0;
                 return Set(Limit * 4 / 5);
             }
