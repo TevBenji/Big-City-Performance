@@ -82,6 +82,17 @@ namespace BigCityPerformance.People
 
         internal int SleepingHouseholds => sleepingHouseholds.Count;
         internal int SleepingCitizens => sleepingCitizens;
+
+        /// <summary>
+        /// The population's share in awake households. Counting sleepers' members against the game's population can go below
+        /// zero: the game's count leaves some members out (test run, 8 November 2026); household counts are exact on both sides.
+        /// </summary>
+        internal int PeopleInDetail(int population)
+        {
+            int awake = households.CalculateEntityCount();
+            int total = awake + sleepingHouseholds.Count;
+            return total == 0 ? population : (int)((long)population * awake / total);
+        }
         internal int SleepingAtStops => crowds.Asleep;
         internal bool Ready => ready;
         internal IReadOnlyList<Entity> SleepingHouseholdList => sleepingHouseholds;

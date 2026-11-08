@@ -7,10 +7,13 @@ namespace BigCityPerformance.Core
     /// Picks how many people to simulate in detail from how the clock is keeping up, so nobody has to guess a number for
     /// their computer. Every <see cref="CheckSeconds"/> of play it looks at the window just gone:
     /// <list type="bullet">
-    /// <item>The clock behind (under 90 % of the speed asked for, at most 2x) and fewer people would help (the clock waited on
+    /// <item>The clock behind (under 90 % of the speed asked for, at most 2x) and fewer people might help (the clock waited on
     /// routes, or the processor, not the graphics card, set the pace): a fifth fewer.</item>
-    /// <item>The clock on time with room to spare (no waiting on routes, the graphics card or spare time setting the pace):
-    /// a tenth more, but not within <see cref="QuietChecks"/> checks of going down, so it doesn't see-saw.</item>
+    /// <item>The check after a cut: unless the game got at least 5 % faster, the cut comes back and no more cuts for
+    /// <see cref="QuietAfterUselessCut"/> checks. In a million-person city the processor stayed busy with everything else and
+    /// cuts alone took the limit to the floor for no speed (test run, 8 November 2026).</item>
+    /// <item>The clock on time with room to spare (no waiting on routes): a tenth more, but not within
+    /// <see cref="QuietChecks"/> checks of a cut, so it doesn't see-saw.</item>
     /// </list>
     /// Between <see cref="Floor"/> and <see cref="Ceiling"/>, in whole thousands.
     /// </summary>
@@ -24,10 +27,16 @@ namespace BigCityPerformance.Core
         /// <summary>Checks after a cut before the limit may rise again.</summary>
         public const int QuietChecks = 3;
 
+        /// <summary>Checks without cuts after a cut that didn't help (five minutes).</summary>
+        public const int QuietAfterUselessCut = 15;
+
         /// <summary>The fastest speed it aims for: the third speed button is "as fast as it goes", not a promise of 4x.</summary>
         public const float MostSpeed = 2f;
 
-        private int sinceCut = QuietChecks;
+        private int sinceCut = QuietChecks, noCuts;
+        private bool judgingCut;
+        private int limitBeforeCut;
+        private float ratioBeforeCut;
 
         public int Limit { get; private set; } = Start;
 
@@ -41,8 +50,22 @@ namespace BigCityPerformance.Core
             if (selected <= 0f) return false;
             float ratio = achieved / Math.Min(selected, MostSpeed);
             if (sinceCut < QuietChecks) sinceCut++;
+            if (noCuts > 0) noCuts--;
+            if (judgingCut)
+            {
+                judgingCut = false;
+                if (ratio < ratioBeforeCut * 1.05f)
+                {
+                    noCuts = QuietAfterUselessCut;
+                    return Set(limitBeforeCut);
+                }
+            }
             if (ratio < 0.9f && (stalledShare > 0.1f || cpuBound))
             {
+                if (noCuts > 0 || Limit <= Floor) return false;
+                judgingCut = true;
+                limitBeforeCut = Limit;
+                ratioBeforeCut = ratio;
                 sinceCut = 0;
                 return Set(Limit * 4 / 5);
             }
@@ -54,6 +77,8 @@ namespace BigCityPerformance.Core
         {
             Limit = Start;
             sinceCut = QuietChecks;
+            noCuts = 0;
+            judgingCut = false;
         }
 
         private bool Set(int limit)

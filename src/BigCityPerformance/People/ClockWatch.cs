@@ -30,6 +30,10 @@ namespace BigCityPerformance.People
         private float statusStart = -1f, autoStart = -1f;
         private uint statusFrame, autoFrame;
         private int autoFrames, autoStalled, autoTimed;
+
+        // Checks left before the automatic limit may change, after a city loads.
+        private const int SettlingChecks = 3;
+        private int settling = SettlingChecks;
         private double autoMain, autoGpu;
 
         [Preserve]
@@ -61,7 +65,7 @@ namespace BigCityPerformance.People
             {
                 float speed = (frame - statusFrame) / 60f / (now - statusStart);
                 int population = dormancy.Population();
-                LiveStatus.Set(population - dormancy.SleepingCitizens, population, speed, dormancy.SleepingAtStops);
+                LiveStatus.Set(dormancy.PeopleInDetail(population), population, speed, dormancy.SleepingAtStops);
                 statusStart = now;
                 statusFrame = frame;
             }
@@ -77,7 +81,10 @@ namespace BigCityPerformance.People
                 autoTimed++;
             }
             if (now - autoStart < AutoLimitPolicy.CheckSeconds) return;
-            if (Mod.Settings != null && Mod.Settings.LimitPeople && Mod.Settings.AutoLimit && dormancy.Population() > AutoLimitPolicy.Floor)
+            // The first minute after loading is the load's own rush (everyone loads awake, and their routes come at once), not
+            // a sign of too many people: it cut the limit twice before the city had settled (test run, 8 November 2026).
+            if (settling > 0) settling--;
+            else if (Mod.Settings != null && Mod.Settings.LimitPeople && Mod.Settings.AutoLimit && dormancy.Population() > AutoLimitPolicy.Floor)
             {
                 float achieved = (frame - autoFrame) / 60f / (now - autoStart);
                 float stalled = autoStalled / (float)System.Math.Max(1, autoFrames);
@@ -112,6 +119,7 @@ namespace BigCityPerformance.People
             base.OnGameLoadingComplete(purpose, mode);
             // Each city starts from the same middle and finds its own level.
             Auto.Reset();
+            settling = SettlingChecks;
             statusStart = autoStart = -1f;
         }
     }
