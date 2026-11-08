@@ -27,11 +27,21 @@ namespace BigCityPerformance.People
     /// there. Everyone wakes before a save (saves stay ordinary, and load without the mod) and sleeps again after.
     ///
     /// The game's own counts, wages and residential tax still cover sleepers (<see cref="SleeperBookkeeping"/>).
+    ///
+    /// Sleepers take turns: the ones asleep longest wake a few at a time, and the next top-up puts as many others to sleep, so
+    /// every household gets its time awake (growing older, changing jobs, moving) about once every <see cref="RotationDays"/>
+    /// game days, while the number awake stays at the limit.
     /// </summary>
     public sealed partial class DormancySystem : GameSystemBase
     {
         /// <summary>Rendered frames between top-ups: each is one batch of tag changes (a sync point), so not every frame.</summary>
         private const int TopUpFrames = 120;
+
+        /// <summary>Game days for every sleeper to have had a turn awake.</summary>
+        internal static float RotationDays = 2f;
+
+        // A game day is 262,144 simulation frames.
+        private const float FramesPerDay = 262144f;
 
         private readonly List<Entity> sleepingHouseholds = new List<Entity>();
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
@@ -47,6 +57,9 @@ namespace BigCityPerformance.People
         private SaveGameSystem saveGame;
         private CitySystem citySystem;
         private EndFrameBarrier endFrame;
+        private SimulationSystem simulation;
+        private uint lastRotation;
+        private double rotationDue;
 
         /// <summary>Set by the save patch: everyone is awake until the save is written.</summary>
         internal static bool SaveInProgress;
@@ -71,6 +84,7 @@ namespace BigCityPerformance.People
             saveGame = World.GetOrCreateSystemManaged<SaveGameSystem>();
             endFrame = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             citySystem = World.GetOrCreateSystemManaged<CitySystem>();
+            simulation = World.GetOrCreateSystemManaged<SimulationSystem>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
             waiting = GetEntityQuery(ComponentType.ReadOnly<Human>(), ComponentType.ReadOnly<Resident>(), ComponentType.ReadOnly<HumanCurrentLane>(),
@@ -119,6 +133,7 @@ namespace BigCityPerformance.People
             float awake = (float)limit / people;
             int total = households.CalculateEntityCount() + sleepingHouseholds.Count;
             int wanted = (int)(total * (1f - awake));
+            Rotate();
             if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
             if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleepingHouseholds.Count} households ({sleepingCitizens} people).");
             crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
@@ -154,6 +169,46 @@ namespace BigCityPerformance.People
             // while its jobs may still be reading them (doing it directly crashed the game, test run 7 November 2026).
             var commands = endFrame.CreateCommandBuffer();
             using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) commands.AddComponent<Disabled>(array);
+        }
+
+        /// <summary>
+        /// Wakes the households asleep longest, as many as the game time since the last top-up is due. They're still disabled
+        /// until the end of the frame, so this top-up's sleeping picks others.
+        /// </summary>
+        private void Rotate()
+        {
+            uint now = simulation.frameIndex;
+            uint elapsed = now - lastRotation;
+            lastRotation = now;
+            float rotationFrames = RotationDays * FramesPerDay;
+            // Paused, or a jump (a city just loaded): nothing due.
+            if (elapsed == 0 || elapsed > rotationFrames || sleepingHouseholds.Count == 0) return;
+            rotationDue += sleepingHouseholds.Count * (double)elapsed / rotationFrames;
+            int count = System.Math.Min((int)rotationDue, sleepingHouseholds.Count);
+            if (count == 0) return;
+            rotationDue -= count;
+            var batch = new List<Entity>();
+            for (int index = 0; index < count; index++)
+            {
+                var household = sleepingHouseholds[index];
+                sleepingSet.Remove(household);
+                if (!EntityManager.Exists(household)) continue;
+                batch.Add(household);
+                var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
+                sleepingCitizens -= members.Length;
+                for (int at = 0; at < members.Length; at++)
+                {
+                    var citizen = members[at].m_Citizen;
+                    batch.Add(citizen);
+                    // Members who fell asleep out on foot sleep with their walker.
+                    if (!EntityManager.HasComponent<CurrentTransport>(citizen)) continue;
+                    var walker = EntityManager.GetComponentData<CurrentTransport>(citizen).m_CurrentTransport;
+                    if (EntityManager.Exists(walker) && EntityManager.HasComponent<Disabled>(walker)) batch.Add(walker);
+                }
+            }
+            sleepingHouseholds.RemoveRange(0, count);
+            if (batch.Count == 0) return;
+            using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(array);
         }
 
         /// <summary>True when every member is home or out on foot (their walkers listed); false if anyone rides or waits for transport.</summary>
@@ -200,6 +255,8 @@ namespace BigCityPerformance.People
             base.OnGameLoadingComplete(purpose, mode);
             lastLimit = -1;
             frames = 0;
+            lastRotation = simulation.frameIndex;
+            rotationDue = 0;
             ready = mode == GameMode.Game;
             // A freshly loaded city has nobody asleep (saves are written awake); this also wakes anyone a save might still
             // hold asleep.
