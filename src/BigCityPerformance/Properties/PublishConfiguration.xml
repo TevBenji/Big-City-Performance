@@ -72,7 +72,7 @@ Built for game version **1.6.***.
 
 ### Found a bug?
 
-Open an issue on GitHub (link on this page) with a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
+Click **Report a bug** in Options, Big City Performance, or open an issue on GitHub (link on this page). Add a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
 
 ### Credits
 
@@ -83,9 +83,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.2.1" />
+	<ModVersion Value="0.2.2" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- Realistic Trips: its leisure trips now get the same extra time as everyone else's while the route-finder is behind.&#10;- The mod page and README say which other mods it works with." />
+	<ChangeLog Value="- A Report a bug button in Options, Big City Performance: it opens a new issue on GitHub." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
