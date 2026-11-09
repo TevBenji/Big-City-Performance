@@ -10,11 +10,16 @@ namespace BigCityPerformance.Settings
 {
     /// <summary>Saved settings and the Options page. Property names are save format: name them once and keep them.</summary>
     [FileLocation("ModsSettings/BigCityPerformance/BigCityPerformance")]
+    [SettingsUIShowGroupName(HelpGroup)]
     public sealed class BigCitySettings : ModSetting
     {
         private const string Section = "Main";
         private const string Group = "Simulation";
         private const string StatusGroup = "Status";
+        private const string HelpGroup = "Help";
+        private const string BugReportAddress = "https://github.com/TevBenji/Big-City-Performance/issues/new";
+        // The Discord button stays hidden while this is empty.
+        private const string DiscordAddress = "https://discord.com/channels/263634513861541888/1568265920902594560";
 
         public BigCitySettings(IMod mod) : base(mod)
         {
@@ -56,11 +61,24 @@ namespace BigCityPerformance.Settings
         [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
         public string StatusStops => LiveStatus.Stops;
 
+        [Exclude]
+        [SettingsUIButton]
+        [SettingsUISection(Section, HelpGroup)]
+        public bool ReportBug { set => UnityEngine.Application.OpenURL(BugReportAddress); }
+
+        [Exclude]
+        [SettingsUIButton]
+        [SettingsUISection(Section, HelpGroup)]
+        [SettingsUIHideByCondition(typeof(BigCitySettings), nameof(NoDiscordAddress))]
+        public bool Discord { set => UnityEngine.Application.OpenURL(DiscordAddress); }
+
         public bool PeopleUnlimited() => !LimitPeople;
 
         public bool LimitChosenForYou() => !LimitPeople || AutoLimit;
 
         public int StatusVersion() => LiveStatus.Version;
+
+        public bool NoDiscordAddress() => DiscordAddress.Length == 0;
 
         public override void SetDefaults()
         {
@@ -81,8 +99,9 @@ namespace BigCityPerformance.Settings
                 [GetOptionTabLocaleID(Section)] = "Big City Performance",
                 [GetOptionGroupLocaleID(Group)] = words[nameof(Group)],
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
+                [GetOptionGroupLocaleID(HelpGroup)] = words[nameof(HelpGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(ReportBug), nameof(Discord) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];

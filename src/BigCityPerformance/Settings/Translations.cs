@@ -36,6 +36,11 @@ namespace BigCityPerformance.Settings
             ["Indicator.Fixed"] = "Set by you",
             ["Indicator.AtHome"] = "{0} people at home: still counted, working and paying taxes",
             ["Indicator.Click"] = "Click for settings",
+            ["HelpGroup"] = "Help",
+            ["ReportBug"] = "Report a bug",
+            ["ReportBug.Desc"] = "Opens a new issue on GitHub. Add a screenshot and your BigCityPerformance.log.",
+            ["Discord"] = "Discord",
+            ["Discord.Desc"] = "Questions, ideas and news.",
         };
 
         private static readonly Dictionary<string, Dictionary<string, string>> Others = new Dictionary<string, Dictionary<string, string>>
@@ -65,6 +70,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Von dir festgelegt",
                 ["Indicator.AtHome"] = "{0} Personen zu Hause: weiterhin gezählt, arbeitend und Steuern zahlend",
                 ["Indicator.Click"] = "Klicken für die Einstellungen",
+                ["HelpGroup"] = "Hilfe",
+                ["ReportBug"] = "Fehler melden",
+                ["ReportBug.Desc"] = "Öffnet ein neues Issue auf GitHub. Füge einen Screenshot und deine BigCityPerformance.log hinzu.",
+                ["Discord.Desc"] = "Fragen, Ideen und Neuigkeiten.",
             },
             ["es-ES"] = new Dictionary<string, string>
             {
@@ -91,6 +100,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Elegido por ti",
                 ["Indicator.AtHome"] = "{0} personas en casa: siguen contando, trabajando y pagando impuestos",
                 ["Indicator.Click"] = "Haz clic para los ajustes",
+                ["HelpGroup"] = "Ayuda",
+                ["ReportBug"] = "Informar de un error",
+                ["ReportBug.Desc"] = "Abre una nueva incidencia en GitHub. Añade una captura de pantalla y tu BigCityPerformance.log.",
+                ["Discord.Desc"] = "Preguntas, ideas y novedades.",
             },
             ["fr-FR"] = new Dictionary<string, string>
             {
@@ -117,6 +130,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Choisie par vous",
                 ["Indicator.AtHome"] = "{0} habitants chez eux : toujours comptés, au travail et payant leurs impôts",
                 ["Indicator.Click"] = "Cliquez pour les réglages",
+                ["HelpGroup"] = "Aide",
+                ["ReportBug"] = "Signaler un bug",
+                ["ReportBug.Desc"] = "Ouvre un nouveau ticket sur GitHub. Ajoutez une capture d'écran et votre BigCityPerformance.log.",
+                ["Discord.Desc"] = "Questions, idées et actualités.",
             },
             ["it-IT"] = new Dictionary<string, string>
             {
@@ -143,6 +160,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Scelto da te",
                 ["Indicator.AtHome"] = "{0} persone a casa: ancora contate, lavorano e pagano le tasse",
                 ["Indicator.Click"] = "Clicca per le impostazioni",
+                ["HelpGroup"] = "Aiuto",
+                ["ReportBug"] = "Segnala un bug",
+                ["ReportBug.Desc"] = "Apre una nuova segnalazione su GitHub. Aggiungi uno screenshot e il tuo BigCityPerformance.log.",
+                ["Discord.Desc"] = "Domande, idee e novità.",
             },
             ["ja-JP"] = new Dictionary<string, string>
             {
@@ -169,6 +190,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "手動設定",
                 ["Indicator.AtHome"] = "{0}人が在宅中：人口に数えられ、働き、税金を払っています",
                 ["Indicator.Click"] = "クリックで設定を開く",
+                ["HelpGroup"] = "ヘルプ",
+                ["ReportBug"] = "バグを報告",
+                ["ReportBug.Desc"] = "GitHubで新しいIssueを開きます。スクリーンショットとBigCityPerformance.logを添付してください。",
+                ["Discord.Desc"] = "質問、アイデア、お知らせ。",
             },
             ["ko-KR"] = new Dictionary<string, string>
             {
@@ -195,6 +220,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "직접 설정",
                 ["Indicator.AtHome"] = "{0}명이 집에 있음: 여전히 인구에 포함되고, 일하고, 세금을 냅니다",
                 ["Indicator.Click"] = "클릭하면 설정이 열립니다",
+                ["HelpGroup"] = "도움말",
+                ["ReportBug"] = "버그 신고",
+                ["ReportBug.Desc"] = "GitHub에서 새 이슈를 엽니다. 스크린샷과 BigCityPerformance.log를 첨부해 주세요.",
+                ["Discord.Desc"] = "질문, 아이디어, 소식.",
             },
             ["pl-PL"] = new Dictionary<string, string>
             {
@@ -221,6 +250,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Ustawiony przez ciebie",
                 ["Indicator.AtHome"] = "{0} osób w domu: wciąż liczone, pracują i płacą podatki",
                 ["Indicator.Click"] = "Kliknij, aby otworzyć ustawienia",
+                ["HelpGroup"] = "Pomoc",
+                ["ReportBug"] = "Zgłoś błąd",
+                ["ReportBug.Desc"] = "Otwiera nowe zgłoszenie na GitHubie. Dołącz zrzut ekranu i swój plik BigCityPerformance.log.",
+                ["Discord.Desc"] = "Pytania, pomysły i nowości.",
             },
             ["pt-BR"] = new Dictionary<string, string>
             {
@@ -247,6 +280,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Definido por você",
                 ["Indicator.AtHome"] = "{0} pessoas em casa: ainda contadas, trabalhando e pagando impostos",
                 ["Indicator.Click"] = "Clique para as configurações",
+                ["HelpGroup"] = "Ajuda",
+                ["ReportBug"] = "Relatar um bug",
+                ["ReportBug.Desc"] = "Abre uma nova issue no GitHub. Adicione uma captura de tela e o seu BigCityPerformance.log.",
+                ["Discord.Desc"] = "Perguntas, ideias e novidades.",
             },
             ["ru-RU"] = new Dictionary<string, string>
             {
@@ -273,6 +310,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "Задан вами",
                 ["Indicator.AtHome"] = "{0} жителей дома: учитываются, работают и платят налоги",
                 ["Indicator.Click"] = "Нажмите, чтобы открыть настройки",
+                ["HelpGroup"] = "Помощь",
+                ["ReportBug"] = "Сообщить об ошибке",
+                ["ReportBug.Desc"] = "Открывает новое обращение на GitHub. Приложите снимок экрана и файл BigCityPerformance.log.",
+                ["Discord.Desc"] = "Вопросы, идеи и новости.",
             },
             ["zh-HANS"] = new Dictionary<string, string>
             {
@@ -299,6 +340,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "手动设置",
                 ["Indicator.AtHome"] = "{0} 人在家：仍计入人口、工作并缴税",
                 ["Indicator.Click"] = "点击打开设置",
+                ["HelpGroup"] = "帮助",
+                ["ReportBug"] = "报告错误",
+                ["ReportBug.Desc"] = "在 GitHub 上新建问题。请附上截图和 BigCityPerformance.log。",
+                ["Discord.Desc"] = "问题、想法和动态。",
             },
             ["zh-HANT"] = new Dictionary<string, string>
             {
@@ -325,6 +370,10 @@ namespace BigCityPerformance.Settings
                 ["Indicator.Fixed"] = "手動設定",
                 ["Indicator.AtHome"] = "{0} 人在家：仍計入人口、工作並繳稅",
                 ["Indicator.Click"] = "點擊開啟設定",
+                ["HelpGroup"] = "說明",
+                ["ReportBug"] = "回報錯誤",
+                ["ReportBug.Desc"] = "在 GitHub 上建立新問題。請附上截圖和 BigCityPerformance.log。",
+                ["Discord.Desc"] = "問題、想法和最新消息。",
             },
         };
 
