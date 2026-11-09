@@ -74,6 +74,8 @@ Built for game version **1.6.***.
 
 Click **Report a bug** in Options, Big City Performance, or open an issue on GitHub (link on this page). Add a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
 
+For questions and ideas, the **Discord** button in Options opens this mod's channel in the official Cities: Skylines Discord.
+
 ### Credits
 
 Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout started from my mods Stepped Streets and Footbridge Builder, and before that from **Placemaker** by jackwrichards (GPL-3.0). Big City Performance is GPL-3.0 too; the full source is on GitHub (link on this page).
@@ -85,7 +87,7 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<Tag Value="Code Mod" />
 	<ModVersion Value="0.2.2" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- A Report a bug button in Options, Big City Performance: it opens a new issue on GitHub." />
+	<ChangeLog Value="- Report a bug and Discord buttons in Options, Big City Performance." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

@@ -143,7 +143,7 @@ without the mod. Removing the mod is safe at any time.
 
 ## Found a bug?
 
-Questions and suggestions are welcome on the [forum thread](https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/).
+Questions and suggestions are welcome on the [forum thread](https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/) or in [this channel](https://discord.com/channels/263634513861541888/1568265920902594560) on the official Cities: Skylines Discord; the **Discord** button in Options opens it too.
 
 Click **Report a bug** in Options → Big City Performance, or [open an issue](https://github.com/TevBenji/Big-City-Performance/issues). Add a screenshot and the log at
 `%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Logs\BigCityPerformance.log`. The mod writes a status

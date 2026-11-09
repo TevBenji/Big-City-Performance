@@ -19,7 +19,7 @@ namespace BigCityPerformance.Settings
         private const string HelpGroup = "Help";
         private const string BugReportAddress = "https://github.com/TevBenji/Big-City-Performance/issues/new";
         // The Discord button stays hidden while this is empty.
-        private const string DiscordAddress = "";
+        private const string DiscordAddress = "https://discord.com/channels/263634513861541888/1568265920902594560";
 
         public BigCitySettings(IMod mod) : base(mod)
         {
