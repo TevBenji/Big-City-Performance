@@ -27,13 +27,20 @@ namespace BigCityPerformance.Core
         /// <summary>Checks after a cut before the limit may rise again.</summary>
         public const int QuietChecks = 3;
 
-        /// <summary>Checks without cuts after a cut that didn't help (five minutes).</summary>
+        /// <summary>
+        /// Checks without cuts after a cut that didn't help (five minutes), twice as long after each one in a row, up to
+        /// <see cref="MostQuietAfterUselessCut"/>. In a three-million city the cost isn't in the awake people, and retrying every
+        /// five minutes only churned households for nothing (a player's logs, 9 November 2026).
+        /// </summary>
         public const int QuietAfterUselessCut = 15;
+
+        /// <summary>The longest wait after useless cuts (80 minutes).</summary>
+        public const int MostQuietAfterUselessCut = 240;
 
         /// <summary>The fastest speed it aims for: the third speed button is "as fast as it goes", not a promise of 4x.</summary>
         public const float MostSpeed = 2f;
 
-        private int sinceCut = QuietChecks, noCuts;
+        private int sinceCut = QuietChecks, noCuts, uselessCuts;
         private bool judgingCut;
         private int limitBeforeCut;
         private float ratioBeforeCut, speedAtCut;
@@ -55,10 +62,16 @@ namespace BigCityPerformance.Core
             {
                 judgingCut = false;
                 // Judged only at the speed it was made at: after a speed change the two windows don't compare, so the cut stays.
-                if (selected == speedAtCut && ratio < ratioBeforeCut * 1.05f)
+                if (selected == speedAtCut)
                 {
-                    noCuts = QuietAfterUselessCut;
-                    return Set(limitBeforeCut);
+                    if (ratio < ratioBeforeCut * 1.05f)
+                    {
+                        noCuts = Math.Min(QuietAfterUselessCut << uselessCuts, MostQuietAfterUselessCut);
+                        if (noCuts < MostQuietAfterUselessCut) uselessCuts++;
+                        return Set(limitBeforeCut);
+                    }
+                    // One step back, not all the way: a single window can look faster by chance.
+                    if (uselessCuts > 0) uselessCuts--;
                 }
             }
             if (ratio < 0.9f && (stalledShare > 0.1f || cpuBound))
@@ -80,6 +93,7 @@ namespace BigCityPerformance.Core
             Limit = Start;
             sinceCut = QuietChecks;
             noCuts = 0;
+            uselessCuts = 0;
             judgingCut = false;
         }
 

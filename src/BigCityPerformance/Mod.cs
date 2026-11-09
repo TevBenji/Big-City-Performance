@@ -13,7 +13,7 @@ namespace BigCityPerformance
 {
     public sealed class Mod : IMod
     {
-        private const string HarmonyId = "TevBenji.BigCityPerformance";
+        internal const string HarmonyId = "TevBenji.BigCityPerformance";
 
         internal static readonly ILog Logger = LogManager.GetLogger(nameof(BigCityPerformance)).SetShowsErrorsInUI(false);
 
@@ -53,6 +53,11 @@ namespace BigCityPerformance
                 harmony.CreateClassProcessor(typeof(People.LoadHoldPatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
                 harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
+            });
+            Register("sleepers in saves", () =>
+            {
+                harmony.CreateClassProcessor(typeof(People.SaveQueryPatch)).Patch();
+                People.SaveQueryPatch.Applied = true;
             });
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));

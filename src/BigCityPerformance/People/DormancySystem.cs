@@ -24,7 +24,7 @@ namespace BigCityPerformance.People
     ///
     /// Households go to sleep as their travellers get home; members out on foot sleep where they stand, with their walker.
     /// Anyone riding or waiting for transport keeps the household awake, so no vehicle or stop waits for someone who isn't
-    /// there. Everyone wakes before a save (saves stay ordinary, and load without the mod) and sleeps again after.
+    /// there. Saves stay ordinary and load without the mod: sleepers are written as ordinary households (<see cref="SaveQueryPatch"/>).
     ///
     /// The game's own counts, wages and residential tax still cover sleepers (<see cref="SleeperBookkeeping"/>).
     ///
@@ -46,7 +46,7 @@ namespace BigCityPerformance.People
         private readonly List<Entity> sleepingHouseholds = new List<Entity>();
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private int sleepingCitizens, frames;
-        private bool afterSave;
+        private bool afterSave, wokeForSave;
         private EntityQuery households, waiting, asleep;
 
         // Only in a fully loaded city in play: sleeping people while a city loads lost track of them when loading finished
@@ -60,7 +60,7 @@ namespace BigCityPerformance.People
         private uint lastRotation;
         private double rotationDue;
 
-        /// <summary>Set by the save patch: everyone is awake until the save is written.</summary>
+        /// <summary>Set by the save patch until the save is written: nobody goes to sleep or wakes while it is.</summary>
         internal static bool SaveInProgress;
 
         // The last entity woken; once it's awake, the whole batch is (one command buffer).
@@ -135,11 +135,16 @@ namespace BigCityPerformance.People
         {
             if (SaveInProgress)
             {
-                // The save patch woke everyone; sleep again once the game has written the save, at once: they're still at home.
+                // Nothing changes until the game has written the save. If everyone was woken for it, they sleep again at once:
+                // they're still at home.
                 if (saveGame.Enabled) return;
                 SaveInProgress = false;
-                frames = TopUpFrames;
-                afterSave = true;
+                if (wokeForSave)
+                {
+                    wokeForSave = false;
+                    frames = TopUpFrames;
+                    afterSave = true;
+                }
             }
             if (HoldClock) ReleaseClockOnceAsleep();
             if (!ready || ++frames < TopUpFrames) return;
@@ -279,7 +284,7 @@ namespace BigCityPerformance.People
             return true;
         }
 
-        /// <summary>Everyone awake: before a save, when the setting goes back up, or when the mod unloads.</summary>
+        /// <summary>Everyone awake: when the setting goes back up, when the mod unloads, or before a save if its patch failed.</summary>
         internal void WakeAll()
         {
             crowds.TakeAll();
@@ -295,6 +300,7 @@ namespace BigCityPerformance.People
                 // 7 November 2026). A save waits for it (SaveHoldPatch).
                 endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(everyone);
                 wakeProbe = everyone[everyone.Length - 1];
+                wokeForSave = SaveInProgress;
                 Mod.Logger.Info($"Woke {everyone.Length} people and households{(SaveInProgress ? " for a save" : "")}.");
             }
         }
@@ -326,8 +332,9 @@ namespace BigCityPerformance.People
     }
 
     /// <summary>
-    /// The game writes a save in SaveGameSystem's update, a frame or more after RunOnce asks for it. Until the sleepers woken for
-    /// it are awake (the tag comes off at the end of a frame), the writing waits; at most 30 frames, so a save never hangs.
+    /// The game writes a save in SaveGameSystem's update, a frame or more after RunOnce asks for it. If sleepers had to be woken
+    /// for it, the writing waits until they are awake (the tag comes off at the end of a frame); at most 30 frames, so a save
+    /// never hangs.
     /// </summary>
     [HarmonyPatch(typeof(SaveGameSystem), "OnUpdate")]
     internal static class SaveHoldPatch
@@ -337,7 +344,7 @@ namespace BigCityPerformance.People
         private static bool Prefix(SaveGameSystem __instance)
         {
             var dormancy = DormancySystem.Instance;
-            if (__instance.m_Writing || dormancy == null || dormancy.Awake || ++held > 30)
+            if (SaveQueryPatch.Applied || __instance.m_Writing || dormancy == null || dormancy.Awake || ++held > 30)
             {
                 if (held > 30) Mod.Logger.Warn("A save went ahead before everyone was awake.");
                 held = 0;
@@ -357,14 +364,14 @@ namespace BigCityPerformance.People
         private static bool Prefix(SimulationSystem __instance) => !DormancySystem.HoldClock || __instance.m_IsLoading;
     }
 
-    /// <summary>Everyone wakes as a save starts, so the save holds the city as the game knows it.</summary>
+    /// <summary>Marks a save as started; wakes everyone first only if the save writer couldn't be made to include sleepers.</summary>
     [HarmonyPatch(typeof(SaveGameSystem), nameof(SaveGameSystem.RunOnce))]
     internal static class SaveWakePatch
     {
         private static void Prefix()
         {
             DormancySystem.SaveInProgress = true;
-            DormancySystem.Instance?.WakeAll();
+            if (!SaveQueryPatch.Applied) DormancySystem.Instance?.WakeAll();
         }
     }
 }

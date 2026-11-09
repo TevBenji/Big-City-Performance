@@ -28,12 +28,27 @@ namespace BigCityPerformance.People
             tax.m_ResidentialTaxPayerGroup = WithSleepers(entities, tax.m_ResidentialTaxPayerGroup);
         }
 
-        private static EntityQuery WithSleepers(EntityManager entities, EntityQuery query)
+        internal static EntityQuery WithSleepers(EntityManager entities, EntityQuery query)
         {
             var descriptions = query.GetEntityQueryDescs();
             foreach (var description in descriptions) description.Options |= EntityQueryOptions.IncludeDisabledEntities;
             return entities.CreateEntityQuery(descriptions);
         }
+    }
+
+    /// <summary>
+    /// The save writer finds what to write through one query, and on its own that query skips disabled entities: sleepers
+    /// would be lost. With sleepers matched too, they are written without waking anyone, and as ordinary households, because
+    /// the writer drops any tag it has no serializer for and Disabled has none.
+    /// </summary>
+    [HarmonyPatch(typeof(Game.Serialization.SerializerSystem), "CreateQuery")]
+    internal static class SaveQueryPatch
+    {
+        /// <summary>False if a game update moved this method: saves then wake everyone first, as they did before.</summary>
+        internal static bool Applied;
+
+        private static void Postfix(Game.Serialization.SerializerSystem __instance) =>
+            __instance.m_Query = SleeperBookkeeping.WithSleepers(__instance.EntityManager, __instance.m_Query);
     }
 
     /// <summary>
