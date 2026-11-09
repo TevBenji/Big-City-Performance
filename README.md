@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.2.3-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.2.4-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -103,8 +103,6 @@ and Chinese (simplified and traditional).
 ## What to expect
 
 - **Fewer people on the streets** of a city over the limit. That's the point: they're home.
-- **Autosave every 10 minutes or more works best.** Every save wakes everyone for a moment (so the save is ordinary), and
-  they go back to sleep straight after; saving every few minutes means more of those moments.
 - **Households take turns.** While asleep, a household doesn't age, change jobs or move. The ones asleep longest wake a
   few at a time and others go to sleep in their place, so every household gets its time awake about once every two game
   days, while the number awake stays at the limit.
@@ -119,12 +117,14 @@ and Chinese (simplified and traditional).
 - **Ultra Performance & Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
 
+**MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
+
 Other mods that change simulation speed or route-finding haven't been tested with it.
 
 ## Saves and removing the mod
 
-Everyone wakes up before the game saves, and the save waits until they have. Every save is an ordinary save that loads
-without the mod. Removing the mod is safe at any time.
+Sleeping households are written to a save as ordinary households, so nobody has to wake up for it. Every save is an
+ordinary save that loads without the mod. Removing the mod is safe at any time.
 
 ## How it works
 

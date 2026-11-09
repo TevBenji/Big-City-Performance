@@ -55,9 +55,8 @@ The settings are in English, German, Spanish, French, Italian, Japanese, Korean,
 ### Good to know
 
 - Fewer people on the streets of a city over the limit: they're at home.
-- **Autosave every 10 minutes or more works best.** Every save wakes everyone for a moment, so the save stays ordinary, and they go back to sleep straight after.
 - Rush hour is gentler, and coverage maps update about once a minute.
-- **Saves are ordinary saves.** Everyone wakes up before the game saves, and a save loads without the mod. Removing the mod is safe.
+- **Saves are ordinary saves.** Sleeping households are written as ordinary households, and a save loads without the mod. Removing the mod is safe.
 - Early release: expect rough edges and tell me what you find.
 
 Built for game version **1.6.***.
@@ -68,6 +67,7 @@ Built for game version **1.6.***.
 - **Service Coverage Stutter Fix** works, and the two help each other: it makes each coverage update cheaper, this mod runs them less often. On the current game version it shows its own warning popup at start: click Continue.
 - **Ultra Performance and Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
+- **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
 - Other mods that change simulation speed or route-finding haven't been tested with it.
 
 ### Found a bug?
@@ -85,9 +85,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.2.3" />
+	<ModVersion Value="0.2.4" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- The Discord button opens this mod's own thread." />
+	<ChangeLog Value="- Saves no longer wake everyone: sleeping households are written as ordinary households.&#10;- The automatic limit waits longer after a cut that did not help, instead of retrying every few minutes.&#10;- MapExt and EconomyEX: their job and home searches get the same treatment as the game's." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

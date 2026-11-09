@@ -4,6 +4,7 @@ using Game;
 using Game.Pathfind;
 using Game.Simulation;
 using HarmonyLib;
+using Unity.Entities;
 using UnityEngine.Scripting;
 
 namespace BigCityPerformance.Routes
@@ -103,6 +104,7 @@ namespace BigCityPerformance.Routes
             base.OnGameLoadingComplete(purpose, mode);
             Reset();
             statusStart = -1f;
+            SearchThrottle.PatchOtherMods(World);
         }
     }
 
@@ -120,15 +122,6 @@ namespace BigCityPerformance.Routes
             typeof(FindJobSystem), typeof(FindSchoolSystem), typeof(HouseholdFindPropertySystem), typeof(ResourceBuyerSystem),
         };
 
-        /// <summary>
-        /// Realistic Trips turns off the game's leisure system and asks for the same routes from its own copy. Class names only:
-        /// no reference to that mod, and its classes don't all share one namespace.
-        /// </summary>
-        private static readonly System.Collections.Generic.HashSet<string> OtherModsPeopleTrips = new System.Collections.Generic.HashSet<string>
-        {
-            "Time2WorkLeisureSystem", "Time2WorkResourceBuyerSystem",
-        };
-
         // GetQueue only runs on the main thread, and a type's answer never changes, so names are compared once per type.
         private static readonly System.Collections.Generic.Dictionary<System.Type, bool> Answers = new System.Collections.Generic.Dictionary<System.Type, bool>();
 
@@ -138,7 +131,7 @@ namespace BigCityPerformance.Routes
             var type = system.GetType();
             if (Answers.TryGetValue(type, out bool answer)) return answer;
             answer = PeopleTrips.Contains(type);
-            if (!answer && OtherModsPeopleTrips.Contains(type.Name))
+            if (!answer && OtherModSystems.AsksForPeoplesTrips(type.Name))
             {
                 answer = true;
                 Mod.Logger.Info($"Route requests from {type.FullName} count as people's trips.");
@@ -172,6 +165,23 @@ namespace BigCityPerformance.Routes
         {
             var prefix = new HarmonyMethod(typeof(SearchThrottle), nameof(Prefix));
             foreach (var type in Systems) harmony.Patch(AccessTools.DeclaredMethod(type, "OnUpdate"), prefix: prefix);
+        }
+
+        private static bool otherModsPatched;
+
+        /// <summary>Once, when a city loads and every mod's systems exist: mods that run their own copy of the job search get the same limit.</summary>
+        internal static void PatchOtherMods(World world)
+        {
+            if (otherModsPatched) return;
+            otherModsPatched = true;
+            var harmony = new Harmony(Mod.HarmonyId);
+            foreach (var system in world.Systems)
+            {
+                var type = system.GetType();
+                if (!OtherModSystems.StartsJobSearches(type.Name)) continue;
+                harmony.Patch(AccessTools.DeclaredMethod(type, "OnUpdate"), prefix: new HarmonyMethod(typeof(SearchThrottle), nameof(Prefix)));
+                Mod.Logger.Info($"{type.FullName} searches a few at a time, like the game's own job search.");
+            }
         }
 
         private static bool Prefix(GameSystemBase __instance)
