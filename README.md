@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.2.0-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.2.1-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -16,6 +16,7 @@ day takes hours. With this mod the same city runs at real time or faster on the 
 <a href="#measured">Measured</a> ·
 <a href="#settings">Settings</a> ·
 <a href="#what-to-expect">What to expect</a> ·
+<a href="#works-with-other-mods">Works with other mods</a> ·
 <a href="#saves-and-removing-the-mod">Saves and removing the mod</a> ·
 <a href="#how-it-works">How it works</a> ·
 <a href="#building-from-source">Building from source</a>
@@ -111,7 +112,14 @@ and Chinese (simplified and traditional).
 - **Coverage maps update about once a minute** at normal speed. A new school shows its coverage a little later.
 - **Job hunting slows down** while the route-finder is busy, and catches up when it isn't.
 
-Other mods that change the same things (simulation speed, commute times, route-finding) haven't been tested alongside it.
+## Works with other mods
+
+- **Realistic Trips** works. With it and the Stutter Fix, a million-person city ran about a tenth slower in testing.
+- **Service Coverage Stutter Fix** works, and the two help each other: it makes each coverage update cheaper, this mod runs them less often. On the current game version it shows its own warning popup at start: click Continue.
+- **Ultra Performance & Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
+- Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
+
+Other mods that change simulation speed or route-finding haven't been tested with it.
 
 ## Saves and removing the mod
 

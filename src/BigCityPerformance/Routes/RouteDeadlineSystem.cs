@@ -120,10 +120,36 @@ namespace BigCityPerformance.Routes
             typeof(FindJobSystem), typeof(FindSchoolSystem), typeof(HouseholdFindPropertySystem), typeof(ResourceBuyerSystem),
         };
 
+        /// <summary>
+        /// Realistic Trips turns off the game's leisure system and asks for the same routes from its own copy. Class names only:
+        /// no reference to that mod, and its classes don't all share one namespace.
+        /// </summary>
+        private static readonly System.Collections.Generic.HashSet<string> OtherModsPeopleTrips = new System.Collections.Generic.HashSet<string>
+        {
+            "Time2WorkLeisureSystem", "Time2WorkResourceBuyerSystem",
+        };
+
+        // GetQueue only runs on the main thread, and a type's answer never changes, so names are compared once per type.
+        private static readonly System.Collections.Generic.Dictionary<System.Type, bool> Answers = new System.Collections.Generic.Dictionary<System.Type, bool>();
+
+        private static bool IsPeopleTrip(object system)
+        {
+            if (system == null) return false;
+            var type = system.GetType();
+            if (Answers.TryGetValue(type, out bool answer)) return answer;
+            answer = PeopleTrips.Contains(type);
+            if (!answer && OtherModsPeopleTrips.Contains(type.Name))
+            {
+                answer = true;
+                Mod.Logger.Info($"Route requests from {type.FullName} count as people's trips.");
+            }
+            return Answers[type] = answer;
+        }
+
         private static void Prefix(object system, ref int maxDelayFrames)
         {
             int stretch = RouteDeadlineSystem.Stretch;
-            if (stretch > DeadlinePolicy.OthersMost && (system == null || !PeopleTrips.Contains(system.GetType()))) stretch = DeadlinePolicy.OthersMost;
+            if (stretch > DeadlinePolicy.OthersMost && !IsPeopleTrip(system)) stretch = DeadlinePolicy.OthersMost;
             if (stretch > 1) maxDelayFrames *= stretch;
         }
     }
