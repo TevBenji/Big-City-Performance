@@ -54,6 +54,12 @@ namespace BigCityPerformance.People
             public int Weight, Stock;
         }
 
+        /// <summary>
+        /// The households asleep longest have woken and left the front of the list: the buyers' turn moves with it, so the
+        /// next sale goes to the household after the last buyer, not to one further along (code review, 10 November 2026).
+        /// </summary>
+        internal static void LeftTheFront(int count) => nextBuyer = System.Math.Max(0, nextBuyer - count);
+
         private static void Prefix(ResourceBuyerSystem __instance)
         {
             var dormancy = DormancySystem.Instance;

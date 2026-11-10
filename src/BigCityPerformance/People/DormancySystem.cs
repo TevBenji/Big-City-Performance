@@ -262,6 +262,7 @@ namespace BigCityPerformance.People
                 }
             }
             sleepingHouseholds.RemoveRange(0, count);
+            ShopTwin.LeftTheFront(count);
             if (batch.Count == 0) return;
             using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(array);
         }
