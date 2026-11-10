@@ -83,16 +83,13 @@ namespace BigCityPerformance.Routes
             }
 #endif
 #if BCP_DEV
-            if (DevCountReasons) CountRerouteReasons(queueSystem);
+            CountRerouteReasons(queueSystem);
 #endif
             QueuePrefix(queueSystem);
         }
 
 #if BCP_DEV
         /// <summary>Why travellers ask for a new route: their route state (PathOwner flags) when the request is made (test runner only).</summary>
-        /// <remarks>Only when asked: it reads every waiting request every frame, tens of milliseconds with thousands waiting.</remarks>
-        internal static bool DevCountReasons;
-
         internal static readonly Dictionary<string, long> RerouteReasons = new Dictionary<string, long>();
 
         private static void CountRerouteReasons(PathfindQueueSystem queue)

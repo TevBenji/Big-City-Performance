@@ -13,27 +13,20 @@ A city of a million people in the base game runs at about a twentieth of normal 
 **Keep the clock running**
 
 - When the route-finder falls behind, new route requests get more time instead of the game's clock stopping. Emergency services, transit and service vehicles keep the game's own deadlines.
-- Job, home, school, shop and leisure searches and empty taxis start a few at a time while it's busy, everyone in turn.
+- Job hunting and empty taxis search a few at a time while it's busy, everyone in turn.
 - **Rush hour is spread out**: workers leave across a few minutes instead of all in the same second. Nobody arrives later.
-- Service coverage is recalculated about once a minute after a road or a service building changes, and every few minutes otherwise, instead of every few seconds.
+- Service coverage is recalculated about once a minute instead of every few seconds.
 - Below 30 fps the game may run up to twice as many simulation steps per frame, so normal speed stays normal speed.
 
 **Limit the people simulated in detail** (on by default, the limit chosen for you)
 
 - In a city bigger than the limit, that many people are simulated one by one. The rest stay at home, asleep: they keep their homes and jobs, count in the population, earn wages, pay rent and taxes, and still buy from the shops. They just make no trips.
-- Households take turns, so everyone gets time awake about once every two game days (less often in a city of several million).
-- **The limit holds on slow computers too**: when households with everyone indoors or on foot aren't enough, people riding or waiting for a ride are sent home and their household sleeps as well.
-- **The streets you look at are the busy ones**: households living where the camera looks are woken first and stay awake while you watch.
+- Households take turns, so everyone gets time awake about once every two game days.
 - At overloaded stops only the first hundred people stay awake; the rest wake in turn as the ones in front board.
 - **The limit picks itself**: fewer people when the clock falls behind and fewer would help, more when there's room. A slow graphics card alone doesn't lower it. Turn it off to choose the number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking for routes at once.
 - **A count in the population box**: while the city is bigger than the limit, the population box at the bottom of the screen also shows how many people are simulated in detail (959,129 | 48k AUTO). Hover it for the details, click it for the settings.
-- While anyone sleeps, water and electricity are worked out again when a pipe, a cable or a building changes, and otherwise about every 17 seconds of play instead of every two; the city-wide counts run a quarter as often. In a three-million city the water calculation was most of every simulation step.
 - Cities smaller than the limit are not changed at all.
-
-**Hold 30 frames a second** (on by default)
-
-- While the graphics card can't draw 30 frames a second, the game draws less detail in the distance, down to half of your own level of detail, and gives it back when there is room. When the processor is what's slow, nothing changes.
 
 ### Measured
 
@@ -53,19 +46,16 @@ In Options, Big City Performance:
 - **Limit the people simulated in detail** (on)
 - **Choose the limit automatically** (on)
 - **Most people simulated in detail**, in thousands, for when the automatic limit is off (lower runs faster, higher puts more people on the streets)
-- **Hold 30 frames a second** (on)
 - **Show it in the population box** (on)
 
-Under **Right now** the page shows what the mod is doing as you play: people simulated in detail out of the population, the game speed reached (1 = normal), how many wait asleep at crowded stops, and how much of your level of detail is being drawn.
+Under **Right now** the page shows what the mod is doing as you play: people simulated in detail out of the population, the game speed reached (1 = normal), and how many wait asleep at crowded stops.
 
 The settings are in English, German, Spanish, French, Italian, Japanese, Korean, Polish, Brazilian Portuguese, Russian and Chinese.
 
 ### Good to know
 
 - Fewer people on the streets of a city over the limit: they're at home.
-- Rush hour is gentler, and coverage maps update about once a minute after you build.
-- The automatic limit may settle lower than before: it used to fill up with people stuck waiting at overloaded stops, and now everyone it counts is really out and about.
-- When the city is over its limit (just after loading, or when the limit drops), a traveller you were watching can vanish: they were sent home so their household could sleep.
+- Rush hour is gentler, and coverage maps update about once a minute.
 - **Saves are ordinary saves.** Sleeping households are written as ordinary households, and a save loads without the mod. Removing the mod is safe.
 - Early release: expect rough edges and tell me what you find.
 
@@ -95,9 +85,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.0" />
+	<ModVersion Value="0.2.4" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- The limit now holds on slow computers: when not enough households are indoors or on foot, people riding or waiting are sent home so their household can sleep.&#10;- The streets you look at are the busy ones: households living where the camera looks are woken first.&#10;- Water and electricity are worked out again when something changes instead of every two seconds: in a three-million city that was most of every simulation step.&#10;- New option, on by default: Hold 30 frames a second (less detail in the distance while the graphics card can't keep up).&#10;- House hunting, school, shopping and leisure searches wait their turn while the route-finder is busy, like job hunting.&#10;- Service coverage and the city-wide counts run less often when nothing has changed." />
+	<ChangeLog Value="- Saves no longer wake everyone: sleeping households are written as ordinary households.&#10;- The automatic limit waits longer after a cut that did not help, instead of retrying every few minutes.&#10;- MapExt and EconomyEX: their job and home searches get the same treatment as the game's." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
