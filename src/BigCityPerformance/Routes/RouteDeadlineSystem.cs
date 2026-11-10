@@ -105,6 +105,8 @@ namespace BigCityPerformance.Routes
             Reset();
             statusStart = -1f;
             SearchThrottle.PatchOtherMods(World);
+            // A loaded city's coverage is worked out at the quicker pace first.
+            CoveragePace.Changed();
         }
     }
 
@@ -148,16 +150,23 @@ namespace BigCityPerformance.Routes
     }
 
     /// <summary>
-    /// Lets the systems that start optional searches run only the updates the throttle allows:
+    /// Lets the systems that start searches which can wait run only the updates the throttle allows:
     /// - CitizenFindJobSystem turns citizens into job seekers, each a wide route search (two thirds of the route-finder's work
     ///   in a million-person city);
-    /// - TaxiDispatchSystem sends empty taxis looking for passengers across the map (about a fifth once job hunting is throttled).
+    /// - TaxiDispatchSystem sends empty taxis looking for passengers across the map (about a fifth once job hunting is throttled);
+    /// - HouseholdFindPropertySystem (house hunting), FindSchoolSystem, LeisureSystem and ResourceBuyerSystem (shopping): in a
+    ///   three-million city house hunting was 16 to 24 % of the route-finder's work and leisure 12 to 16 %, one leisure search
+    ///   costing about five commutes (test runs, 9 November 2026).
     /// Single updates run, spread out (<see cref="ThrottlePolicy.Stride"/>), each serving one slice of citizens, and every slice
     /// gets its turn: nobody is skipped more than anyone else, everyone just looks less often while the route-finder is behind.
     /// </summary>
     internal static class SearchThrottle
     {
-        internal static readonly System.Type[] Systems = { typeof(CitizenFindJobSystem), typeof(TaxiDispatchSystem) };
+        internal static readonly System.Type[] Systems =
+        {
+            typeof(CitizenFindJobSystem), typeof(TaxiDispatchSystem), typeof(HouseholdFindPropertySystem), typeof(FindSchoolSystem), typeof(LeisureSystem),
+            typeof(ResourceBuyerSystem),
+        };
 
         private static readonly System.Collections.Generic.Dictionary<System.Type, uint> Intervals = new System.Collections.Generic.Dictionary<System.Type, uint>();
 
@@ -166,6 +175,11 @@ namespace BigCityPerformance.Routes
             var prefix = new HarmonyMethod(typeof(SearchThrottle), nameof(Prefix));
             foreach (var type in Systems) harmony.Patch(AccessTools.DeclaredMethod(type, "OnUpdate"), prefix: prefix);
         }
+
+#if BCP_DEV
+        /// <summary>The test runner's comparison: only the job and taxi searches are held back, as before 0.3.</summary>
+        internal static bool DevFewer;
+#endif
 
         private static bool otherModsPatched;
 
@@ -189,6 +203,9 @@ namespace BigCityPerformance.Routes
             var throttle = RouteDeadlineSystem.Throttle;
             if (throttle.Level == 0) return true;
             var type = __instance.GetType();
+#if BCP_DEV
+            if (DevFewer && type != typeof(CitizenFindJobSystem) && type != typeof(TaxiDispatchSystem)) return true;
+#endif
             if (!Intervals.TryGetValue(type, out uint frames))
                 Intervals[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation));
             return throttle.Runs(RouteDeadlineSystem.FrameIndex / frames);

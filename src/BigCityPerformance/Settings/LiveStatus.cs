@@ -15,6 +15,9 @@ namespace BigCityPerformance.Settings
         internal static string People { get; private set; } = None;
         internal static string Speed { get; private set; } = None;
         internal static string Stops { get; private set; } = None;
+
+        /// <summary>The share of the player's own level of detail the game draws with (the frame-rate hold lowers it).</summary>
+        internal static string Detail { get; private set; } = "100%";
         internal static int Version { get; private set; }
 
         internal static int InDetail { get; private set; }
@@ -37,6 +40,14 @@ namespace BigCityPerformance.Settings
             People = people;
             Speed = pace;
             Stops = stops;
+            Version++;
+        }
+
+        internal static void SetDetail(float share)
+        {
+            string detail = ((int)System.Math.Round(share * 100f)).ToString(CultureInfo.InvariantCulture) + "%";
+            if (detail == Detail) return;
+            Detail = detail;
             Version++;
         }
 
