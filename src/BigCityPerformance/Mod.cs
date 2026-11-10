@@ -35,7 +35,6 @@ namespace BigCityPerformance
             {
                 updateSystem.UpdateAt<RouteDeadlineSystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<CommuteSpread>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<CoverageWatch>(SystemUpdatePhase.ModificationEnd);
                 harmony = new Harmony(HarmonyId);
                 harmony.CreateClassProcessor(typeof(GetQueuePatch)).Patch();
                 SearchThrottle.Patch(harmony);
@@ -48,16 +47,13 @@ namespace BigCityPerformance
             {
                 updateSystem.UpdateAt<People.DormancySystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<People.ClockWatch>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<People.FlowWatch>(SystemUpdatePhase.ModificationEnd);
                 updateSystem.UpdateAt<UI.IndicatorUISystem>(SystemUpdatePhase.UIUpdate);
                 harmony.CreateClassProcessor(typeof(People.SaveWakePatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.SaveHoldPatch)).Patch();
                 harmony.CreateClassProcessor(typeof(People.LoadHoldPatch)).Patch();
-                People.CityPace.Patch(harmony);
-                People.FlowPace.Patch(harmony);
+                harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
                 harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
             });
-            Register("frame rate", () => updateSystem.UpdateAt<Rendering.FrameGuard>(SystemUpdatePhase.UIUpdate));
             Register("sleepers in saves", () =>
             {
                 harmony.CreateClassProcessor(typeof(People.SaveQueryPatch)).Patch();
@@ -71,7 +67,6 @@ namespace BigCityPerformance
         public void OnDispose()
         {
             Register("waking everyone", () => People.DormancySystem.Instance?.WakeAll());
-            Register("the level of detail", () => Rendering.FrameGuard.Instance?.Restore());
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
             Settings = null;

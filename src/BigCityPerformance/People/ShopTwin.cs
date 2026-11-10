@@ -38,6 +38,7 @@ namespace BigCityPerformance.People
         private const long SmallestSale = 200;
 
         private static uint lastHour = uint.MaxValue;
+        private static int nextBuyer;
         private static double pickOffset;
         private static EntityQuery awakeHouseholds, shops;
         private static bool queriesMade;
@@ -52,6 +53,12 @@ namespace BigCityPerformance.People
             public Resource Resource;
             public int Weight, Stock;
         }
+
+        /// <summary>
+        /// The households asleep longest have woken and left the front of the list: the buyers' turn moves with it, so the
+        /// next sale goes to the household after the last buyer, not to one further along (code review, 10 November 2026).
+        /// </summary>
+        internal static void LeftTheFront(int count) => nextBuyer = System.Math.Max(0, nextBuyer - count);
 
         private static void Prefix(ResourceBuyerSystem __instance)
         {
@@ -75,10 +82,11 @@ namespace BigCityPerformance.People
             // The queue was last used by the system's own jobs, finished once its dependencies are.
             ((JobHandle)DependencyGetter.Invoke(__instance, null)).Complete();
             var prefabs = __instance.m_ResourceSystem.GetPrefabs();
+            var sleepers = dormancy.SleepingHouseholdList;
             // Many smaller sales, each charged to the next sleeping household in turn (the turn carries over from hour to hour), so
             // every household pays its share over time. One sale per shop put each shop's whole share on one household, the same
             // few households every hour (code review, 8 November 2026).
-            int saleCount = (int)System.Math.Max(1L, System.Math.Min(System.Math.Min(dormancy.SleepingHouseholds, MaxSalesPerHour), budget / SmallestSale));
+            int saleCount = (int)System.Math.Max(1L, System.Math.Min(System.Math.Min(sleepers.Count, MaxSalesPerHour), budget / SmallestSale));
             var weights = new long[found.Count];
             for (int index = 0; index < found.Count; index++) weights[index] = found[index].Weight;
             // Where the picks land moves on each hour (by the golden ratio, which never repeats), so when there are fewer sales
@@ -99,13 +107,12 @@ namespace BigCityPerformance.People
                 {
                     int amount = (int)math.min(stock, perSale / price);
                     if (amount <= 0) break;
-                    var buyer = dormancy.NextSleeper();
-                    if (buyer == Entity.Null) break;
                     stock -= amount;
+                    nextBuyer = (nextBuyer + 1) % sleepers.Count;
                     __instance.m_SalesQueue.Enqueue(new ResourceBuyerSystem.SalesEvent
                     {
                         m_Flags = ResourceBuyerSystem.SaleFlags.CommercialSeller | ResourceBuyerSystem.SaleFlags.Virtual,
-                        m_Buyer = buyer,
+                        m_Buyer = sleepers[nextBuyer],
                         m_Seller = shop.Entity,
                         m_Resource = shop.Resource,
                         m_Amount = amount,
