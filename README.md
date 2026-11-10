@@ -143,6 +143,9 @@ and Chinese (simplified and traditional).
   few at a time and others go to sleep in their place, so every household gets its time awake about once every two game
   days, while the number awake stays at the limit. At most 200,000 households take their turn in a game day, so in a
   city of several million a turn comes round less often.
+- **The automatic limit may settle lower than before.** The limit used to fill up with people stuck waiting at
+  overloaded stops, who cost little. Now everyone it counts is really out and about, so the same number is more work:
+  on the test laptop a million-person city kept normal speed at about 32,000.
 - **A traveller can vanish.** When the city is over its limit (just after loading, or when the limit drops), people on
   their way are sent home so their household can sleep: a car or a walker you were watching may disappear. At the
   limit, only households with everyone indoors or on foot are picked.

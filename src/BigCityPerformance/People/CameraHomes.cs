@@ -79,7 +79,7 @@ namespace BigCityPerformance.People
         /// Keeps the list of homes in view up to date and wakes a few of their sleeping households into <paramref name="woken"/>.
         /// <paramref name="awakeBudget"/> is how many households the limit lets be awake.
         /// </summary>
-        internal void Update(DormancySystem system, int awakeBudget, HashSet<Entity> sleeping, List<Entity> woken)
+        internal void Update(DormancySystem system, int awakeBudget, List<Entity> woken)
         {
             float now = UnityEngine.Time.realtimeSinceStartup;
             if (!On || !View(system, out float3 pivot, out float radius))
@@ -104,10 +104,7 @@ namespace BigCityPerformance.People
                 var renters = entities.GetBuffer<Renter>(building, true);
                 for (int at = 0; at < renters.Length && found < most; at++)
                 {
-                    var household = renters[at].m_Renter;
-                    if (!sleeping.Remove(household)) continue;
-                    system.Wake(household, woken);
-                    found++;
+                    if (system.WakeOutOfTurn(renters[at].m_Renter, woken)) found++;
                 }
             }
             Awake += found;

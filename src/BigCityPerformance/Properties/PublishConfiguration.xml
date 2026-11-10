@@ -64,6 +64,7 @@ The settings are in English, German, Spanish, French, Italian, Japanese, Korean,
 
 - Fewer people on the streets of a city over the limit: they're at home.
 - Rush hour is gentler, and coverage maps update about once a minute after you build.
+- The automatic limit may settle lower than before: it used to fill up with people stuck waiting at overloaded stops, and now everyone it counts is really out and about.
 - When the city is over its limit (just after loading, or when the limit drops), a traveller you were watching can vanish: they were sent home so their household could sleep.
 - **Saves are ordinary saves.** Sleeping households are written as ordinary households, and a save loads without the mod. Removing the mod is safe.
 - Early release: expect rough edges and tell me what you find.

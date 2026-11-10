@@ -1,5 +1,6 @@
 // Big City Performance. Original work by TevBenji, 2026-11. GPL-3.0.
 using System.Collections.Generic;
+using BigCityPerformance.Core;
 using Game;
 using Game.Buildings;
 using Game.Citizens;
@@ -74,10 +75,13 @@ namespace BigCityPerformance.People
         // A game day is 262,144 simulation frames.
         private const float FramesPerDay = 262144f;
 
-        // Longest asleep first. A household woken out of turn stays listed until its turn comes and is skipped then:
-        // sleepingSet is who is asleep.
-        private readonly List<Entity> sleepingHouseholds = new List<Entity>();
-        private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
+        // Who is asleep, each with the number of its current sleep, and a ticket for every sleep in the order they began
+        // (longest asleep first). A household woken out of turn leaves its ticket behind: a ticket only counts while its
+        // number is the household's current one, so an old one is passed over, by the turns and by the shopping alike, even
+        // if the household has gone back to sleep since.
+        private readonly Dictionary<Entity, int> sleeping = new Dictionary<Entity, int>();
+        private readonly List<Ticket> tickets = new List<Ticket>();
+        private int lastTicket, nextBuyer;
         private readonly List<Entity> batch = new List<Entity>(), walkers = new List<Entity>();
         private readonly List<Traveller> travellers = new List<Traveller>();
         private readonly List<int> withTravellers = new List<int>();
@@ -103,6 +107,14 @@ namespace BigCityPerformance.People
             public Entity Citizen, Walker;
         }
 
+        private struct Ticket
+        {
+            public Entity Household;
+            public int Number;
+        }
+
+        private bool Current(Ticket ticket) => sleeping.TryGetValue(ticket.Household, out int number) && number == ticket.Number;
+
         /// <summary>Set by the save patch until the save is written: nobody goes to sleep or wakes while it is.</summary>
         internal static bool SaveInProgress;
 
@@ -125,7 +137,7 @@ namespace BigCityPerformance.People
         internal bool Awake => wakeProbe == Entity.Null || !EntityManager.Exists(wakeProbe) || !EntityManager.HasComponent<Disabled>(wakeProbe);
         internal static DormancySystem Instance;
 
-        internal int SleepingHouseholds => sleepingSet.Count;
+        internal int SleepingHouseholds => sleeping.Count;
         internal int SleepingCitizens => sleepingCitizens;
 
         /// <summary>People sent home since the city loaded, so their household could sleep.</summary>
@@ -138,14 +150,33 @@ namespace BigCityPerformance.People
         internal int PeopleInDetail(int population)
         {
             int awake = households.CalculateEntityCount();
-            int total = awake + sleepingSet.Count;
+            int total = awake + sleeping.Count;
             return total == 0 ? population : (int)((long)population * awake / total);
         }
         internal int SleepingAtStops => crowds.Asleep;
         internal bool Ready => ready;
 
-        /// <summary>Everyone who has slept, longest asleep first; a few may have been woken out of turn since (see the list's note).</summary>
-        internal IReadOnlyList<Entity> SleepingHouseholdList => sleepingHouseholds;
+        /// <summary>
+        /// The next sleeping household in turn, for the shop twin's sales: each call moves one on, so every sleeper pays its
+        /// share over time. Null with nobody asleep.
+        /// </summary>
+        internal Entity NextSleeper()
+        {
+            for (int tried = 0; tried < tickets.Count; tried++)
+            {
+                nextBuyer = (nextBuyer + 1) % tickets.Count;
+                if (Current(tickets[nextBuyer])) return tickets[nextBuyer].Household;
+            }
+            return Entity.Null;
+        }
+
+        /// <summary>Wakes one sleeping household whatever its turn (it lives where the camera looks); false if it isn't asleep.</summary>
+        internal bool WakeOutOfTurn(Entity household, List<Entity> woken)
+        {
+            if (!sleeping.Remove(household)) return false;
+            Wake(household, woken);
+            return true;
+        }
 
         [Preserve]
         protected override void OnCreate()
@@ -218,27 +249,27 @@ namespace BigCityPerformance.People
             {
                 // No limit, or a city under it: nobody sleeps, at stops included (code review, 8 November 2026: they can be
                 // the only sleepers).
-                if (sleepingSet.Count > 0 || crowds.Asleep > 0) WakeAll();
+                if (sleeping.Count > 0 || crowds.Asleep > 0) WakeAll();
                 lastSlept = 0;
                 return;
             }
             float awake = (float)limit / people;
-            int total = households.CalculateEntityCount() + sleepingSet.Count;
+            int total = households.CalculateEntityCount() + sleeping.Count;
             int wanted = (int)(total * (1f - awake));
             if (!HoldClock)
             {
                 Rotate();
-                camera.Update(this, total - wanted, sleepingSet, batch);
+                camera.Update(this, total - wanted, batch);
                 WakeBatch();
             }
             // A higher limit (the setting, or the automatic limit finding room) wakes only the difference, longest asleep first:
             // waking everyone for every change churned the whole city (test run, 7 November 2026). A little slack, so drift in the
             // counts doesn't wake and re-sleep the same few households.
-            int over = sleepingSet.Count - wanted;
+            int over = sleeping.Count - wanted;
             lastSlept = 0;
             if (over > System.Math.Max(10, wanted / 50)) WakeLongestAsleep(over);
-            else if (wanted > sleepingSet.Count) lastSlept = Sleep(wanted - sleepingSet.Count);
-            if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleepingSet.Count} households ({sleepingCitizens} people).");
+            else if (wanted > sleeping.Count) lastSlept = Sleep(wanted - sleeping.Count);
+            if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleeping.Count} households ({sleepingCitizens} people).");
             crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
         }
 
@@ -265,31 +296,32 @@ namespace BigCityPerformance.People
                 int mostSent = SendTravellersHome && !HoldClock && shortTopUps >= 2
                     ? System.Math.Min(MostSentHomeAtOnce, System.Math.Max(MostSentHome, count / 4)) : 0;
                 bool spare = camera.Protecting;
-                // An even stride over the awake households, so the ones still awake are spread over the whole city; each
-                // top-up starts one further along, so its share of looks falls on others.
-                int stride = System.Math.Max(1, length / System.Math.Max(1, count));
-                cursor++;
-                for (int start = 0; start < stride && found < count && budget > 0; start++)
-                    for (int index = (start + cursor) % stride; index < length && found < count && budget > 0; index += stride)
+                // An even walk over the awake households, so the ones still awake are spread over the whole city. It reaches
+                // every household once before any twice, and the next top-up carries on where this one stops: starting over
+                // each time would look at the same households again and never reach the rest (code review, 10 November 2026).
+                int step = EvenWalk.Step(length, count);
+                int index = cursor % length;
+                for (int looked = 0; looked < length && found < count && budget > 0; looked++, index = (index + step) % length)
+                {
+                    var household = awake[index];
+                    if (sleeping.ContainsKey(household) || (spare && camera.Contains(homes[index].m_Property))) continue;
+                    budget--;
+                    var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
+                    if (!Look(members)) continue;
+                    if (travellers.Count > 0)
                     {
-                        var household = awake[index];
-                        if (sleepingSet.Contains(household) || (spare && camera.Contains(homes[index].m_Property))) continue;
-                        budget--;
-                        var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
-                        if (!Look(members)) continue;
-                        if (travellers.Count > 0)
-                        {
-                            if (withTravellers.Count < mostSent) withTravellers.Add(index);
-                            continue;
-                        }
-                        PutToSleep(household, members);
-                        found++;
+                        if (withTravellers.Count < mostSent) withTravellers.Add(index);
+                        continue;
                     }
-                foreach (int index in withTravellers)
+                    PutToSleep(household, members);
+                    found++;
+                }
+                cursor = index;
+                foreach (int at in withTravellers)
                 {
                     if (found >= count) break;
-                    var household = awake[index];
-                    var home = homes[index].m_Property;
+                    var household = awake[at];
+                    var home = homes[at].m_Property;
                     var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
                     if (!EntityManager.Exists(home) || !Look(members)) continue;
                     foreach (var traveller in travellers) SendHome(household, traveller, home, commands);
@@ -346,8 +378,8 @@ namespace BigCityPerformance.People
             for (int at = 0; at < members.Length; at++) batch.Add(members[at].m_Citizen);
             batch.AddRange(walkers);
             sleepingCitizens += members.Length;
-            sleepingHouseholds.Add(household);
-            sleepingSet.Add(household);
+            tickets.Add(new Ticket { Household = household, Number = ++lastTicket });
+            sleeping[household] = lastTicket;
 #if BCP_DEV
             devEverSlept.Add(household);
 #endif
@@ -407,7 +439,7 @@ namespace BigCityPerformance.People
             bool asleepNow = sleepProbe == Entity.Null || !EntityManager.Exists(sleepProbe) || EntityManager.HasComponent<Disabled>(sleepProbe);
             if ((lastSlept > 0 || !asleepNow) && now - holdStart < MostHoldSeconds) return false;
             HoldClock = false;
-            Mod.Logger.Info($"The clock waited {now - holdStart:F1} s after loading, while {sleepingSet.Count:N0} households went to sleep.");
+            Mod.Logger.Info($"The clock waited {now - holdStart:F1} s after loading, while {sleeping.Count:N0} households went to sleep.");
             return true;
         }
 
@@ -422,9 +454,9 @@ namespace BigCityPerformance.People
             lastRotation = now;
             float rotationFrames = RotationDays * FramesPerDay;
             // Paused, or a jump (a city just loaded): nothing due.
-            if (elapsed == 0 || elapsed > rotationFrames || sleepingSet.Count == 0) return;
-            rotationDue += System.Math.Min(sleepingSet.Count / (double)rotationFrames, MostTurnsADay / (double)FramesPerDay) * elapsed;
-            int count = System.Math.Min((int)rotationDue, sleepingSet.Count);
+            if (elapsed == 0 || elapsed > rotationFrames || sleeping.Count == 0) return;
+            rotationDue += System.Math.Min(sleeping.Count / (double)rotationFrames, MostTurnsADay / (double)FramesPerDay) * elapsed;
+            int count = System.Math.Min((int)rotationDue, sleeping.Count);
             if (count == 0) return;
             rotationDue -= count;
             WakeLongestAsleep(count);
@@ -434,20 +466,22 @@ namespace BigCityPerformance.People
         private void WakeLongestAsleep(int count)
         {
             int taken = 0, index = 0;
-            for (; index < sleepingHouseholds.Count && taken < count; index++)
+            for (; index < tickets.Count && taken < count; index++)
             {
-                var household = sleepingHouseholds[index];
-                // Woken out of turn since (it lives where the camera looked): nothing to do.
-                if (!sleepingSet.Remove(household)) continue;
+                // A ticket from a sleep that ended out of turn (the household lives where the camera looked): passed over.
+                if (!Current(tickets[index])) continue;
+                sleeping.Remove(tickets[index].Household);
                 taken++;
-                Wake(household, batch);
+                Wake(tickets[index].Household, batch);
             }
-            sleepingHouseholds.RemoveRange(0, index);
+            tickets.RemoveRange(0, index);
+            // The shopping's place in the line moves with it.
+            nextBuyer = System.Math.Max(0, nextBuyer - index);
             WakeBatch();
         }
 
         /// <summary>Lists a sleeping household, its members and their walkers in <paramref name="woken"/> to have the tag taken off.</summary>
-        internal void Wake(Entity household, List<Entity> woken)
+        private void Wake(Entity household, List<Entity> woken)
         {
             if (!EntityManager.Exists(household)) return;
             woken.Add(household);
@@ -475,8 +509,9 @@ namespace BigCityPerformance.People
         internal void WakeAll()
         {
             crowds.TakeAll();
-            sleepingHouseholds.Clear();
-            sleepingSet.Clear();
+            tickets.Clear();
+            sleeping.Clear();
+            nextBuyer = 0;
             sleepingCitizens = 0;
             // Everyone with the tag, not only the ones this system remembers: the game never disables anything itself, so
             // nobody can be left asleep by a slip in the bookkeeping.
@@ -520,6 +555,13 @@ namespace BigCityPerformance.People
         // Every household that has slept since the city loaded (test runner only): were today's homeless asleep before?
         private readonly HashSet<Entity> devEverSlept = new HashSet<Entity>();
 
+        /// <summary>Every <paramref name="every"/>th sleeping household (test runner only).</summary>
+        internal IEnumerable<Entity> DevSleepers(int every)
+        {
+            for (int index = 0; index < tickets.Count; index += every)
+                if (Current(tickets[index])) yield return tickets[index].Household;
+        }
+
         /// <summary>Who is awake and why (test runner only): it looks at every awake household.</summary>
         internal string DevCensus()
         {
@@ -551,7 +593,7 @@ namespace BigCityPerformance.People
                 + $"moving away {Count(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Game.Agents.MovingAway>()):N0} "
                 + $"({Count(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Game.Agents.MovingAway>(), ComponentType.ReadOnly<PropertyRenter>()):N0} still with a home), "
                 + $"homeless {Count(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<HomelessHousehold>()):N0} ({homelessSleptBefore:N0} of them slept earlier in this session); "
-                + $"asleep {sleepingSet.Count:N0} households; travellers sent home since loading {SentHome:N0}; {camera.DevState(this)}";
+                + $"asleep {sleeping.Count:N0} households ({tickets.Count:N0} tickets); travellers sent home since loading {SentHome:N0}; {camera.DevState(this)}";
         }
 #endif
 
