@@ -42,6 +42,10 @@ namespace BigCityPerformance.Settings
         [SettingsUIDisableByCondition(typeof(BigCitySettings), nameof(LimitChosenForYou))]
         public int PeopleInDetail { get; set; }
 
+        /// <summary>Less detail in the distance while the graphics card can't draw 30 frames a second (see FrameGuard).</summary>
+        [SettingsUISection(Section, Group)]
+        public bool HoldFrameRate { get; set; }
+
         /// <summary>The count beside the population at the bottom of the screen.</summary>
         [SettingsUISection(Section, StatusGroup)]
         public bool ShowOnScreen { get; set; }
@@ -60,6 +64,11 @@ namespace BigCityPerformance.Settings
         [SettingsUISection(Section, StatusGroup)]
         [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
         public string StatusStops => LiveStatus.Stops;
+
+        [Exclude]
+        [SettingsUISection(Section, StatusGroup)]
+        [SettingsUIValueVersion(typeof(BigCitySettings), nameof(StatusVersion))]
+        public string StatusDetail => LiveStatus.Detail;
 
         [Exclude]
         [SettingsUIButton]
@@ -86,6 +95,7 @@ namespace BigCityPerformance.Settings
             LimitPeople = true;
             AutoLimit = true;
             PeopleInDetail = 50;
+            HoldFrameRate = true;
             ShowOnScreen = true;
         }
 
@@ -101,7 +111,7 @@ namespace BigCityPerformance.Settings
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
                 [GetOptionGroupLocaleID(HelpGroup)] = words[nameof(HelpGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(ReportBug), nameof(Discord) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(HoldFrameRate), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(StatusDetail), nameof(ReportBug), nameof(Discord) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];
