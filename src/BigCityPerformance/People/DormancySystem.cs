@@ -94,6 +94,8 @@ namespace BigCityPerformance.People
             return total == 0 ? population : (int)((long)population * awake / total);
         }
         internal int SleepingAtStops => crowds.Asleep;
+        /// <summary>Every household with a home, asleep or awake.</summary>
+        internal int Households => households.CalculateEntityCount() + sleepingHouseholds.Count;
         internal bool Ready => ready;
         internal IReadOnlyList<Entity> SleepingHouseholdList => sleepingHouseholds;
 
@@ -319,6 +321,7 @@ namespace BigCityPerformance.People
             HoldClock = ready && Limit > 0;
             heldFrames = 0;
             sleepProbe = Entity.Null;
+            CountPace.Reset();
             // Reflection on another mod's system: a failure is logged, never in the way of loading the city.
             try { SleeperBookkeeping.ApplyToOtherMods(World); }
             catch (System.Exception exception) { Mod.Logger.Error(exception, "Big City Performance: other mods' household queries failed"); }

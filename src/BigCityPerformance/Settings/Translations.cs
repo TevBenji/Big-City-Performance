@@ -41,6 +41,8 @@ namespace BigCityPerformance.Settings
             ["HelpGroup"] = "Help",
             ["ReportBug"] = "Report a bug",
             ["ReportBug.Desc"] = "Opens a new issue on GitHub. Add a screenshot and your BigCityPerformance.log.",
+            ["WriteReport"] = "Write a performance report",
+            ["WriteReport.Desc"] = "Measures where the game's time goes for 3 minutes while your city runs (the second half runs a little slower), then writes a short report to BigCityPerformance.log, next to the game's other logs. Paste it into Discord or a bug report. Keep the city running at normal speed, with the camera where you usually play.",
             ["Discord"] = "Discord",
             ["Discord.Desc"] = "Questions, ideas and news.",
         };
@@ -77,6 +79,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Hilfe",
                 ["ReportBug"] = "Fehler melden",
                 ["ReportBug.Desc"] = "Öffnet ein neues Issue auf GitHub. Füge einen Screenshot und deine BigCityPerformance.log hinzu.",
+                ["WriteReport"] = "Leistungsbericht schreiben",
+                ["WriteReport.Desc"] = "Misst 3 Minuten lang, wohin die Zeit des Spiels geht, während deine Stadt läuft (die zweite Hälfte läuft etwas langsamer), und schreibt dann einen kurzen Bericht in BigCityPerformance.log, neben die anderen Logs des Spiels. Füge ihn in Discord oder einen Fehlerbericht ein. Lass die Stadt auf normaler Geschwindigkeit laufen, mit der Kamera dort, wo du sonst spielst.",
                 ["Discord.Desc"] = "Fragen, Ideen und Neuigkeiten.",
             },
             ["es-ES"] = new Dictionary<string, string>
@@ -109,6 +113,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Ayuda",
                 ["ReportBug"] = "Informar de un error",
                 ["ReportBug.Desc"] = "Abre una nueva incidencia en GitHub. Añade una captura de pantalla y tu BigCityPerformance.log.",
+                ["WriteReport"] = "Escribir un informe de rendimiento",
+                ["WriteReport.Desc"] = "Mide durante 3 minutos en qué se va el tiempo del juego mientras tu ciudad funciona (la segunda mitad va un poco más lenta) y luego escribe un informe breve en BigCityPerformance.log, junto a los demás registros del juego. Pégalo en Discord o en un informe de error. Deja la ciudad a velocidad normal, con la cámara donde sueles jugar.",
                 ["Discord.Desc"] = "Preguntas, ideas y novedades.",
             },
             ["fr-FR"] = new Dictionary<string, string>
@@ -141,6 +147,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Aide",
                 ["ReportBug"] = "Signaler un bug",
                 ["ReportBug.Desc"] = "Ouvre un nouveau ticket sur GitHub. Ajoutez une capture d'écran et votre BigCityPerformance.log.",
+                ["WriteReport"] = "Écrire un rapport de performance",
+                ["WriteReport.Desc"] = "Mesure pendant 3 minutes où passe le temps du jeu pendant que votre ville tourne (la seconde moitié va un peu moins vite), puis écrit un court rapport dans BigCityPerformance.log, à côté des autres journaux du jeu. Collez-le dans Discord ou dans un rapport de bug. Laissez la ville à vitesse normale, avec la caméra là où vous jouez d'habitude.",
                 ["Discord.Desc"] = "Questions, idées et actualités.",
             },
             ["it-IT"] = new Dictionary<string, string>
@@ -173,6 +181,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Aiuto",
                 ["ReportBug"] = "Segnala un bug",
                 ["ReportBug.Desc"] = "Apre una nuova segnalazione su GitHub. Aggiungi uno screenshot e il tuo BigCityPerformance.log.",
+                ["WriteReport"] = "Scrivi un rapporto sulle prestazioni",
+                ["WriteReport.Desc"] = "Misura per 3 minuti dove va il tempo del gioco mentre la tua città gira (la seconda metà va un po' più lenta), poi scrive un breve rapporto in BigCityPerformance.log, accanto agli altri log del gioco. Incollalo su Discord o in una segnalazione di bug. Lascia la città a velocità normale, con la telecamera dove giochi di solito.",
                 ["Discord.Desc"] = "Domande, idee e novità.",
             },
             ["ja-JP"] = new Dictionary<string, string>
@@ -205,6 +215,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "ヘルプ",
                 ["ReportBug"] = "バグを報告",
                 ["ReportBug.Desc"] = "GitHubで新しいIssueを開きます。スクリーンショットとBigCityPerformance.logを添付してください。",
+                ["WriteReport"] = "パフォーマンスレポートを書き出す",
+                ["WriteReport.Desc"] = "都市を動かしたまま、ゲームの時間がどこに使われているかを3分間測定し（後半は少し遅くなります）、短いレポートをゲームの他のログと同じ場所の BigCityPerformance.log に書き出します。Discord やバグ報告に貼り付けてください。都市は通常速度で動かし、カメラはいつも遊ぶ場所に置いてください。",
                 ["Discord.Desc"] = "質問、アイデア、お知らせ。",
             },
             ["ko-KR"] = new Dictionary<string, string>
@@ -237,6 +249,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "도움말",
                 ["ReportBug"] = "버그 신고",
                 ["ReportBug.Desc"] = "GitHub에서 새 이슈를 엽니다. 스크린샷과 BigCityPerformance.log를 첨부해 주세요.",
+                ["WriteReport"] = "성능 보고서 작성",
+                ["WriteReport.Desc"] = "도시가 돌아가는 동안 3분 동안 게임의 시간이 어디에 쓰이는지 측정하고(후반부는 조금 느려집니다), 게임의 다른 로그와 같은 곳의 BigCityPerformance.log에 짧은 보고서를 씁니다. Discord나 버그 신고에 붙여 넣으세요. 도시는 보통 속도로 두고, 카메라는 평소 플레이하는 곳에 두세요.",
                 ["Discord.Desc"] = "질문, 아이디어, 소식.",
             },
             ["pl-PL"] = new Dictionary<string, string>
@@ -269,6 +283,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Pomoc",
                 ["ReportBug"] = "Zgłoś błąd",
                 ["ReportBug.Desc"] = "Otwiera nowe zgłoszenie na GitHubie. Dołącz zrzut ekranu i swój plik BigCityPerformance.log.",
+                ["WriteReport"] = "Zapisz raport wydajności",
+                ["WriteReport.Desc"] = "Przez 3 minuty mierzy, na co idzie czas gry, gdy miasto działa (druga połowa idzie nieco wolniej), a potem zapisuje krótki raport w BigCityPerformance.log, obok innych logów gry. Wklej go na Discordzie lub w zgłoszeniu błędu. Zostaw miasto na normalnej prędkości, z kamerą tam, gdzie zwykle grasz.",
                 ["Discord.Desc"] = "Pytania, pomysły i nowości.",
             },
             ["pt-BR"] = new Dictionary<string, string>
@@ -301,6 +317,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Ajuda",
                 ["ReportBug"] = "Relatar um bug",
                 ["ReportBug.Desc"] = "Abre uma nova issue no GitHub. Adicione uma captura de tela e o seu BigCityPerformance.log.",
+                ["WriteReport"] = "Gravar um relatório de desempenho",
+                ["WriteReport.Desc"] = "Mede por 3 minutos para onde vai o tempo do jogo enquanto a sua cidade roda (a segunda metade fica um pouco mais lenta) e depois grava um relatório curto em BigCityPerformance.log, junto dos outros logs do jogo. Cole no Discord ou num relato de bug. Deixe a cidade na velocidade normal, com a câmera onde você costuma jogar.",
                 ["Discord.Desc"] = "Perguntas, ideias e novidades.",
             },
             ["ru-RU"] = new Dictionary<string, string>
@@ -333,6 +351,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "Помощь",
                 ["ReportBug"] = "Сообщить об ошибке",
                 ["ReportBug.Desc"] = "Открывает новое обращение на GitHub. Приложите снимок экрана и файл BigCityPerformance.log.",
+                ["WriteReport"] = "Записать отчёт о производительности",
+                ["WriteReport.Desc"] = "В течение 3 минут измеряет, на что уходит время игры, пока город работает (вторая половина идёт чуть медленнее), затем записывает короткий отчёт в BigCityPerformance.log рядом с другими журналами игры. Вставьте его в Discord или в сообщение об ошибке. Оставьте город на обычной скорости, а камеру там, где вы обычно играете.",
                 ["Discord.Desc"] = "Вопросы, идеи и новости.",
             },
             ["zh-HANS"] = new Dictionary<string, string>
@@ -365,6 +385,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "帮助",
                 ["ReportBug"] = "报告错误",
                 ["ReportBug.Desc"] = "在 GitHub 上新建问题。请附上截图和 BigCityPerformance.log。",
+                ["WriteReport"] = "生成性能报告",
+                ["WriteReport.Desc"] = "在城市运行时测量 3 分钟，看游戏的时间花在哪里（后半段会稍慢一些），然后把一份简短报告写入游戏其他日志旁边的 BigCityPerformance.log。请把它粘贴到 Discord 或错误报告中。让城市以正常速度运行，镜头放在你平时游玩的位置。",
                 ["Discord.Desc"] = "问题、想法和动态。",
             },
             ["zh-HANT"] = new Dictionary<string, string>
@@ -397,6 +419,8 @@ namespace BigCityPerformance.Settings
                 ["HelpGroup"] = "說明",
                 ["ReportBug"] = "回報錯誤",
                 ["ReportBug.Desc"] = "在 GitHub 上建立新問題。請附上截圖和 BigCityPerformance.log。",
+                ["WriteReport"] = "產生效能報告",
+                ["WriteReport.Desc"] = "在城市運行時測量 3 分鐘，看遊戲的時間花在哪裡（後半段會稍慢一些），然後把一份簡短報告寫入遊戲其他日誌旁邊的 BigCityPerformance.log。請把它貼到 Discord 或錯誤回報中。讓城市以正常速度運行，鏡頭放在你平時遊玩的位置。",
                 ["Discord.Desc"] = "問題、想法和最新消息。",
             },
         };
