@@ -290,10 +290,7 @@ namespace BigCityPerformance.People
         /// <summary>Everyone awake: when the setting goes back up, when the mod unloads, or before a save if its patch failed.</summary>
         internal void WakeAll()
         {
-            crowds.TakeAll();
-            sleepingHouseholds.Clear();
-            sleepingSet.Clear();
-            sleepingCitizens = 0;
+            Forget();
             // Everyone with the tag, not only the ones this system remembers: the game never disables anything itself, so
             // nobody can be left asleep by a slip in the bookkeeping.
             using (var everyone = asleep.ToEntityArray(Allocator.Temp))
@@ -305,6 +302,30 @@ namespace BigCityPerformance.People
                 wakeProbe = everyone[everyone.Length - 1];
                 wokeForSave = SaveInProgress;
                 Mod.Logger.Info($"Woke {everyone.Length} people and households{(SaveInProgress ? " for a save" : "")}.");
+            }
+        }
+
+        private void Forget()
+        {
+            crowds.TakeAll();
+            sleepingHouseholds.Clear();
+            sleepingSet.Clear();
+            sleepingCitizens = 0;
+        }
+
+        /// <summary>
+        /// A city loaded. It has nobody asleep: the Disabled tag isn't saved. Anyone still tagged was left from the city before
+        /// (the game's clear takes sleepers with it, see <see cref="SleeperBookkeeping"/>): a ghost of a city that's gone, so it's
+        /// removed, never woken. Waking them doubled a player's households (12 November 2026).
+        /// </summary>
+        private void RemoveLeftovers()
+        {
+            Forget();
+            using (var leftovers = asleep.ToEntityArray(Allocator.Temp))
+            {
+                if (leftovers.Length == 0) return;
+                endFrame.CreateCommandBuffer().DestroyEntity(leftovers);
+                Mod.Logger.Warn($"{leftovers.Length} people and households were still asleep from the city before: removed, not woken.");
             }
         }
 
@@ -325,9 +346,7 @@ namespace BigCityPerformance.People
             // Reflection on another mod's system: a failure is logged, never in the way of loading the city.
             try { SleeperBookkeeping.ApplyToOtherMods(World); }
             catch (System.Exception exception) { Mod.Logger.Error(exception, "Big City Performance: other mods' household queries failed"); }
-            // A freshly loaded city has nobody asleep (saves are written awake); this also wakes anyone a save might still
-            // hold asleep.
-            WakeAll();
+            RemoveLeftovers();
         }
 
         [Preserve]

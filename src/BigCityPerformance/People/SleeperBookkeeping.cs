@@ -32,6 +32,11 @@ namespace BigCityPerformance.People
             wages.m_HouseholdGroup = WithSleepers(entities, wages.m_HouseholdGroup);
             var tax = world.GetOrCreateSystemManaged<TaxSystem>();
             tax.m_ResidentialTaxPayerGroup = WithSleepers(entities, tax.m_ResidentialTaxPayerGroup);
+            // Before another city loads, the game's ClearSystem destroys the old one through a query that skips disabled
+            // entities: every sleeper survived it and woke into the next city, doubling its households (a player's log, 12
+            // November 2026). With sleepers matched, they go with the rest of the old city.
+            var clear = world.GetOrCreateSystemManaged<Game.Serialization.ClearSystem>();
+            clear.m_ClearQuery = WithSleepers(entities, clear.m_ClearQuery);
         }
 
         private static bool otherModsApplied;
