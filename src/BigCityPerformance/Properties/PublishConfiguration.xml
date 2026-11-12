@@ -16,7 +16,6 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - Job hunting and empty taxis search a few at a time while it's busy, everyone in turn.
 - **Rush hour is spread out**: workers leave across a few minutes instead of all in the same second. Nobody arrives later.
 - Service coverage is recalculated about once a minute instead of every few seconds.
-- Below 30 fps the game may run up to twice as many simulation steps per frame, so normal speed stays normal speed.
 
 **Limit the people simulated in detail** (on by default, the limit chosen for you)
 
@@ -28,9 +27,14 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - **A count in the population box**: while the city is bigger than the limit, the population box at the bottom of the screen also shows how many people are simulated in detail (959,129 | 48k AUTO). Hover it for the details, click it for the settings.
 - Cities smaller than the limit are not changed at all.
 
+**Run extra simulation steps** (off by default)
+
+- Below 30 fps the game can't run enough simulation steps to keep normal speed. This lets it run up to twice as many per frame: the simulation goes faster, but each frame takes longer.
+- Worth trying when your graphics card is the slow part. When your processor is, the frame rate can drop a lot: one player went from 30 fps to 9-12 for a quarter more simulation.
+
 ### Measured
 
-The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card:
+The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card, with Run extra simulation steps on:
 
 - Base game: **0.05x** normal speed
 - First speed button: **about 0.95x**, 17 to 25 fps
@@ -43,6 +47,7 @@ In a city this size the frame rate is mostly the graphics card: the mod simulate
 In Options, Big City Performance:
 
 - **Keep the clock running** (on)
+- **Run extra simulation steps** (off)
 - **Limit the people simulated in detail** (on)
 - **Choose the limit automatically** (on)
 - **Most people simulated in detail**, in thousands, for when the automatic limit is off (lower runs faster, higher puts more people on the streets)
@@ -68,6 +73,8 @@ Built for game version **1.6.***.
 - **Ultra Performance and Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
 - **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
+- **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
+- **MapExt** on a bigger map may show a CRITICAL CellMap conflict popup at start that lists every loaded mod, this one included. It appears when another mod switches off the game's happiness system (FiscalOverhaul does, to run its own copy of it), not because of this mod.
 - Other mods that change simulation speed or route-finding haven't been tested with it.
 
 ### Found a bug?
@@ -85,9 +92,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.1" />
+	<ModVersion Value="0.3.2" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- Takes back version 0.3.0. Its change to water and electricity made buildings flash no power, no water and sewage warnings, and the game could crash.&#10;- This version works as 0.2.4 did. The other 0.3.0 changes will come back one at a time, after longer testing." />
+	<ChangeLog Value="- New option, Run extra simulation steps, off by default. The extra steps per frame used to come with Keep the clock running; on computers where the processor is the slow part they cost far more frames than they gained. Turn it on if your graphics card is the slow part.&#10;- With FiscalOverhaul, sleeping households now pay residential tax: its tax engine counts them too." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

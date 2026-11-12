@@ -29,6 +29,10 @@ namespace BigCityPerformance.Settings
         [SettingsUISection(Section, Group)]
         public bool KeepClockRunning { get; set; }
 
+        /// <summary>Up to twice the game's simulation steps per frame below 30 fps (<see cref="Routes.StepBudget"/>).</summary>
+        [SettingsUISection(Section, Group)]
+        public bool ExtraSteps { get; set; }
+
         [SettingsUISection(Section, Group)]
         public bool LimitPeople { get; set; }
 
@@ -83,6 +87,9 @@ namespace BigCityPerformance.Settings
         public override void SetDefaults()
         {
             KeepClockRunning = true;
+            // Off: on a computer where the processor sets the pace, the extra steps cost far more frames than they gain
+            // (a player's report, 11 November 2026: 30 fps down to 9-12 for a quarter more simulation).
+            ExtraSteps = false;
             LimitPeople = true;
             AutoLimit = true;
             PeopleInDetail = 50;
@@ -101,7 +108,7 @@ namespace BigCityPerformance.Settings
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
                 [GetOptionGroupLocaleID(HelpGroup)] = words[nameof(HelpGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(ReportBug), nameof(Discord) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(ExtraSteps), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(ReportBug), nameof(Discord) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];

@@ -12,8 +12,10 @@ namespace BigCityPerformance.Routes
     /// The game runs at most two simulation steps per frame for each step of speed (two at 1x, four at 2x), so below 30 frames a
     /// second the clock can't keep up however little each step costs: at 22 fps a city ran at 0.64x on normal speed (test run,
     /// 7 November 2026). This doubles the limit. The game only runs the steps real time asks for (one per 60th of a second at
-    /// 1x), so above 30 fps nothing changes; below it the clock keeps time down to 15 fps. Big cities spend much of a frame
-    /// waiting for the graphics card, so the extra steps mostly use time the processor would have spent idle.
+    /// 1x), so above 30 fps nothing changes; below it the clock keeps time down to 15 fps. Where the graphics card sets the
+    /// pace, the extra steps mostly use time the processor would have spent idle. Where the processor does, every step makes
+    /// the frame longer: a player's city went from 30 fps to 9-12 for a quarter more simulation (11 November 2026). So it's
+    /// its own option, off by default.
     /// </summary>
     [HarmonyPatch(typeof(SimulationSystem), "OnUpdate")]
     internal static class StepBudget
@@ -47,7 +49,7 @@ namespace BigCityPerformance.Routes
         // frames the game ran, and stayed at 2 (test run, 7 November 2026).
         private static float StepsPerSpeed()
         {
-            Last = DevOff || Mod.Settings == null || !Mod.Settings.KeepClockRunning ? 2f : 4f;
+            Last = DevOff || Mod.Settings == null || !Mod.Settings.ExtraSteps ? 2f : 4f;
             return Last;
         }
     }

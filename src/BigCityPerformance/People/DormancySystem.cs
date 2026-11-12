@@ -319,6 +319,9 @@ namespace BigCityPerformance.People
             HoldClock = ready && Limit > 0;
             heldFrames = 0;
             sleepProbe = Entity.Null;
+            // Reflection on another mod's system: a failure is logged, never in the way of loading the city.
+            try { SleeperBookkeeping.ApplyToOtherMods(World); }
+            catch (System.Exception exception) { Mod.Logger.Error(exception, "Big City Performance: other mods' household queries failed"); }
             // A freshly loaded city has nobody asleep (saves are written awake); this also wakes anyone a save might still
             // hold asleep.
             WakeAll();
