@@ -58,9 +58,11 @@ namespace BigCityPerformance.People
             uint frame = simulation.frameIndex;
             bool running = simulation.selectedSpeed > 0f;
             // A jump in the clock (a city loaded) or a pause starts both windows over: paused time isn't slow time. A new speed
-            // starts the automatic limit's window over too: 19 s at 1x then 1 s at 2x would read as falling behind at 2x.
+            // starts the automatic limit's window over too: 19 s at 1x then 1 s at 2x would read as falling behind at 2x. So does a
+            // performance report while it measures: it slows the game on purpose.
             if (statusStart < 0f || frame < statusFrame) { statusStart = now; statusFrame = frame; }
-            if (!running || autoStart < 0f || frame < autoFrame || simulation.selectedSpeed != autoSpeed) StartAutoWindow(now, frame);
+            if (!running || autoStart < 0f || frame < autoFrame || simulation.selectedSpeed != autoSpeed || Diagnostics.PerformanceReport.Measuring)
+                StartAutoWindow(now, frame);
 
             if (now - statusStart >= 1f)
             {

@@ -119,9 +119,16 @@ namespace BigCityPerformance.Diagnostics
         /// <summary>The last report written, for the test runner.</summary>
         internal static string Last = "";
 
+        /// <summary>
+        /// True while a report measures. The automatic limit takes no decisions then: the second half slows the game on
+        /// purpose, and a cut made for that would change the work being measured and outlast the report (code review, 12
+        /// November 2026).
+        /// </summary>
+        internal static bool Measuring => phase != Phase.Idle;
+
         private enum Phase { Idle, MainThread, AllWork }
 
-        private Phase phase;
+        private static Phase phase;
         private float phaseStart;
         private uint stepStart;
         private int frameStart;
@@ -165,7 +172,7 @@ namespace BigCityPerformance.Diagnostics
                 frames = waitingFrames = timed = 0;
                 mainMs = gpuMs = 0;
                 Begin(Phase.MainThread);
-                Mod.Logger.Info($"Performance report: measuring for {2 * HalfSeconds / 60f:F0} minutes. Keep the city running; the report follows here.");
+                Mod.Logger.Info($"Performance report: measuring for {2 * HalfSeconds / 60f:F0} minutes; the last {HalfSeconds:F0} seconds run slower, while it times all of each system's work. Keep the city running; the report follows here.");
                 return;
             }
             if (phase == Phase.MainThread) Sample();
@@ -186,6 +193,32 @@ namespace BigCityPerformance.Diagnostics
             SystemTimes.Stop();
             phase = Phase.Idle;
             Write(allWork);
+        }
+
+        /// <summary>
+        /// A report under way when the city closes is dropped, and the timing patch comes off: finishing every system's jobs
+        /// inside it would slow the next city's loading (code review, 12 November 2026).
+        /// </summary>
+        private void Cancel()
+        {
+            SystemTimes.Stop();
+            if (phase == Phase.Idle) return;
+            phase = Phase.Idle;
+            Mod.Logger.Info("Performance report: stopped, the city closed before it finished.");
+        }
+
+        [Preserve]
+        protected override void OnGamePreload(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
+        {
+            base.OnGamePreload(purpose, mode);
+            Cancel();
+        }
+
+        [Preserve]
+        protected override void OnDestroy()
+        {
+            Cancel();
+            base.OnDestroy();
         }
 
         private void Begin(Phase next)
@@ -230,7 +263,7 @@ namespace BigCityPerformance.Diagnostics
                 $"City: {dormancy?.Population() ?? 0:N0} people, {dormancy?.Households ?? 0:N0} households ({dormancy?.SleepingHouseholds ?? 0:N0} asleep), "
                     + $"{buildings.CalculateEntityCount():N0} buildings, {companies.CalculateEntityCount():N0} companies, {kilometres:N0} km of road.",
                 speed <= 0f ? "Speed: the game was paused while it measured; the times below are for drawing only."
-                    : $"Speed: {speed:F2}x of normal on speed {simulation.selectedSpeed}, {fps:F0} fps, {stepsPerFrame:F1} simulation steps per frame, "
+                    : $"Speed (first {HalfSeconds:F0} seconds, before the slower half): {speed:F2}x of normal on speed {simulation.selectedSpeed}, {fps:F0} fps, {stepsPerFrame:F1} simulation steps per frame, "
                         + $"waiting on routes {waitingFrames / (float)Math.Max(1, frames):P0} of frames, {results.pendingRequestCount + setup.pendingRequestCount} route requests waiting.",
                 $"Pace: {pace}; {Environment.ProcessorCount} logical processors, {JobsUtility.JobWorkerCount} job workers.",
                 $"Settings: keep the clock running {(settings?.KeepClockRunning == true ? "on" : "off")}, extra simulation steps {(settings?.ExtraSteps == true ? "on" : "off")}, limit {limit}.",
