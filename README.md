@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.1-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.2-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -43,8 +43,6 @@ Two things, and neither is the frame rate.
   each worker a few minutes' head start of their own, so they leave across a window instead. Nobody arrives later.
 - Service coverage (how far each school, clinic or station reaches) is recalculated about once a minute instead of every
   few seconds. In a million-person city that recalculation was a quarter to a third of all route searches.
-- Below 30 frames a second, the game lets the clock run up to twice as many simulation steps per frame, so normal speed
-  stays normal speed.
 
 **Limit the people simulated in detail** (on by default, with the limit chosen automatically):
 
@@ -66,10 +64,17 @@ Two things, and neither is the frame rate.
   limit, the game speed, people waiting at stops); click it to open the settings.
 - Cities smaller than the limit are not changed at all.
 
+**Run extra simulation steps** (off by default):
+
+- Below 30 frames a second, the game can't run enough simulation steps to keep normal speed. This lets it run up to
+  twice as many per frame: the simulation goes faster, but each frame takes longer.
+- Worth trying when your graphics card is the slow part. When your processor is, the frame rate can drop a lot: one
+  player went from 30 frames a second to 9–12 for a quarter more simulation.
+
 ## Measured
 
 The "1 Million Population City" save (about 960,000 people), on a laptop with a four-core, eight-thread processor and an
-RTX 3050 laptop graphics card:
+RTX 3050 laptop graphics card, with Run extra simulation steps on:
 
 | | Game speed | Frames a second |
 |---|---|---|
@@ -88,6 +93,7 @@ Options → Big City Performance:
 | Setting | Default | What it does |
 |---|---|---|
 | Keep the clock running | On | Everything in the first list above |
+| Run extra simulation steps | Off | Up to twice the simulation steps per frame below 30 frames a second; costs frames |
 | Limit the people simulated in detail | On | Everything in the second list above |
 | Choose the limit automatically | On | The limit follows how your computer keeps up |
 | Most people simulated in detail (thousands) | 50 | When the automatic limit is off: lower runs faster, higher puts more people on the streets |
@@ -118,6 +124,12 @@ and Chinese (simplified and traditional).
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
 
 **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
+
+**FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
+
+**MapExt** on a bigger map may show a CRITICAL CellMap conflict popup at start that lists every loaded mod, this one
+included. It appears when another mod switches off the game's happiness system (FiscalOverhaul does, to run its own
+copy of it), not because of this mod.
 
 Other mods that change simulation speed or route-finding haven't been tested with it.
 

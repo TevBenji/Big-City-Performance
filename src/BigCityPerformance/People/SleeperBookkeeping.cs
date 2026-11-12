@@ -1,4 +1,5 @@
 // Big City Performance. Original work by TevBenji, 2026-11. GPL-3.0.
+using BigCityPerformance.Core;
 using Game.Simulation;
 using HarmonyLib;
 using Unity.Entities;
@@ -26,6 +27,32 @@ namespace BigCityPerformance.People
             wages.m_HouseholdGroup = WithSleepers(entities, wages.m_HouseholdGroup);
             var tax = world.GetOrCreateSystemManaged<TaxSystem>();
             tax.m_ResidentialTaxPayerGroup = WithSleepers(entities, tax.m_ResidentialTaxPayerGroup);
+        }
+
+        private static bool otherModsApplied;
+
+        /// <summary>
+        /// Once, when a city loads and every mod's systems exist: a mod that charges tax in place of the game's TaxSystem
+        /// (FiscalOverhaul's tax engine) has its own residential query, which skipped sleepers, so with both mods on they paid
+        /// no residential tax (a player's mod list, 11 November 2026). Its query gets the same copy as the game's.
+        /// </summary>
+        internal static void ApplyToOtherMods(World world)
+        {
+            if (otherModsApplied) return;
+            otherModsApplied = true;
+            foreach (var system in world.Systems)
+            {
+                var type = system.GetType();
+                if (!OtherModSystems.ChargesResidentialTax(type.Name)) continue;
+                var field = AccessTools.Field(type, "m_ResidentialTaxPayerGroup");
+                if (field == null || field.FieldType != typeof(EntityQuery))
+                {
+                    Mod.Logger.Warn($"{type.FullName} has no residential tax query where it used to: sleeping households pay it no residential tax.");
+                    continue;
+                }
+                field.SetValue(system, WithSleepers(world.EntityManager, (EntityQuery)field.GetValue(system)));
+                Mod.Logger.Info($"{type.FullName} charges sleeping households residential tax too.");
+            }
         }
 
         internal static EntityQuery WithSleepers(EntityManager entities, EntityQuery query)

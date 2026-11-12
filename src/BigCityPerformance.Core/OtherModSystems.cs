@@ -24,5 +24,8 @@ namespace BigCityPerformance.Core
 
         /// <summary>True for another mod's copy of the system that turns citizens into job seekers (MapExt and EconomyEX).</summary>
         public static bool StartsJobSearches(string className) => className == "CitizenFindJobSystemMod";
+
+        /// <summary>True for another mod's copy of the game's tax charge, with a residential query of its own (FiscalOverhaul).</summary>
+        public static bool ChargesResidentialTax(string className) => className == "TaxEngineSystem";
     }
 }
