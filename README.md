@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.2-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.3-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -62,6 +62,8 @@ Two things, and neither is the frame rate.
 - **A count in the population box.** While the city is bigger than the limit, the population box at the bottom of the
   screen also shows how many people are simulated in detail, like `959,129 | 48k AUTO`. Hover it for the details (the
   limit, the game speed, people waiting at stops); click it to open the settings.
+- While anyone sleeps, the city-wide counts of households, companies and homes (they feed demand and the statistics) run
+  one time in four, about once a second of play instead of four times. Sleepers don't change between counts.
 - Cities smaller than the limit are not changed at all.
 
 **Run extra simulation steps** (off by default):
@@ -98,6 +100,7 @@ Options → Big City Performance:
 | Choose the limit automatically | On | The limit follows how your computer keeps up |
 | Most people simulated in detail (thousands) | 50 | When the automatic limit is off: lower runs faster, higher puts more people on the streets |
 | Show it in the population box | On | The count of people in detail beside the population at the bottom of the screen |
+| Write a performance report | (button) | Measures for 3 minutes, then writes a short report to `BigCityPerformance.log`: see below |
 
 Under **Right now** the page shows what the mod is doing as you play: people simulated in detail out of the whole
 population, the game speed reached over the last few seconds (1 = normal), and how many people wait asleep at crowded
@@ -160,6 +163,11 @@ Questions and suggestions are welcome on the [forum thread](https://forum.parado
 Click **Report a bug** in Options → Big City Performance, or [open an issue](https://github.com/TevBenji/Big-City-Performance/issues). Add a screenshot and the log at
 `%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Logs\BigCityPerformance.log`. The mod writes a status
 line there every five minutes, so the log shows how the city was running.
+
+**If your city runs slowly**, press **Write a performance report** in Options → Big City Performance with the city running
+at normal speed and the camera where you usually play. After 3 minutes (the second half runs a little slower) the log gets
+a short report: the city's size, its speed and frame rate, whether the processor or the graphics card sets the pace, and
+the game's systems that take the most time, other mods' included. Paste it into Discord or the issue.
 
 ## Building from source
 

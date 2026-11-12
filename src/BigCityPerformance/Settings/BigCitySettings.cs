@@ -68,6 +68,11 @@ namespace BigCityPerformance.Settings
         [Exclude]
         [SettingsUIButton]
         [SettingsUISection(Section, HelpGroup)]
+        public bool WriteReport { set => Diagnostics.PerformanceReport.Requested = true; }
+
+        [Exclude]
+        [SettingsUIButton]
+        [SettingsUISection(Section, HelpGroup)]
         public bool ReportBug { set => UnityEngine.Application.OpenURL(BugReportAddress); }
 
         [Exclude]
@@ -108,7 +113,7 @@ namespace BigCityPerformance.Settings
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
                 [GetOptionGroupLocaleID(HelpGroup)] = words[nameof(HelpGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(ExtraSteps), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(ReportBug), nameof(Discord) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(ExtraSteps), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(WriteReport), nameof(ReportBug), nameof(Discord) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];

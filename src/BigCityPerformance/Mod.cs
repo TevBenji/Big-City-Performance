@@ -54,6 +54,7 @@ namespace BigCityPerformance
                 harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
                 harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
             });
+            Register("performance report", () => updateSystem.UpdateAt<Diagnostics.PerformanceReport>(SystemUpdatePhase.UIUpdate));
             Register("sleepers in saves", () =>
             {
                 harmony.CreateClassProcessor(typeof(People.SaveQueryPatch)).Patch();
@@ -68,6 +69,7 @@ namespace BigCityPerformance
         {
             Register("waking everyone", () => People.DormancySystem.Instance?.WakeAll());
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
+            Register("stopping a performance report", Diagnostics.SystemTimes.Stop);
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
             Settings = null;
         }
