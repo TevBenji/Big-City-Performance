@@ -40,6 +40,13 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - Turn it off again and pollution builds up as before, starting from a clean city.
 - Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it into the pipes.
 
+**Water pipes without the wait** (experimental, off by default)
+
+- Every two seconds or so the game works out how water flows through all your pipes, in the background. In a big city that work can fall behind, and then the whole game stops to wait for it: a hitch.
+- With this on, the game never waits. A late result is used a cycle later, and until then every building keeps the water it had, so new buildings and pipes can take a few seconds longer to get water.
+- On the three-million save, on a laptop short of memory, the frames where the water result came in took 7 seconds on average without it (up to 25), and a quarter of a second with it.
+- Experimental: if you see water or sewage warnings that look wrong, turn it off.
+
 ### Measured
 
 The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card, with Run extra simulation steps on:
@@ -60,6 +67,7 @@ In Options, Big City Performance:
 - **Choose the limit automatically** (on)
 - **Most people simulated in detail**, in thousands, for when the automatic limit is off (lower runs faster, higher puts more people on the streets)
 - **Turn off pollution** (off)
+- **Water pipes without the wait** (off, experimental)
 - **Show it in the population box** (on)
 - **Write a performance report**: a button. It measures for 3 minutes, then writes a short report to BigCityPerformance.log.
 
@@ -107,7 +115,7 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<Tag Value="Code Mod" />
 	<ModVersion Value="0.3.5" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- New option, off by default: Turn off pollution. Air, ground, noise and tap-water pollution stop and the pollution a city already has is cleared. It switches the game's own pollution systems off, so it costs nothing while you play, and it replaces the No Pollution mod, which cleans up after the game on every simulation step." />
+	<ChangeLog Value="- New option, off by default: Turn off pollution. Air, ground, noise and tap-water pollution stop and the pollution a city already has is cleared. It switches the game's own pollution systems off, so it costs nothing while you play, and it replaces the No Pollution mod, which cleans up after the game on every simulation step.&#10;- New option, experimental and off by default: Water pipes without the wait. In a big city the game's water calculation can fall behind, and the game stops to wait for it. With this on it never waits: a late result is used a cycle later." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

@@ -82,6 +82,16 @@ Two things, and neither is the frame rate.
 - Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it
   into the pipes.
 
+**Water pipes without the wait** (experimental, off by default):
+
+- Every two seconds or so the game works out how water flows through all your pipes, in the background. In a big city
+  that work can fall behind, and then the whole game stops to wait for it: a hitch.
+- With this on, the game never waits. A late result is used a cycle later, and until then every building keeps the water
+  it had, so new buildings and pipes can take a few seconds longer to get water.
+- On the three-million save, on a laptop short of memory, the frames where the water result came in took 7 seconds on
+  average without it (up to 25), and a quarter of a second with it.
+- Experimental: if you see water or sewage warnings that look wrong, turn it off.
+
 ## Measured
 
 The "1 Million Population City" save (about 960,000 people), on a laptop with a four-core, eight-thread processor and an
@@ -109,6 +119,7 @@ Options → Big City Performance:
 | Choose the limit automatically | On | The limit follows how your computer keeps up |
 | Most people simulated in detail (thousands) | 50 | When the automatic limit is off: lower runs faster, higher puts more people on the streets |
 | Turn off pollution | Off | Air, ground, noise and tap-water pollution stop, and existing pollution is cleared |
+| Water pipes without the wait (experimental) | Off | The game never stops to wait for the water network; a late result is used a cycle later |
 | Show it in the population box | On | The count of people in detail beside the population at the bottom of the screen |
 | Write a performance report | (button) | Measures for 3 minutes, then writes a short report to `BigCityPerformance.log`: see below |
 
