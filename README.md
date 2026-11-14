@@ -197,6 +197,10 @@ Click **Report a bug** in Options → Big City Performance, or [open an issue](h
 `%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Logs\BigCityPerformance.log`. The mod writes a status
 line there every five minutes, so the log shows how the city was running.
 
+**If your game crashed**, just start it again: the mod writes a short crash summary to the same log. It says when the
+game crashed, how long after the city loaded, where the game was, which of this mod's options were on and which mods were
+loaded. Send that log. It stays on your PC until you send it; the mod never uploads anything.
+
 **If your city runs slowly**, press **Write a performance report** in Options → Big City Performance with the city running
 at normal speed and the camera where you usually play. After 3 minutes (the second half runs a little slower) the log gets
 a short report: the city's size, its speed and frame rate, whether the processor or the graphics card sets the pace, and

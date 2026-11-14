@@ -31,6 +31,11 @@ namespace BigCityPerformance
                 Settings.RegisterInOptionsUI();
                 foreach (string locale in Translations.Locales) GameManager.instance.localizationManager.AddSource(locale, Settings.Labels(locale));
             });
+            Register("crash check", () =>
+            {
+                Diagnostics.CrashCheck.ReportLastSession();
+                updateSystem.UpdateAt<Diagnostics.CrashCheck>(SystemUpdatePhase.UIUpdate);
+            });
             Register("route deadlines", () =>
             {
                 updateSystem.UpdateAt<RouteDeadlineSystem>(SystemUpdatePhase.UIUpdate);

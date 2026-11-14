@@ -102,6 +102,8 @@ Built for game version **1.6.***.
 
 Click **Report a bug** in Options, Big City Performance, or open an issue on GitHub (link on this page). Add a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
 
+**If your game crashed**, just start it again: the mod writes a short crash summary to BigCityPerformance.log. It says when the game crashed, how long after the city loaded, where the game was, which of this mod's options were on and which mods were loaded. Send that log. It stays on your PC until you send it; the mod never uploads anything.
+
 **If your city runs slowly**, press **Write a performance report** in Options with the city running at normal speed. After 3 minutes the log gets a short report: the city's size, its speed and frame rate, whether the processor or the graphics card sets the pace, and the game's systems (other mods' included) that take the most time. Paste it into Discord.
 
 For questions and ideas, the **Discord** button in Options opens this mod's thread in the official Cities: Skylines Discord.
@@ -117,7 +119,7 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<Tag Value="Code Mod" />
 	<ModVersion Value="0.3.6" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- Fixed: with Placemaker, saves also kept its hidden helper areas, which came back broken and could crash the game after loading. Saves now keep only this mod's own sleeping households, as intended. Thanks to fengz1y for finding it.&#10;- Turn off pollution now says what to do if your game crashes after you turn it on: turn it off again and send your log." />
+	<ChangeLog Value="- Fixed: with Placemaker, saves also kept its hidden helper areas, which came back broken and could crash the game after loading. Saves now keep only this mod's own sleeping households, as intended. Thanks to fengz1y for finding it.&#10;- Turn off pollution now says what to do if your game crashes after you turn it on: turn it off again and send your log.&#10;- New: after a crash, the next start writes a short crash summary to BigCityPerformance.log (when, how long after the city loaded, where the game was, this mod's options and the mods loaded), so one log is enough for a bug report. Nothing is uploaded." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
