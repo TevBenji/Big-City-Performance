@@ -57,15 +57,16 @@ namespace BigCityPerformance.Services
             return true;
         }
 
-        // A result was applied at this cycle's step 62 and the next cycle hasn't started: its phase is back to Prepare.
-        private static bool Applied() => !Mod.Settings.WaterNoWait || flow == null || flow.m_NextPhase == WaterPipeFlowSystem.Phase.Prepare;
+        // A put-off result is still waiting for its step 62. Never true at the game's own pace, where the result is applied at
+        // step 62 before the dispatch runs, so the holds also cover a result put off just before the option was turned off.
+        private static bool Pending() => flow != null && flow.m_NextPhase == WaterPipeFlowSystem.Phase.Apply;
 
         [HarmonyPatch(typeof(DispatchWaterSystem), "OnUpdate")]
         [HarmonyPrefix]
-        private static bool Dispatch() => Applied();
+        private static bool Dispatch() => !Pending();
 
         [HarmonyPatch(typeof(AdjustWaterConsumptionSystem), "OnUpdate")]
         [HarmonyPrefix]
-        private static bool Consumption() => Applied();
+        private static bool Consumption() => !Pending();
     }
 }
