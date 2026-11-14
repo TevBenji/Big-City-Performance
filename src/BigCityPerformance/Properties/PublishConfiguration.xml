@@ -39,6 +39,7 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - It switches off the game's own pollution systems, so nothing runs in their place: it costs nothing while you play.
 - Turn it off again and pollution builds up as before, starting from a clean city.
 - Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it into the pipes.
+- If your game crashes after you turn it on, turn it off again and send your log (see Found a bug? below).
 
 **Water pipes without the wait** (experimental, off by default)
 
@@ -90,15 +91,18 @@ Built for game version **1.6.***.
 - **Service Coverage Stutter Fix** works, and the two help each other: it makes each coverage update cheaper, this mod runs them less often. On the current game version it shows its own warning popup at start: click Continue.
 - **Ultra Performance and Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
-- **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
+- **MapExt: Big Map, Economy and Performance** works: a player runs a 296,000-person city on a 57 km MapExt map with it. If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
 - **No Pollution** isn't needed with Turn off pollution on. It cleans up after the game on every simulation step, which costs time in a big city; this mod switches the work off instead. The two don't clash, and the log says so when both are loaded.
 - **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
+- **Placemaker** works. Before 0.3.6 a save made with this mod also kept the helper areas Placemaker hides and rebuilds at each load, and they came back broken: the game could crash when you moved the camera. Saves now keep only this mod's own sleepers. A city saved with an earlier version may still hold them; once they're cleaned up, they don't come back.
 - **MapExt** on a bigger map may show a CRITICAL CellMap conflict popup at start that lists every loaded mod, this one included. It appears when another mod switches off the game's happiness system (FiscalOverhaul does, to run its own copy of it), not because of this mod.
 - Other mods that change simulation speed or route-finding haven't been tested with it.
 
 ### Found a bug?
 
 Click **Report a bug** in Options, Big City Performance, or open an issue on GitHub (link on this page). Add a screenshot and your **BigCityPerformance.log**, from AppData\LocalLow\Colossal Order\Cities Skylines II\Logs. The mod writes a status line there every five minutes, so the log shows how your city was running.
+
+**If your game crashed**, just start it again: the mod writes a short crash summary to BigCityPerformance.log. It says when the game crashed, how long after the city loaded, where the game was, which of this mod's options were on and which mods were loaded. Send that log. It stays on your PC until you send it; the mod never uploads anything.
 
 **If your city runs slowly**, press **Write a performance report** in Options with the city running at normal speed. After 3 minutes the log gets a short report: the city's size, its speed and frame rate, whether the processor or the graphics card sets the pace, and the game's systems (other mods' included) that take the most time. Paste it into Discord.
 
@@ -113,9 +117,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.5" />
+	<ModVersion Value="0.3.6" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- New option, off by default: Turn off pollution. Air, ground, noise and tap-water pollution stop and the pollution a city already has is cleared. It switches the game's own pollution systems off, so it costs nothing while you play, and it replaces the No Pollution mod, which cleans up after the game on every simulation step.&#10;- New option, experimental and off by default: Water pipes without the wait. In a big city the game's water calculation can fall behind, and the game stops to wait for it. With this on it never waits: a late result is used a cycle later." />
+	<ChangeLog Value="- Fixed: with Placemaker, saves also kept its hidden helper areas, which came back broken and could crash the game after loading. Saves now keep only this mod's own sleeping households, as intended. Thanks to fengz1y for finding it.&#10;- Turn off pollution now says what to do if your game crashes after you turn it on: turn it off again and send your log.&#10;- New: after a crash, the next start writes a short crash summary to BigCityPerformance.log (when, how long after the city loaded, where the game was, this mod's options and the mods loaded), so one log is enough for a bug report. Nothing is uploaded." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

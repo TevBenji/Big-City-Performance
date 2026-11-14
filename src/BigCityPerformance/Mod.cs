@@ -31,6 +31,11 @@ namespace BigCityPerformance
                 Settings.RegisterInOptionsUI();
                 foreach (string locale in Translations.Locales) GameManager.instance.localizationManager.AddSource(locale, Settings.Labels(locale));
             });
+            Register("crash check", () =>
+            {
+                Diagnostics.CrashCheck.ReportLastSession();
+                updateSystem.UpdateAt<Diagnostics.CrashCheck>(SystemUpdatePhase.UIUpdate);
+            });
             Register("route deadlines", () =>
             {
                 updateSystem.UpdateAt<RouteDeadlineSystem>(SystemUpdatePhase.UIUpdate);
@@ -77,6 +82,7 @@ namespace BigCityPerformance
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("stopping a performance report", Diagnostics.SystemTimes.Stop);
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
+            Register("closing the crash check's diary", Diagnostics.CrashCheck.CloseSession);
             Settings = null;
         }
 

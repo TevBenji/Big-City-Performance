@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.5-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.6-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -81,6 +81,7 @@ Two things, and neither is the frame rate.
 - Turn it off again and pollution builds up as before, starting from a clean city.
 - Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it
   into the pipes.
+- If your game crashes after you turn it on, turn it off again and send your log (see [Found a bug?](#found-a-bug)).
 
 **Water pipes without the wait** (experimental, off by default):
 
@@ -147,13 +148,17 @@ and Chinese (simplified and traditional).
 - **Ultra Performance & Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
 
-**MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
+**MapExt: Big Map, Economy and Performance** works: a player runs a 296,000-person city on a 57 km MapExt map with it. If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
 
 **No Pollution** isn't needed with Turn off pollution on. It cleans up after the game on every simulation step, which
 costs time in a big city; this mod switches the work off instead. The two don't clash, and the log says so when both are
 loaded.
 
 **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
+
+**Placemaker** works. Before 0.3.6 a save made with this mod also kept the helper areas Placemaker hides and rebuilds at
+each load, and they came back broken: the game could crash when you moved the camera. Saves now keep only this mod's own
+sleepers. A city saved with an earlier version may still hold them; once they're cleaned up, they don't come back.
 
 **MapExt** on a bigger map may show a CRITICAL CellMap conflict popup at start that lists every loaded mod, this one
 included. It appears when another mod switches off the game's happiness system (FiscalOverhaul does, to run its own
@@ -163,7 +168,9 @@ Other mods that change simulation speed or route-finding haven't been tested wit
 
 ## Saves and removing the mod
 
-Sleeping households are written to a save as ordinary households, so nobody has to wake up for it. Every save is an
+Sleeping households are written to a save as ordinary households, so nobody has to wake up for it. Only this mod's own
+sleepers are written that way: anything another mod hides with the same tag stays out of the save, as it would without
+this mod. Every save is an
 ordinary save that loads without the mod. Removing the mod is safe at any time. With Turn off pollution on, a save holds
 a clean city; without the mod, pollution starts building up again from there.
 
@@ -189,6 +196,10 @@ Questions and suggestions are welcome on the [forum thread](https://forum.parado
 Click **Report a bug** in Options → Big City Performance, or [open an issue](https://github.com/TevBenji/Big-City-Performance/issues). Add a screenshot and the log at
 `%USERPROFILE%\AppData\LocalLow\Colossal Order\Cities Skylines II\Logs\BigCityPerformance.log`. The mod writes a status
 line there every five minutes, so the log shows how the city was running.
+
+**If your game crashed**, just start it again: the mod writes a short crash summary to the same log. It says when the
+game crashed, how long after the city loaded, where the game was, which of this mod's options were on and which mods were
+loaded. Send that log. It stays on your PC until you send it; the mod never uploads anything.
 
 **If your city runs slowly**, press **Write a performance report** in Options → Big City Performance with the city running
 at normal speed and the camera where you usually play. After 3 minutes (the second half runs a little slower) the log gets
