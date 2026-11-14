@@ -49,22 +49,37 @@ namespace BigCityPerformance.People
         /// A copy of a city-wide query that also matches this mod's sleepers, and no other disabled entity. Other mods hide their
         /// own entities with Disabled too: Placemaker keeps its helper areas out of saves that way and rebuilds them at each load.
         /// Saved anyway, they came back without their prefabs, and the game crashed creating from them (two players, 14
-        /// November 2026). The original stays as it was, with disabled entities left out, and one more description per sleeper
-        /// type adds the disabled entities of that type.
+        /// November 2026). The original stays as it was, with disabled entities left out, and one small description adds the
+        /// disabled entities of the sleeper types.
         /// </summary>
         internal static EntityQuery WithOwnSleepers(EntityManager entities, EntityQuery query)
         {
+            var originals = query.GetEntityQueryDescs();
             var descriptions = new List<EntityQueryDesc>();
-            foreach (var original in query.GetEntityQueryDescs())
+            // The same options on every description: the originals keep disabled entities out by naming the tag instead.
+            var options = EntityQueryOptions.IncludeDisabledEntities;
+            foreach (var original in originals) options |= original.Options;
+            foreach (var original in originals)
             {
-                var all = original.All ?? Array.Empty<ComponentType>();
                 var none = original.None ?? Array.Empty<ComponentType>();
-                // The same options on every description: the original keeps disabled entities out by naming the tag instead.
-                var options = original.Options | EntityQueryOptions.IncludeDisabledEntities;
-                descriptions.Add(new EntityQueryDesc { All = all, Any = original.Any, None = none.Append(ComponentType.ReadOnly<Disabled>()).ToArray(), Options = options });
-                foreach (var sleeper in SleeperTypes)
-                    descriptions.Add(new EntityQueryDesc { All = all.Append(ComponentType.ReadOnly<Disabled>()).Append(sleeper).ToArray(), Any = original.Any, None = none, Options = options });
+                descriptions.Add(new EntityQueryDesc
+                {
+                    All = original.All ?? Array.Empty<ComponentType>(),
+                    Any = original.Any ?? Array.Empty<ComponentType>(),
+                    None = none.Append(ComponentType.ReadOnly<Disabled>()).ToArray(),
+                    Options = options,
+                });
             }
+            // The sleepers without copying the original's types: the save's query lists every saved component type, hundreds,
+            // and copies of that for each sleeper type outgrew the space the game builds a query in (a load with 54 mods came
+            // up empty, 14 November 2026). Both city-wide queries match anything with a PrefabRef, which every sleeper has.
+            descriptions.Add(new EntityQueryDesc
+            {
+                All = new[] { ComponentType.ReadOnly<Disabled>() },
+                Any = SleeperTypes,
+                None = originals.SelectMany(original => original.None ?? Array.Empty<ComponentType>()).Distinct().ToArray(),
+                Options = options,
+            });
             return entities.CreateEntityQuery(descriptions.ToArray());
         }
 
