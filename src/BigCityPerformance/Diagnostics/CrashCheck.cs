@@ -74,17 +74,20 @@ namespace BigCityPerformance.Diagnostics
 
         private static string OnOff(bool on) => on ? "on" : "off";
 
-        // Every code mod the game loaded, by assembly name and version.
+        // Every code mod the game loaded, by assembly name and version, and any it couldn't load. Only real mods: the game also
+        // lists each library a mod ships (a dozen copies of Harmony in one test, 14 November 2026).
         private static string LoadedMods()
         {
             try
             {
-                var names = GameManager.instance.modManager.Where(mod => mod.isLoaded).Select(mod =>
+                var mods = GameManager.instance.modManager.Where(mod => mod.isValid).ToList();
+                var loaded = mods.Where(mod => mod.isLoaded && mod.instances.Count > 0).Select(mod =>
                 {
                     var name = new System.Reflection.AssemblyName(mod.assemblyFullName);
                     return $"{name.Name} {name.Version}";
-                }).OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToList();
-                return $"{names.Count}: {string.Join(", ", names)}";
+                }).Distinct().OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToList();
+                var failed = mods.Where(mod => mod.state > Game.Modding.ModManager.ModInfo.State.Disposed).Select(mod => $"{mod.name} ({mod.state})").ToList();
+                return $"{loaded.Count}: {string.Join(", ", loaded)}" + (failed.Count > 0 ? $"; failed to load: {string.Join(", ", failed)}" : "");
             }
             catch (Exception exception)
             {
