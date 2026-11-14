@@ -15,7 +15,7 @@ namespace BigCityPerformance.Core
     /// </summary>
     public static class CrashSummary
     {
-        public const string Started = "game started", CityLoaded = "city loaded", Options = "options:", Mods = "mods:";
+        public const string Started = "game started", CityLoaded = "city loaded", Options = "options:", Mods = "mods:", Closed = "game closed";
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -31,6 +31,7 @@ namespace BigCityPerformance.Core
 
             DateTime? loaded = null;
             string options = null, mods = null;
+            bool diaryClosed = false;
             foreach (var raw in (diary ?? "").Split('\n'))
             {
                 string line = raw.TrimEnd('\r');
@@ -41,7 +42,11 @@ namespace BigCityPerformance.Core
                 if (text.StartsWith(CityLoaded, StringComparison.Ordinal)) loaded = time;
                 else if (text.StartsWith(Options, StringComparison.Ordinal)) options = text.Substring(Options.Length).Trim();
                 else if (text.StartsWith(Mods, StringComparison.Ordinal)) mods = text.Substring(Mods.Length).Trim();
+                else if (text.StartsWith(Closed, StringComparison.Ordinal)) diaryClosed = true;
             }
+            // A diary whose session closed normally didn't crash: it's from an earlier run, and the crashed one ran without this
+            // mod (turned off, then on again). Its details would describe the wrong session.
+            if (diaryClosed) { loaded = null; options = null; mods = null; }
 
             var frames = Frames(previousPlayerLog);
             var summary = new StringBuilder();
@@ -51,10 +56,11 @@ namespace BigCityPerformance.Core
                 var after = crashTime - loaded.Value;
                 summary.Append(", ").Append((int)after.TotalMinutes).Append(" min ").Append(after.Seconds).Append(" s after the city loaded");
             }
-            else summary.Append(", before a city was loaded");
+            else if (!diaryClosed) summary.Append(", before a city was loaded");
             summary.Append(native ? " (a crash in the game's native code)." : ".");
             if (frames.Any(frame => frame.Contains("EntityCommandBuffer")))
                 summary.Append("\nWhere: while the game applied a batch of queued changes to the city. That is usually broken data from a mod or an asset reaching the game, more than a fault in the code that ran.");
+            if (diaryClosed) summary.Append("\nBig City Performance has no notes from that session, so it probably wasn't running then.");
             if (options != null) summary.Append("\nBig City Performance's options then: ").Append(options).Append('.');
             if (mods != null) summary.Append("\nMods loaded then: ").Append(mods).Append('.');
             if (frames.Count > 0) summary.Append("\nThe game's own report (Player-prev.log):\n  ").Append(string.Join("\n  ", frames));

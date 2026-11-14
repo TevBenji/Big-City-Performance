@@ -82,6 +82,7 @@ namespace BigCityPerformance
             Register("removing the patches", () => harmony?.UnpatchAll(HarmonyId));
             Register("stopping a performance report", Diagnostics.SystemTimes.Stop);
             Register("removing the settings", () => Settings?.UnregisterInOptionsUI());
+            Register("closing the crash check's diary", Diagnostics.CrashCheck.CloseSession);
             Settings = null;
         }
 

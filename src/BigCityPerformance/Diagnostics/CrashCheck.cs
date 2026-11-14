@@ -23,7 +23,7 @@ namespace BigCityPerformance.Diagnostics
 
         private string lastOptions;
         private float nextCheck;
-        private bool inCity, modsWritten;
+        private bool modsWritten;
 
         /// <summary>At mod load, before this session writes anything: the last session's summary if it crashed, then a new diary.</summary>
         internal static void ReportLastSession()
@@ -38,10 +38,20 @@ namespace BigCityPerformance.Diagnostics
             File.WriteAllText(Diary, CrashSummary.Line(DateTime.Now, $"{CrashSummary.Started}, Big City Performance {typeof(Mod).Assembly.GetName().Version}") + "\n");
         }
 
+        /// <summary>At a normal exit: a diary that says so never describes a crash (see <see cref="CrashSummary.Build"/>).</summary>
+        internal static void CloseSession() => Write(CrashSummary.Closed);
+
         [Preserve]
         protected override void OnUpdate()
         {
-            if (!inCity || UnityEngine.Time.realtimeSinceStartup < nextCheck) return;
+            // From the first update, in the main menu, so a crash there or while the first city loads still has them; every mod
+            // has loaded by then.
+            if (!modsWritten)
+            {
+                modsWritten = true;
+                Write($"{CrashSummary.Mods} {LoadedMods()}");
+            }
+            if (UnityEngine.Time.realtimeSinceStartup < nextCheck) return;
             nextCheck = UnityEngine.Time.realtimeSinceStartup + CheckSeconds;
             string options = OptionsNow();
             if (options == lastOptions) return;
@@ -53,14 +63,10 @@ namespace BigCityPerformance.Diagnostics
         protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
-            inCity = mode == GameMode.Game;
-            if (!inCity) return;
+            if (mode != GameMode.Game) return;
             Write(CrashSummary.CityLoaded);
             lastOptions = OptionsNow();
             Write($"{CrashSummary.Options} {lastOptions}");
-            if (modsWritten) return;
-            modsWritten = true;
-            Write($"{CrashSummary.Mods} {LoadedMods()}");
         }
 
         private static string OptionsNow()
