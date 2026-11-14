@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.4-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.5-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -73,6 +73,15 @@ Two things, and neither is the frame rate.
 - Worth trying when your graphics card is the slow part. When your processor is, the frame rate can drop a lot: one
   player went from 30 frames a second to 9–12 for a quarter more simulation.
 
+**Turn off pollution** (off by default):
+
+- Air, ground, noise and tap-water pollution stop, and the pollution your city already has is cleared. Happiness,
+  health, land value and rent see a clean city.
+- It switches off the game's own pollution systems, so nothing runs in their place: it costs nothing while you play.
+- Turn it off again and pollution builds up as before, starting from a clean city.
+- Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it
+  into the pipes.
+
 ## Measured
 
 The "1 Million Population City" save (about 960,000 people), on a laptop with a four-core, eight-thread processor and an
@@ -99,6 +108,7 @@ Options → Big City Performance:
 | Limit the people simulated in detail | On | Everything in the second list above |
 | Choose the limit automatically | On | The limit follows how your computer keeps up |
 | Most people simulated in detail (thousands) | 50 | When the automatic limit is off: lower runs faster, higher puts more people on the streets |
+| Turn off pollution | Off | Air, ground, noise and tap-water pollution stop, and existing pollution is cleared |
 | Show it in the population box | On | The count of people in detail beside the population at the bottom of the screen |
 | Write a performance report | (button) | Measures for 3 minutes, then writes a short report to `BigCityPerformance.log`: see below |
 
@@ -126,7 +136,11 @@ and Chinese (simplified and traditional).
 - **Ultra Performance & Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
 
-**MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
+**MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
+
+**No Pollution** isn't needed with Turn off pollution on. It cleans up after the game on every simulation step, which
+costs time in a big city; this mod switches the work off instead. The two don't clash, and the log says so when both are
+loaded.
 
 **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
 
@@ -139,7 +153,8 @@ Other mods that change simulation speed or route-finding haven't been tested wit
 ## Saves and removing the mod
 
 Sleeping households are written to a save as ordinary households, so nobody has to wake up for it. Every save is an
-ordinary save that loads without the mod. Removing the mod is safe at any time.
+ordinary save that loads without the mod. Removing the mod is safe at any time. With Turn off pollution on, a save holds
+a clean city; without the mod, pollution starts building up again from there.
 
 ## How it works
 

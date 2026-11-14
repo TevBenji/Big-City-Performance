@@ -46,6 +46,10 @@ namespace BigCityPerformance.Settings
         [SettingsUIDisableByCondition(typeof(BigCitySettings), nameof(LimitChosenForYou))]
         public int PeopleInDetail { get; set; }
 
+        /// <summary>The game's pollution systems switched off and its pollution cleared (<see cref="Services.PollutionSwitch"/>).</summary>
+        [SettingsUISection(Section, Group)]
+        public bool TurnOffPollution { get; set; }
+
         /// <summary>The count beside the population at the bottom of the screen.</summary>
         [SettingsUISection(Section, StatusGroup)]
         public bool ShowOnScreen { get; set; }
@@ -99,6 +103,7 @@ namespace BigCityPerformance.Settings
             AutoLimit = true;
             PeopleInDetail = 50;
             ShowOnScreen = true;
+            TurnOffPollution = false;
         }
 
         /// <summary>The Options page's words in one language (English for any it doesn't have): without them it shows raw ids.</summary>
@@ -113,7 +118,7 @@ namespace BigCityPerformance.Settings
                 [GetOptionGroupLocaleID(StatusGroup)] = words[nameof(StatusGroup)],
                 [GetOptionGroupLocaleID(HelpGroup)] = words[nameof(HelpGroup)],
             };
-            foreach (string name in new[] { nameof(KeepClockRunning), nameof(ExtraSteps), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(WriteReport), nameof(ReportBug), nameof(Discord) })
+            foreach (string name in new[] { nameof(KeepClockRunning), nameof(ExtraSteps), nameof(LimitPeople), nameof(AutoLimit), nameof(PeopleInDetail), nameof(TurnOffPollution), nameof(ShowOnScreen), nameof(StatusPeople), nameof(StatusSpeed), nameof(StatusStops), nameof(WriteReport), nameof(ReportBug), nameof(Discord) })
             {
                 labels[GetOptionLabelLocaleID(name)] = words[name];
                 labels[GetOptionDescLocaleID(name)] = words[name + ".Desc"];

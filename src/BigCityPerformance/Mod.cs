@@ -54,6 +54,11 @@ namespace BigCityPerformance
                 harmony.CreateClassProcessor(typeof(People.CountPace)).Patch();
                 harmony.CreateClassProcessor(typeof(People.ShopTwin)).Patch();
             });
+            Register("turning off pollution", () =>
+            {
+                updateSystem.UpdateAt<Services.PollutionSwitch>(SystemUpdatePhase.UIUpdate);
+                harmony.CreateClassProcessor(typeof(Services.PollutionSavePatch)).Patch();
+            });
             Register("performance report", () => updateSystem.UpdateAt<Diagnostics.PerformanceReport>(SystemUpdatePhase.UIUpdate));
             Register("sleepers in saves", () =>
             {
