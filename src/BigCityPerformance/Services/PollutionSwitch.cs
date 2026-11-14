@@ -84,8 +84,9 @@ namespace BigCityPerformance.Services
             base.OnGameLoadingComplete(purpose, mode);
             // The main menu and the editors switch it back on.
             inCity = mode == GameMode.Game;
-            // A save carries its city's pollution.
+            // A save carries its city's pollution. Another mod may have added its copies since the last city.
             clearOwed = true;
+            makers = null;
             if (inCity && !noPollutionChecked)
             {
                 noPollutionChecked = true;
@@ -109,6 +110,9 @@ namespace BigCityPerformance.Services
             var found = new List<ComponentSystemBase>();
             foreach (var system in World.Systems)
                 if (Makers.Contains(system.GetType().Name)) found.Add(system);
+            // The game's own system is left alone where MapExt runs a copy: MapExt keeps it off, and turning pollution back on
+            // must never start it beside the copy.
+            found.RemoveAll(system => found.Exists(copy => copy.GetType().Name == system.GetType().Name + "Mod"));
             Mod.Logger.Info("Pollution switched off: " + string.Join(", ", found.ConvertAll(system => system.GetType().Name)));
             return found;
         }

@@ -33,6 +33,13 @@ A city of a million people in the base game runs at about a twentieth of normal 
 - Below 30 fps the game can't run enough simulation steps to keep normal speed. This lets it run up to twice as many per frame: the simulation goes faster, but each frame takes longer.
 - Worth trying when your graphics card is the slow part. When your processor is, the frame rate can drop a lot: one player went from 30 fps to 9-12 for a quarter more simulation.
 
+**Turn off pollution** (off by default)
+
+- Air, ground, noise and tap-water pollution stop, and the pollution your city already has is cleared. Happiness, health, land value and rent see a clean city.
+- It switches off the game's own pollution systems, so nothing runs in their place: it costs nothing while you play.
+- Turn it off again and pollution builds up as before, starting from a clean city.
+- Water near sewage outlets still looks dirty (the game works that out on the graphics card), but pumps don't pass it into the pipes.
+
 ### Measured
 
 The "1 Million Population City" save (about 960,000 people) on a laptop with a four-core processor and an RTX 3050 laptop graphics card, with Run extra simulation steps on:
@@ -52,6 +59,7 @@ In Options, Big City Performance:
 - **Limit the people simulated in detail** (on)
 - **Choose the limit automatically** (on)
 - **Most people simulated in detail**, in thousands, for when the automatic limit is off (lower runs faster, higher puts more people on the streets)
+- **Turn off pollution** (off)
 - **Show it in the population box** (on)
 - **Write a performance report**: a button. It measures for 3 minutes, then writes a short report to BigCityPerformance.log.
 
@@ -74,7 +82,8 @@ Built for game version **1.6.***.
 - **Service Coverage Stutter Fix** works, and the two help each other: it makes each coverage update cheaper, this mod runs them less often. On the current game version it shows its own warning popup at start: click Continue.
 - **Ultra Performance and Simulation Booster** overlaps with this mod. Turn off its Pathfind Queue Unchoker, and its Optimize Parking too: a bug there opens an error popup that pauses the game.
 - Don't run Ultra Performance and the Stutter Fix together. They clash with each other and show an error popup at every start.
-- **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop.
+- **MapExt: Big Map, Economy and Performance** should work (read from its code, not tested in the game). If you turn on its resource buyer option, sleepers' shopping and the slower coverage updates stop. Turn off pollution switches off MapExt's own pollution systems too, and turns only those back on.
+- **No Pollution** isn't needed with Turn off pollution on. It cleans up after the game on every simulation step, which costs time in a big city; this mod switches the work off instead. The two don't clash, and the log says so when both are loaded.
 - **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
 - **MapExt** on a bigger map may show a CRITICAL CellMap conflict popup at start that lists every loaded mod, this one included. It appears when another mod switches off the game's happiness system (FiscalOverhaul does, to run its own copy of it), not because of this mod.
 - Other mods that change simulation speed or route-finding haven't been tested with it.
@@ -96,9 +105,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.4" />
+	<ModVersion Value="0.3.5" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- Fixes loading a second city without restarting the game: the households asleep in the first city survived the game's clear and woke up in the new one, so its households and population went up by about the number that had been asleep. The game now clears them with the rest of the old city.&#10;- A save made after that happened holds the extra households. If your population jumped after loading a city, load a save from before.&#10;- Anyone still asleep when a city finishes loading is removed, never woken, with a warning in BigCityPerformance.log." />
+	<ChangeLog Value="- New option, off by default: Turn off pollution. Air, ground, noise and tap-water pollution stop and the pollution a city already has is cleared. It switches the game's own pollution systems off, so it costs nothing while you play, and it replaces the No Pollution mod, which cleans up after the game on every simulation step." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
