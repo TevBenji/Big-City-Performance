@@ -59,6 +59,7 @@ namespace BigCityPerformance
                 updateSystem.UpdateAt<Services.PollutionSwitch>(SystemUpdatePhase.UIUpdate);
                 harmony.CreateClassProcessor(typeof(Services.PollutionSavePatch)).Patch();
             });
+            Register("water pipes", () => harmony.CreateClassProcessor(typeof(Services.WaterPace)).Patch());
             Register("performance report", () => updateSystem.UpdateAt<Diagnostics.PerformanceReport>(SystemUpdatePhase.UIUpdate));
             Register("sleepers in saves", () =>
             {
