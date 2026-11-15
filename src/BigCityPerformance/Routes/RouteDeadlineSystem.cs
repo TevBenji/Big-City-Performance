@@ -154,6 +154,7 @@ namespace BigCityPerformance.Routes
     /// - TaxiDispatchSystem sends empty taxis looking for passengers across the map (about a fifth once job hunting is throttled).
     /// Single updates run, spread out (<see cref="ThrottlePolicy.Stride"/>), each serving one slice of citizens, and every slice
     /// gets its turn: nobody is skipped more than anyone else, everyone just looks less often while the route-finder is behind.
+    /// Job hunting is never slowed past <see cref="ThrottlePolicy.JobStrideMost"/>, so open jobs keep getting filled.
     /// </summary>
     internal static class SearchThrottle
     {
@@ -191,7 +192,8 @@ namespace BigCityPerformance.Routes
             var type = __instance.GetType();
             if (!Intervals.TryGetValue(type, out uint frames))
                 Intervals[type] = frames = (uint)System.Math.Max(1, __instance.GetUpdateInterval(SystemUpdatePhase.GameSimulation));
-            return throttle.Runs(RouteDeadlineSystem.FrameIndex / frames);
+            long update = RouteDeadlineSystem.FrameIndex / frames;
+            return __instance is TaxiDispatchSystem ? throttle.Runs(update) : throttle.Runs(update, ThrottlePolicy.JobStrideMost);
         }
     }
 }

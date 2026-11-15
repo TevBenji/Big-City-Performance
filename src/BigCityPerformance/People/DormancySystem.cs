@@ -192,7 +192,7 @@ namespace BigCityPerformance.People
                         if (sleepingSet.Contains(household)) continue;
                         var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
                         walkers.Clear();
-                        if (!AllAtHomeOrOnFoot(members, walkers)) continue;
+                        if (!AllAtHomeOrOnFoot(members, walkers) || HasAdultLearner(members)) continue;
                         batch.Add(household);
                         for (int at = 0; at < members.Length; at++) batch.Add(members[at].m_Citizen);
                         batch.AddRange(walkers);
@@ -291,6 +291,23 @@ namespace BigCityPerformance.People
                 walkers.Add(walker);
             }
             return true;
+        }
+
+        /// <summary>
+        /// True if a member is an adult at elementary school, which the game never does by itself: Adult Basic Education's learners.
+        /// That mod follows its learners through a query that can't see sleepers, so one asleep looked to it like one who had
+        /// left school (a player's 3-million city, 15 November 2026).
+        /// </summary>
+        private bool HasAdultLearner(DynamicBuffer<HouseholdCitizen> members)
+        {
+            for (int at = 0; at < members.Length; at++)
+            {
+                var citizen = members[at].m_Citizen;
+                if (!EntityManager.HasComponent<Game.Citizens.Student>(citizen) || EntityManager.GetComponentData<Game.Citizens.Student>(citizen).m_Level != 1) continue;
+                var age = EntityManager.GetComponentData<Citizen>(citizen).GetAge();
+                if (age == CitizenAge.Adult || age == CitizenAge.Elderly) return true;
+            }
+            return false;
         }
 
         /// <summary>Everyone awake: when the setting goes back up, when the mod unloads, or before a save if its patch failed.</summary>

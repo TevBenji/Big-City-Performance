@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.8-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.9-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -38,7 +38,8 @@ Two things, and neither is the frame rate.
 - When the route-finder falls behind, new route requests get more time instead of the clock stopping. People set off a
   moment later; the city keeps moving. Emergency services, transit and service vehicles keep the game's own deadlines.
 - While it's behind, citizens look for new jobs, and empty taxis look for passengers, less often until it catches up:
-  a few at a time, everyone in turn, never all at once.
+  a few at a time, everyone in turn, never all at once. Job hunting never drops below a fifth of its usual pace, so open
+  jobs keep getting filled in a city that stays behind.
 - Rush hour is spread out. The game sends everyone who starts work at the same hour off in the same second; the mod gives
   each worker a few minutes' head start of their own, so they leave across a window instead. Nobody arrives later.
 - Service coverage (how far each school, clinic or station reaches) is recalculated about once a minute instead of every
@@ -156,6 +157,9 @@ costs time in a big city; this mod switches the work off instead. The two don't 
 loaded.
 
 **FiscalOverhaul** works: its tax engine charges sleeping households residential tax too.
+
+**Adult Basic Education** works from 0.3.9: its counts of the city's adults include sleeping households, and its adult
+learners stay awake while they study. Before, its stats came out far too low with the people limit on.
 
 **Placemaker** works. Before 0.3.6 a save made with this mod also kept the helper areas Placemaker hides and rebuilds at
 each load, and they came back broken: the game could crash when you moved the camera. Saves now keep only this mod's own

@@ -25,7 +25,18 @@ namespace BigCityPerformance.Core
         /// <summary>True for another mod's copy of the system that turns citizens into job seekers (MapExt and EconomyEX).</summary>
         public static bool StartsJobSearches(string className) => className == "CitizenFindJobSystemMod";
 
-        /// <summary>True for another mod's copy of the game's tax charge, with a residential query of its own (FiscalOverhaul).</summary>
-        public static bool ChargesResidentialTax(string className) => className == "TaxEngineSystem";
+        // Queries in other mods' systems that have to see sleepers too, by class name: the field that holds each.
+        private static readonly Dictionary<string, string> SleeperQueries = new Dictionary<string, string>
+        {
+            // FiscalOverhaul: its own residential tax, in place of the game's.
+            ["TaxEngineSystem"] = "m_ResidentialTaxPayerGroup",
+            // Adult Basic Education: its counts of the city's adults, and where its graduates are six months on.
+            ["AdultEducationSystem"] = "m_AllCitizensQuery",
+            // Adult Basic Education: the city report it writes to its log.
+            ["AdultEducationScanSystem"] = "m_CitizenQuery",
+        };
+
+        /// <summary>The field of another mod's query that has to count sleepers too, or null.</summary>
+        public static string QueryCountingSleepers(string className) => SleeperQueries.TryGetValue(className, out var field) ? field : null;
     }
 }
