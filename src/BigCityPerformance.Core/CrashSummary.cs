@@ -19,11 +19,14 @@ namespace BigCityPerformance.Core
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
 
-        // The game writes a few lines after the mods close (memory statistics), seconds, not minutes.
-        private const double SameSessionMinutes = 2;
-
         /// <summary>One diary line: the local time, then what happened.</summary>
         public static string Line(DateTime time, string text) => time.ToString(TimeFormat, CultureInfo.InvariantCulture) + " " + text;
+
+        /// <summary>
+        /// The line a session writes to the game's own log as it starts, with the time its diary starts at, so the next start can
+        /// tell whether the diary belongs to the session that log describes.
+        /// </summary>
+        public static string Mark(DateTime started) => "Big City Performance session " + started.ToString(TimeFormat, CultureInfo.InvariantCulture);
 
         /// <summary>The summary to log, or null if the previous session didn't crash.</summary>
         public static string Build(string previousPlayerLog, DateTime crashTime, string diary)
@@ -32,8 +35,9 @@ namespace BigCityPerformance.Core
             bool native = previousPlayerLog.Contains("Native Crash Reporting");
             if (!native && !previousPlayerLog.Contains("Crash!!!")) return null;
 
-            DateTime? loaded = null, closed = null;
+            DateTime? started = null, loaded = null;
             string options = null, mods = null;
+            bool closed = false;
             foreach (var raw in (diary ?? "").Split('\n'))
             {
                 string line = raw.TrimEnd('\r');
@@ -41,20 +45,19 @@ namespace BigCityPerformance.Core
                     || !DateTime.TryParseExact(line.Substring(0, TimeFormat.Length), TimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
                     continue;
                 string text = line.Substring(TimeFormat.Length + 1);
-                // Read even a moment past the log's last write: the game's last lines and this one can share a second.
-                if (text.StartsWith(Closed, StringComparison.Ordinal)) closed = time;
-                if (time > crashTime) continue;
-                if (text.StartsWith(CityLoaded, StringComparison.Ordinal)) loaded = time;
+                if (text.StartsWith(Started, StringComparison.Ordinal)) started = started ?? time;
+                else if (text.StartsWith(CityLoaded, StringComparison.Ordinal)) loaded = time;
                 else if (text.StartsWith(Options, StringComparison.Ordinal)) options = text.Substring(Options.Length).Trim();
                 else if (text.StartsWith(Mods, StringComparison.Ordinal)) mods = text.Substring(Mods.Length).Trim();
+                else if (text.StartsWith(Closed, StringComparison.Ordinal)) closed = true;
             }
+            // The diary describes the crashed session only if that session's log carries its mark: the mod may have been off
+            // then, and the diary left from an earlier run.
+            bool ours = started.HasValue && previousPlayerLog.Contains(Mark(started.Value));
             // The game can write a crash report and carry on (14 November 2026: one at start-up, while it set up its entity
-            // types). If the diary closed normally as the log stopped, it's that session, and it didn't crash.
-            if (closed.HasValue && Math.Abs((crashTime - closed.Value).TotalMinutes) < SameSessionMinutes) return null;
-            // A diary that closed normally long before the log stopped is from an earlier run, and the crashed one ran without
-            // this mod (turned off, then on again). Its details would describe the wrong session.
-            bool diaryClosed = closed.HasValue;
-            if (diaryClosed) { loaded = null; options = null; mods = null; }
+            // types). A session that then closed normally didn't crash.
+            if (ours && closed) return null;
+            if (!ours) { loaded = null; options = null; mods = null; }
 
             var frames = Frames(previousPlayerLog);
             var summary = new StringBuilder();
@@ -64,11 +67,11 @@ namespace BigCityPerformance.Core
                 var after = crashTime - loaded.Value;
                 summary.Append(", ").Append((int)after.TotalMinutes).Append(" min ").Append(after.Seconds).Append(" s after the city loaded");
             }
-            else if (!diaryClosed) summary.Append(", before a city was loaded");
+            else if (ours) summary.Append(", before a city was loaded");
             summary.Append(native ? " (a crash in the game's native code)." : ".");
             if (frames.Any(frame => frame.Contains("EntityCommandBuffer")))
                 summary.Append("\nWhere: while the game applied a batch of queued changes to the city. That is usually broken data from a mod or an asset reaching the game, more than a fault in the code that ran.");
-            if (diaryClosed) summary.Append("\nBig City Performance has no notes from that session, so it probably wasn't running then.");
+            if (!ours) summary.Append("\nBig City Performance has no notes from that session: it wasn't running then, or it was a version before 0.3.7.");
             if (options != null) summary.Append("\nBig City Performance's options then: ").Append(options).Append('.');
             if (mods != null) summary.Append("\nMods loaded then: ").Append(mods).Append('.');
             if (frames.Count > 0) summary.Append("\nThe game's own report (Player-prev.log):\n  ").Append(string.Join("\n  ", frames));
