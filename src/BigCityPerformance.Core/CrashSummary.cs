@@ -19,6 +19,9 @@ namespace BigCityPerformance.Core
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
 
+        // The game writes a few lines after the mods close (memory statistics), seconds, not minutes.
+        private const double SameSessionMinutes = 2;
+
         /// <summary>One diary line: the local time, then what happened.</summary>
         public static string Line(DateTime time, string text) => time.ToString(TimeFormat, CultureInfo.InvariantCulture) + " " + text;
 
@@ -29,23 +32,28 @@ namespace BigCityPerformance.Core
             bool native = previousPlayerLog.Contains("Native Crash Reporting");
             if (!native && !previousPlayerLog.Contains("Crash!!!")) return null;
 
-            DateTime? loaded = null;
+            DateTime? loaded = null, closed = null;
             string options = null, mods = null;
-            bool diaryClosed = false;
             foreach (var raw in (diary ?? "").Split('\n'))
             {
                 string line = raw.TrimEnd('\r');
                 if (line.Length <= TimeFormat.Length
-                    || !DateTime.TryParseExact(line.Substring(0, TimeFormat.Length), TimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
-                    || time > crashTime) continue;
+                    || !DateTime.TryParseExact(line.Substring(0, TimeFormat.Length), TimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
+                    continue;
                 string text = line.Substring(TimeFormat.Length + 1);
+                // Read even a moment past the log's last write: the game's last lines and this one can share a second.
+                if (text.StartsWith(Closed, StringComparison.Ordinal)) closed = time;
+                if (time > crashTime) continue;
                 if (text.StartsWith(CityLoaded, StringComparison.Ordinal)) loaded = time;
                 else if (text.StartsWith(Options, StringComparison.Ordinal)) options = text.Substring(Options.Length).Trim();
                 else if (text.StartsWith(Mods, StringComparison.Ordinal)) mods = text.Substring(Mods.Length).Trim();
-                else if (text.StartsWith(Closed, StringComparison.Ordinal)) diaryClosed = true;
             }
-            // A diary whose session closed normally didn't crash: it's from an earlier run, and the crashed one ran without this
-            // mod (turned off, then on again). Its details would describe the wrong session.
+            // The game can write a crash report and carry on (14 November 2026: one at start-up, while it set up its entity
+            // types). If the diary closed normally as the log stopped, it's that session, and it didn't crash.
+            if (closed.HasValue && Math.Abs((crashTime - closed.Value).TotalMinutes) < SameSessionMinutes) return null;
+            // A diary that closed normally long before the log stopped is from an earlier run, and the crashed one ran without
+            // this mod (turned off, then on again). Its details would describe the wrong session.
+            bool diaryClosed = closed.HasValue;
             if (diaryClosed) { loaded = null; options = null; mods = null; }
 
             var frames = Frames(previousPlayerLog);
