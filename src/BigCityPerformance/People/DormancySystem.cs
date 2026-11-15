@@ -23,8 +23,8 @@ namespace BigCityPerformance.People
     /// some 20 times faster than without (test runs, 7 November 2026).
     ///
     /// Households go to sleep as their travellers get home; members out on foot sleep where they stand, with their walker.
-    /// Anyone riding or waiting for transport keeps the household awake, so no vehicle or stop waits for someone who isn't
-    /// there. Saves stay ordinary and load without the mod: sleepers are written as ordinary households (<see cref="SaveQueryPatch"/>).
+    /// Anyone riding or waiting for transport, a taxi hailed at the kerb included, keeps the household awake, so no vehicle or
+    /// stop waits for someone who isn't there. Saves stay ordinary and load without the mod: sleepers are written as ordinary households (<see cref="SaveQueryPatch"/>).
     ///
     /// The game's own counts, wages and residential tax still cover sleepers (<see cref="SleeperBookkeeping"/>).
     ///
@@ -110,8 +110,9 @@ namespace BigCityPerformance.People
             simulation = World.GetOrCreateSystemManaged<SimulationSystem>();
             households = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<PropertyRenter>(), ComponentType.ReadOnly<HouseholdCitizen>(),
                 ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
+            // Not someone who has hailed a taxi: the taxi they called waits for them in particular (see AllAtHomeOrOnFoot).
             waiting = GetEntityQuery(ComponentType.ReadOnly<Human>(), ComponentType.ReadOnly<Resident>(), ComponentType.ReadOnly<HumanCurrentLane>(),
-                ComponentType.Exclude<CurrentVehicle>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
+                ComponentType.Exclude<CurrentVehicle>(), ComponentType.Exclude<RideNeeder>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
             asleep = GetEntityQuery(new EntityQueryDesc
             {
                 All = new[] { ComponentType.ReadOnly<Disabled>() },
@@ -270,6 +271,11 @@ namespace BigCityPerformance.People
         }
 
         /// <summary>True when every member is home or out on foot (their walkers listed); false if anyone rides or waits for transport.</summary>
+        /// <remarks>
+        /// Someone who hails a taxi at the kerb has a ride request but no waiting flag, and steps along the kerb to meet the taxi.
+        /// Put to sleep then, the taxi came and waited for them until their next turn awake, blocking the road (a player's report, 21
+        /// taxis in two saves, 15 November 2026). The game keeps a dispatched taxi waiting for as long as its fare holds the request.
+        /// </remarks>
         private bool AllAtHomeOrOnFoot(DynamicBuffer<HouseholdCitizen> members, List<Entity> walkers)
         {
             for (int at = 0; at < members.Length; at++)
@@ -279,7 +285,7 @@ namespace BigCityPerformance.People
                 var walker = EntityManager.GetComponentData<CurrentTransport>(citizen).m_CurrentTransport;
                 if (!EntityManager.Exists(walker) || !EntityManager.HasComponent<Human>(walker) || !EntityManager.HasComponent<Resident>(walker)) return false;
                 var flags = EntityManager.GetComponentData<Resident>(walker).m_Flags;
-                if (EntityManager.HasComponent<CurrentVehicle>(walker)
+                if (EntityManager.HasComponent<CurrentVehicle>(walker) || EntityManager.HasComponent<RideNeeder>(walker)
                     || (flags & (ResidentFlags.InVehicle | ResidentFlags.WaitingTransport | ResidentFlags.Disembarking)) != 0
                     || (EntityManager.GetComponentData<Human>(walker).m_Flags & HumanFlags.Waiting) != 0) return false;
                 walkers.Add(walker);
