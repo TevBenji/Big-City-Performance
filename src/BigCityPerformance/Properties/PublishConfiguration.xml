@@ -117,9 +117,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.9" />
+	<ModVersion Value="0.3.10" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- Fixed: taxis could wait at the kerb for a passenger the people limit had put to sleep, and block the road. Anyone who has hailed a taxi now stays awake until it picks them up.&#10;- Fixed: in a big city that stays behind, Keep the clock running slowed job hunting so much that open jobs and job seekers stopped meeting. Job hunting now never drops below a fifth of its usual pace.&#10;- Adult Basic Education works with the people limit: its counts of the city's adults include sleeping households, and its adult learners stay awake while they study." />
+	<ChangeLog Value="- The mod's log now notes every change to its options, so a bug report shows what was changed and when." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />
