@@ -60,6 +60,16 @@ namespace BigCityPerformance.Core
         /// <summary>Whether the update numbered <paramref name="update"/> may run at the current level.</summary>
         public bool Runs(long update) => Level == 0 || update % Stride == 0;
 
+        /// <summary>
+        /// The most job hunting is slowed: one update in this many (odd, so every slice still gets its turn). A big city's
+        /// route-finder can stay behind for good, and at the full stride jobs filled far slower than people lost them: a player's
+        /// 3-million city built up 50,000 job seekers and 60,000 open jobs that never met (15 November 2026).
+        /// </summary>
+        public static int JobStrideMost = 5;
+
+        /// <summary>As <see cref="Runs(long)"/>, never slower than one update in <paramref name="strideMost"/>.</summary>
+        public bool Runs(long update, int strideMost) => Level == 0 || update % System.Math.Min(Stride, strideMost) == 0;
+
         public void Reset()
         {
             Level = 0;

@@ -86,9 +86,10 @@ namespace BigCityPerformance.People
         private static bool otherModsApplied;
 
         /// <summary>
-        /// Once, when a city loads and every mod's systems exist: a mod that charges tax in place of the game's TaxSystem
-        /// (FiscalOverhaul's tax engine) has its own residential query, which skipped sleepers, so with both mods on they paid
-        /// no residential tax (a player's mod list, 11 November 2026). Its query gets the same copy as the game's.
+        /// Once, when a city loads and every mod's systems exist: other mods' queries that skipped sleepers and so got the city
+        /// wrong get the same copy as the game's (<see cref="OtherModSystems.QueryCountingSleepers"/>). FiscalOverhaul's tax
+        /// engine charged them no residential tax (a player's mod list, 11 November 2026); Adult Basic Education's counts of the
+        /// city's adults came out far too low (a player's 3-million city, 15 November 2026).
         /// </summary>
         internal static void ApplyToOtherMods(World world)
         {
@@ -97,15 +98,16 @@ namespace BigCityPerformance.People
             foreach (var system in world.Systems)
             {
                 var type = system.GetType();
-                if (!OtherModSystems.ChargesResidentialTax(type.Name)) continue;
-                var field = AccessTools.Field(type, "m_ResidentialTaxPayerGroup");
+                string name = OtherModSystems.QueryCountingSleepers(type.Name);
+                if (name == null) continue;
+                var field = AccessTools.Field(type, name);
                 if (field == null || field.FieldType != typeof(EntityQuery))
                 {
-                    Mod.Logger.Warn($"{type.FullName} has no residential tax query where it used to: sleeping households pay it no residential tax.");
+                    Mod.Logger.Warn($"{type.FullName} has no {name} query where it used to: it leaves sleeping households out.");
                     continue;
                 }
                 field.SetValue(system, WithSleepers(world.EntityManager, (EntityQuery)field.GetValue(system)));
-                Mod.Logger.Info($"{type.FullName} charges sleeping households residential tax too.");
+                Mod.Logger.Info($"{type.FullName} counts sleeping households too ({name}).");
             }
         }
 
