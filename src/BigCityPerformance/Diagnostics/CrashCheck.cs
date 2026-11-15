@@ -57,6 +57,9 @@ namespace BigCityPerformance.Diagnostics
             nextCheck = UnityEngine.Time.realtimeSinceStartup + CheckSeconds;
             string options = OptionsNow();
             if (options == lastOptions) return;
+            // In the log too, so a change of setting shows beside the status lines it explains (a player's session, 15 November
+            // 2026: a manual people limit looked like the automatic one acting without saying so).
+            Mod.Logger.Info($"Options {(lastOptions == null ? "at start" : "changed")}: {options}.");
             lastOptions = options;
             Write($"{CrashSummary.Options} {options}");
         }
