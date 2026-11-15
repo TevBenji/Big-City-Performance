@@ -35,7 +35,9 @@ namespace BigCityPerformance.Diagnostics
                 string summary = CrashSummary.Build(ReadShared(previousLog), File.GetLastWriteTime(previousLog), File.Exists(Diary) ? ReadShared(Diary) : "");
                 if (summary != null) Mod.Logger.Warn(summary);
             }
-            File.WriteAllText(Diary, CrashSummary.Line(DateTime.Now, $"{CrashSummary.Started}, Big City Performance {typeof(Mod).Assembly.GetName().Version}") + "\n");
+            var now = DateTime.Now;
+            Debug.Log(CrashSummary.Mark(now));
+            File.WriteAllText(Diary, CrashSummary.Line(now, $"{CrashSummary.Started}, Big City Performance {typeof(Mod).Assembly.GetName().Version}") + "\n");
         }
 
         /// <summary>At a normal exit: a diary that says so never describes a crash (see <see cref="CrashSummary.Build"/>).</summary>
