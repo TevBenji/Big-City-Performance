@@ -5,11 +5,12 @@ namespace BigCityPerformance.Core
 {
     /// <summary>
     /// Picks how many people to simulate in detail from how the clock is keeping up, so nobody has to guess a number for
-    /// their computer. Every <see cref="CheckSeconds"/> of play it looks at the window just gone:
+    /// their computer. Every <see cref="CheckSeconds"/> of play it looks at the window just gone, and at the last
+    /// <see cref="Typical"/> of them:
     /// <list type="bullet">
-    /// <item>The clock behind (under 90 % of the speed asked for, at most 2x) and fewer people might help (the clock waited on
-    /// routes, or the processor, not the graphics card, set the pace): a fifth fewer.</item>
-    /// <item>The check after a cut: unless the game got at least 5 % faster, the cut comes back and no more cuts for
+    /// <item>The clock behind over those windows (under 90 % of the speed asked for, at most 2x) and fewer people might help
+    /// (the clock waited on routes, or the processor, not the graphics card, set the pace): a fifth fewer.</item>
+    /// <item>As many windows after a cut: unless the game got at least 5 % faster, the cut comes back and no more cuts for
     /// <see cref="QuietAfterUselessCut"/> checks. In a million-person city the processor stayed busy with everything else and
     /// cuts alone took the limit to the floor for no speed (test run, 8 November 2026).</item>
     /// <item>The clock on time with room to spare (no waiting on routes): a tenth more, but not within
@@ -45,6 +46,12 @@ namespace BigCityPerformance.Core
         private int limitBeforeCut;
         private float ratioBeforeCut, speedAtCut;
 
+        /// <summary>Checks averaged into the usual speed (a minute).</summary>
+        public const int Typical = 3;
+        private readonly float[] recent = new float[Typical];
+        private int recentCount;
+        private float recentSpeed;
+
         public int Limit { get; private set; } = Start;
 
         /// <param name="achieved">Game speed reached in the window (1 = normal).</param>
@@ -56,30 +63,40 @@ namespace BigCityPerformance.Core
         {
             if (selected <= 0f) return false;
             float ratio = achieved / Math.Min(selected, MostSpeed);
+            if (selected != recentSpeed) { recentSpeed = selected; recentCount = 0; }
+            recent[recentCount++ % Typical] = ratio;
             if (sinceCut < QuietChecks) sinceCut++;
             if (noCuts > 0) noCuts--;
+            // A minute's average, before a cut and after it, not one window: a cut follows a slow window and the next one is
+            // usually faster by chance alone. Judged window against window, cuts that changed nothing kept passing and walked a
+            // 296,000-person city down to the floor for no speed (a player's three hours, 16 November 2026).
+            float usual = (recent[0] + recent[1] + recent[2]) / Typical;
             if (judgingCut)
             {
-                judgingCut = false;
-                // Judged only at the speed it was made at: after a speed change the two windows don't compare, so the cut stays.
-                if (selected == speedAtCut)
+                // Judged only at the speed it was made at: after a speed change the two don't compare, so the cut stays.
+                if (selected != speedAtCut) judgingCut = false;
+                else if (recentCount < Typical) return false;
+                else
                 {
-                    if (ratio < ratioBeforeCut * 1.05f)
+                    judgingCut = false;
+                    if (usual < ratioBeforeCut * 1.05f)
                     {
                         noCuts = Math.Min(QuietAfterUselessCut << uselessCuts, MostQuietAfterUselessCut);
                         if (noCuts < MostQuietAfterUselessCut) uselessCuts++;
+                        recentCount = 0;
                         return Set(limitBeforeCut);
                     }
-                    // One step back, not all the way: a single window can look faster by chance.
+                    // One step back, not all the way: even a minute can look faster by chance.
                     if (uselessCuts > 0) uselessCuts--;
                 }
             }
-            if (ratio < 0.9f && (stalledShare > 0.1f || cpuBound))
+            if (recentCount >= Typical && usual < 0.9f && (stalledShare > 0.1f || cpuBound))
             {
                 if (noCuts > 0 || Limit <= Floor) return false;
                 judgingCut = true;
                 limitBeforeCut = Limit;
-                ratioBeforeCut = ratio;
+                ratioBeforeCut = usual;
+                recentCount = 0;
                 speedAtCut = selected;
                 sinceCut = 0;
                 return Set(Limit * 4 / 5);
@@ -95,6 +112,7 @@ namespace BigCityPerformance.Core
             noCuts = 0;
             uselessCuts = 0;
             judgingCut = false;
+            recentCount = 0;
         }
 
         private bool Set(int limit)
