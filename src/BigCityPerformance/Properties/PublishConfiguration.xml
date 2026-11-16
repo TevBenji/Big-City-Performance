@@ -117,9 +117,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.10" />
+	<ModVersion Value="0.3.11" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- The mod's log now notes every change to its options, so a bug report shows what was changed and when." />
+	<ChangeLog Value="- The automatic people limit judges its cuts on a minute of play, not one moment, so it no longer puts more and more people to sleep when that doesn't make the game any faster." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

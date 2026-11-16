@@ -27,7 +27,7 @@ namespace BigCityPerformance.People
         private PathfindResultSystem results;
         private PathfindSetupSystem setup;
 
-        private float statusStart = -1f, autoStart = -1f, autoSpeed;
+        private float statusStart = -1f, autoStart = -1f, autoSpeed, lastRunningSpeed;
         private uint statusFrame, autoFrame;
         private int autoFrames, autoStalled, autoTimed;
 
@@ -73,6 +73,12 @@ namespace BigCityPerformance.People
                 statusFrame = frame;
             }
             if (!running) return;
+            // A speed button held under one check never reaches the policy, so it hears of every change here; a pause isn't one.
+            if (simulation.selectedSpeed != lastRunningSpeed)
+            {
+                lastRunningSpeed = simulation.selectedSpeed;
+                Auto.SpeedChanged();
+            }
 
             autoFrames++;
             if (WaitingOnRoutes(frame)) autoStalled++;
