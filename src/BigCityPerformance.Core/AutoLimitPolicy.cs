@@ -54,6 +54,16 @@ namespace BigCityPerformance.Core
 
         public int Limit { get; private set; } = Start;
 
+        /// <summary>
+        /// The player picked another speed, even for a moment between checks: what came before doesn't compare with what comes
+        /// next, so the minute starts over, and a cut being judged stays, as with a change <see cref="Update"/> sees itself.
+        /// </summary>
+        public void SpeedChanged()
+        {
+            recentCount = 0;
+            judgingCut = false;
+        }
+
         /// <param name="achieved">Game speed reached in the window (1 = normal).</param>
         /// <param name="selected">The speed the player picked.</param>
         /// <param name="stalledShare">Share of frames the clock waited on route deadlines.</param>
