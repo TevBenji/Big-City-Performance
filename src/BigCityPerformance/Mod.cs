@@ -23,7 +23,7 @@ namespace BigCityPerformance
 
         public void OnLoad(UpdateSystem updateSystem)
         {
-            Logger.Info("Big City Performance loading");
+            Logger.Info($"Big City Performance {typeof(Mod).Assembly.GetName().Version} loading");
             Register("settings", () =>
             {
                 Settings = new BigCitySettings(this);
