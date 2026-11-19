@@ -100,7 +100,10 @@ namespace BigCityPerformance.People
                 // Without timings (some graphics drivers give none) it can't tell, so it assumes fewer people would help.
                 bool cpuBound = autoTimed == 0 || autoMain >= autoGpu * 0.9;
                 int before = Auto.Limit;
-                if (Auto.Update(achieved, simulation.selectedSpeed, stalled, cpuBound))
+                bool changed = Auto.Update(achieved, simulation.selectedSpeed, stalled, cpuBound);
+                string judgement = Auto.TakeJudgement();
+                if (judgement != null) Mod.Logger.Info($"Automatic limit {judgement}.");
+                if (changed)
                     Mod.Logger.Info($"Automatic limit {before:N0} -> {Auto.Limit:N0}: game speed {achieved:F2}x on speed {simulation.selectedSpeed}, "
                         + $"waiting on routes {stalled:P0} of frames, {(cpuBound ? "processor" : "graphics card")} setting the pace.");
             }
