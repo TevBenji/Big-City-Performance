@@ -284,6 +284,15 @@ namespace BigCityPerformance.People
         /// fresh one, ran into debt and moved out by the thousand (a player's logs and graphs, 19 November 2026). Its last real
         /// day stays as it was before it slept.
         /// </summary>
+        /// <summary>
+        /// Before a save: every sleeper's pile goes too. A save keeps sleepers as ordinary households and they load awake, where
+        /// the pile would become their "last day" just the same (code review, 19 November 2026).
+        /// </summary>
+        internal void ForgetSleepersShopping()
+        {
+            foreach (var household in sleepingHouseholds) if (EntityManager.Exists(household)) ForgetSleepShopping(household);
+        }
+
         private void ForgetSleepShopping(Entity household)
         {
             if (DevOldShopping) return;
@@ -455,6 +464,7 @@ namespace BigCityPerformance.People
         {
             DormancySystem.SaveInProgress = true;
             if (!SaveQueryPatch.Applied) DormancySystem.Instance?.WakeAll();
+            else DormancySystem.Instance?.ForgetSleepersShopping();
         }
     }
 }

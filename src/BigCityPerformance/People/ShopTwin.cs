@@ -97,6 +97,7 @@ namespace BigCityPerformance.People
             int sales = 0, visited = 0;
             long spent = 0;
             bool noBuyerLeft = false;
+            var charged = new HashSet<Entity>();
             for (int index = 0; index < found.Count && !noBuyerLeft; index++)
             {
                 if (counts[index] == 0) continue;
@@ -108,8 +109,9 @@ namespace BigCityPerformance.People
                 {
                     int amount = (int)math.min(stock, perSale / price);
                     if (amount <= 0) break;
-                    Entity buyer = NextBuyerWhoCanPay(entities, sleepers, (long)(amount * price), ref visited);
-                    if (buyer == Entity.Null) { noBuyerLeft = true; break; }
+                    Entity buyer = NextBuyerWhoCanPay(entities, sleepers, (long)(amount * price), charged, ref visited);
+                    // Nobody left who can pay this much: the next shop's sales may be cheaper (a shop low on stock sells less).
+                    if (buyer == Entity.Null) { noBuyerLeft = visited >= 2 * sleepers.Count; break; }
                     stock -= amount;
                     __instance.m_SalesQueue.Enqueue(new ResourceBuyerSystem.SalesEvent
                     {
@@ -128,20 +130,26 @@ namespace BigCityPerformance.People
         }
 
         /// <summary>
-        /// The next sleeping household in turn that has the money, or none once every sleeper has been looked at this hour. The
+        /// The next sleeping household in turn that has the money and hasn't bought this hour, or none after a whole round. The
         /// game takes a sale's money even from a household without it, so charged regardless, sleepers ran into debt and the game
         /// moved them out (a player's 300,000-person city, 19 November 2026). Awake households only shop with money to spend.
         /// </summary>
-        private static Entity NextBuyerWhoCanPay(EntityManager entities, IReadOnlyList<Entity> sleepers, long cost, ref int visited)
+        private static Entity NextBuyerWhoCanPay(EntityManager entities, IReadOnlyList<Entity> sleepers, long cost, HashSet<Entity> charged, ref int visited)
         {
-            while (visited < sleepers.Count)
+            // ponytail: at most two rounds of the sleepers a game hour, so a cheaper sale after a dear one can still find a buyer
+            // without the search growing with the number of sales.
+            for (int tries = 0; tries < sleepers.Count && visited < 2 * sleepers.Count; tries++)
             {
                 visited++;
                 nextBuyer = (nextBuyer + 1) % sleepers.Count;
                 var household = sleepers[nextBuyer];
-                if (DormancySystem.DevOldShopping) return household;
-                if (entities.Exists(household) && entities.HasBuffer<Game.Economy.Resources>(household)
-                    && EconomyUtils.GetResources(Resource.Money, entities.GetBuffer<Game.Economy.Resources>(household, true)) >= cost) return household;
+                if (charged.Contains(household)) continue;
+                if (DormancySystem.DevOldShopping || (entities.Exists(household) && entities.HasBuffer<Game.Economy.Resources>(household)
+                    && EconomyUtils.GetResources(Resource.Money, entities.GetBuffer<Game.Economy.Resources>(household, true)) >= cost))
+                {
+                    charged.Add(household);
+                    return household;
+                }
             }
             return Entity.Null;
         }
