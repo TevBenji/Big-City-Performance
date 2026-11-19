@@ -55,6 +55,20 @@ namespace BigCityPerformance.Core
         public int Limit { get; private set; } = Start;
 
         /// <summary>
+        /// How the last cut was judged, once, for the log: the minute after it against the minute before. A player's limit still
+        /// slid to the floor in an hour, and the log showed the cuts but not why each was kept (19 November 2026).
+        /// </summary>
+        public string LastJudgement { get; private set; }
+
+        /// <summary>Hands over <see cref="LastJudgement"/> and forgets it.</summary>
+        public string TakeJudgement()
+        {
+            string judgement = LastJudgement;
+            LastJudgement = null;
+            return judgement;
+        }
+
+        /// <summary>
         /// The player picked another speed, even for a moment between checks: what came before doesn't compare with what comes
         /// next, so the minute starts over, and a cut being judged stays, as with a change <see cref="Update"/> sees itself.
         /// </summary>
@@ -89,7 +103,10 @@ namespace BigCityPerformance.Core
                 else
                 {
                     judgingCut = false;
-                    if (usual < ratioBeforeCut * 1.05f)
+                    bool helped = usual >= ratioBeforeCut * 1.05f;
+                    LastJudgement = $"{(helped ? "kept the cut to" : "undid the cut to")} {Limit:N0}: the minute after it ran at {usual:P0} of the speed asked for, "
+                        + $"the minute before {ratioBeforeCut:P0}{(helped ? "" : " (it needs 5 % more)")}";
+                    if (!helped)
                     {
                         noCuts = Math.Min(QuietAfterUselessCut << uselessCuts, MostQuietAfterUselessCut);
                         if (noCuts < MostQuietAfterUselessCut) uselessCuts++;

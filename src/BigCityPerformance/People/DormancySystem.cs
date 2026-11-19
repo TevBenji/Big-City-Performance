@@ -250,6 +250,7 @@ namespace BigCityPerformance.People
                 var household = sleepingHouseholds[index];
                 sleepingSet.Remove(household);
                 if (!EntityManager.Exists(household)) continue;
+                ForgetSleepShopping(household);
                 batch.Add(household);
                 var members = EntityManager.GetBuffer<HouseholdCitizen>(household, true);
                 sleepingCitizens -= members.Length;
@@ -269,6 +270,29 @@ namespace BigCityPerformance.People
             using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(array);
         }
 
+        /// <summary>Dev only: sleepers shop as before 0.3.13, in debt if need be and with their asleep shopping kept (for comparing).</summary>
+        internal static bool DevOldShopping = false;
+
+        /// <summary>Dev only: households sleep with someone waiting for a hearse or an ambulance, as before 0.3.13 (for comparing).</summary>
+        internal static bool DevOldHealth = false;
+
+        /// <summary>
+        /// A household waking starts a new day of shopping. Asleep, the game's daily turnover of "shopped today" into "shopped
+        /// last day" never ran, so every purchase the sleepers' shopping (<see cref="ShopTwin"/>) charged it piled up, two days'
+        /// worth or more; awake, that pile became its "last day", raised the average the sleepers' shopping copies, and every
+        /// sleeper was charged more the next hour. In a 300,000-person city sleepers came to spend 20 times what they did in a
+        /// fresh one, ran into debt and moved out by the thousand (a player's logs and graphs, 19 November 2026). Its last real
+        /// day stays as it was before it slept.
+        /// </summary>
+        private void ForgetSleepShopping(Entity household)
+        {
+            if (DevOldShopping) return;
+            var data = EntityManager.GetComponentData<Household>(household);
+            data.m_ShoppedValuePerDay = 0;
+            data.m_LastDayFrameIndex = simulation.frameIndex;
+            EntityManager.SetComponentData(household, data);
+        }
+
         /// <summary>Dev only: members out on foot sleep where they stand, with their walker, as before 0.3.12 (for comparing).</summary>
         internal static bool DevWalkersSleep = false;
 
@@ -283,6 +307,10 @@ namespace BigCityPerformance.People
             for (int at = 0; at < members.Length; at++)
             {
                 var citizen = members[at].m_Citizen;
+                // Waiting for a hearse or an ambulance: the game's health system skips sleepers, so the body or the patient never
+                // came out and the hearse waited at the door for good, blocking the road (a player's report, 18 November 2026).
+                if (!DevOldHealth && EntityManager.HasComponent<HealthProblem>(citizen)
+                    && (EntityManager.GetComponentData<HealthProblem>(citizen).m_Flags & HealthProblemFlags.RequireTransport) != 0) return false;
                 if (!EntityManager.HasComponent<CurrentTransport>(citizen)) continue;
                 var walker = EntityManager.GetComponentData<CurrentTransport>(citizen).m_CurrentTransport;
                 if (!EntityManager.Exists(walker) || !EntityManager.HasComponent<Human>(walker) || !EntityManager.HasComponent<Resident>(walker)) return false;
@@ -324,6 +352,7 @@ namespace BigCityPerformance.People
             using (var everyone = asleep.ToEntityArray(Allocator.Temp))
             {
                 if (everyone.Length == 0) return;
+                foreach (var entity in everyone) if (EntityManager.HasComponent<Household>(entity)) ForgetSleepShopping(entity);
                 // At the end of the frame, like every other tag change: changing them mid-frame crashed the game (test run,
                 // 7 November 2026). A save waits for it (SaveHoldPatch).
                 endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(everyone);

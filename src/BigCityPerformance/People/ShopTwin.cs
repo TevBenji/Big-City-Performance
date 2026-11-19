@@ -94,9 +94,10 @@ namespace BigCityPerformance.People
             pickOffset = (pickOffset + 0.6180339887) % 1.0;
             var counts = ShareOut.Counts(weights, saleCount, pickOffset);
             long perSale = budget / saleCount;
-            int sales = 0;
+            int sales = 0, visited = 0;
             long spent = 0;
-            for (int index = 0; index < found.Count; index++)
+            bool noBuyerLeft = false;
+            for (int index = 0; index < found.Count && !noBuyerLeft; index++)
             {
                 if (counts[index] == 0) continue;
                 var shop = found[index];
@@ -107,12 +108,13 @@ namespace BigCityPerformance.People
                 {
                     int amount = (int)math.min(stock, perSale / price);
                     if (amount <= 0) break;
+                    Entity buyer = NextBuyerWhoCanPay(entities, sleepers, (long)(amount * price), ref visited);
+                    if (buyer == Entity.Null) { noBuyerLeft = true; break; }
                     stock -= amount;
-                    nextBuyer = (nextBuyer + 1) % sleepers.Count;
                     __instance.m_SalesQueue.Enqueue(new ResourceBuyerSystem.SalesEvent
                     {
                         m_Flags = ResourceBuyerSystem.SaleFlags.CommercialSeller | ResourceBuyerSystem.SaleFlags.Virtual,
-                        m_Buyer = sleepers[nextBuyer],
+                        m_Buyer = buyer,
                         m_Seller = shop.Entity,
                         m_Resource = shop.Resource,
                         m_Amount = amount,
@@ -123,6 +125,25 @@ namespace BigCityPerformance.People
             }
             LastSales = sales;
             LastSpent = spent;
+        }
+
+        /// <summary>
+        /// The next sleeping household in turn that has the money, or none once every sleeper has been looked at this hour. The
+        /// game takes a sale's money even from a household without it, so charged regardless, sleepers ran into debt and the game
+        /// moved them out (a player's 300,000-person city, 19 November 2026). Awake households only shop with money to spend.
+        /// </summary>
+        private static Entity NextBuyerWhoCanPay(EntityManager entities, IReadOnlyList<Entity> sleepers, long cost, ref int visited)
+        {
+            while (visited < sleepers.Count)
+            {
+                visited++;
+                nextBuyer = (nextBuyer + 1) % sleepers.Count;
+                var household = sleepers[nextBuyer];
+                if (DormancySystem.DevOldShopping) return household;
+                if (entities.Exists(household) && entities.HasBuffer<Game.Economy.Resources>(household)
+                    && EconomyUtils.GetResources(Resource.Money, entities.GetBuffer<Game.Economy.Resources>(household, true)) >= cost) return household;
+            }
+            return Entity.Null;
         }
 
         private static void MakeQueries(EntityManager entities)
