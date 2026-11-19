@@ -15,7 +15,7 @@ namespace BigCityPerformance.Core
         /// </summary>
         public const int Most = 64;
 
-        /// <summary>For everything else (emergencies, transit, service vehicles): never more than this.</summary>
+        /// <summary>For everything else (emergencies, service vehicles) but public transport, which keeps its own: never more than this.</summary>
         public const int OthersMost = 16;
 
         /// <summary>The game slows its clock this many frames ahead of a route deadline (SimulationSystem).</summary>

@@ -122,6 +122,21 @@ namespace BigCityPerformance.Routes
             typeof(FindJobSystem), typeof(FindSchoolSystem), typeof(HouseholdFindPropertySystem), typeof(ResourceBuyerSystem),
         };
 
+        /// <summary>
+        /// Public transport: the dispatch that sends a bus, train, ship or plane out of its depot to a line, and those vehicles
+        /// finding their way. Stretched like any other search, a 1.7-million city's lines showed "not enough vehicles" with the
+        /// option on and not off (a player's report, 19 November 2026): the game flags a line once its request for a vehicle has
+        /// failed twice. They keep the game's own deadlines.
+        /// </summary>
+        private static readonly System.Collections.Generic.HashSet<System.Type> Transit = new System.Collections.Generic.HashSet<System.Type>
+        {
+            typeof(TransportVehicleDispatchSystem), typeof(TransportCarAISystem), typeof(TransportTrainAISystem), typeof(TransportWatercraftAISystem),
+            typeof(TransportAircraftAISystem),
+        };
+
+        /// <summary>Dev only: transit searches are stretched like the rest, as before 0.3.14 (for comparing).</summary>
+        internal static bool DevStretchTransit = false;
+
         // GetQueue only runs on the main thread, and a type's answer never changes, so names are compared once per type.
         private static readonly System.Collections.Generic.Dictionary<System.Type, bool> Answers = new System.Collections.Generic.Dictionary<System.Type, bool>();
 
@@ -141,6 +156,7 @@ namespace BigCityPerformance.Routes
 
         private static void Prefix(object system, ref int maxDelayFrames)
         {
+            if (!DevStretchTransit && system != null && Transit.Contains(system.GetType())) return;
             int stretch = RouteDeadlineSystem.Stretch;
             if (stretch > DeadlinePolicy.OthersMost && !IsPeopleTrip(system)) stretch = DeadlinePolicy.OthersMost;
             if (stretch > 1) maxDelayFrames *= stretch;
