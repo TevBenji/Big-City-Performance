@@ -15,7 +15,8 @@ namespace BigCityPerformance.Core
     /// everything else and cuts alone took the limit to the floor for no speed (test run, 8 November 2026).</item>
     /// <item>Below <see cref="Start"/>, after <see cref="StepUpAfter"/> checks at one limit: a step back up, kept unless the
     /// limit below was <see cref="NeededGain"/> faster. A cut kept by chance doesn't stay for good, and on the top speed button,
-    /// where the clock is rarely on time, the limit can come back up at all.</item>
+    /// where the clock is rarely on time, the limit can come back up at all. A kept step up holds off cuts as a useless cut
+    /// does.</item>
     /// <item>The clock on time with room to spare (no waiting on routes): a tenth more, but not within
     /// <see cref="QuietChecks"/> checks of a cut, so it doesn't see-saw.</item>
     /// </list>
@@ -151,6 +152,10 @@ namespace BigCityPerformance.Core
                         return Set(limitBefore);
                     }
                     stepUpWait = StepUpAfter;
+                    // The lower limit wasn't clearly faster: as good as a cut that didn't help, measured the other way round. So
+                    // no cut straight back down, which would only be undone a minute later, moving the same households twice.
+                    noCuts = Math.Min(QuietAfterUselessCut << uselessCuts, MostQuietAfterUselessCut);
+                    if (noCuts < MostQuietAfterUselessCut) uselessCuts++;
                 }
             }
             if (recentCount >= Typical && usual < 0.9f && (stalledShare > 0.1f || cpuBound) && noCuts == 0 && Limit > Floor)
