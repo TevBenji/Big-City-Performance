@@ -14,7 +14,7 @@ namespace BigCityPerformance.People
     /// <summary>
     /// The game's own bookkeeping keeps covering sleeping households, so the city adds up as if everyone were awake: the
     /// population count (and with it the workforce, education, ages and what households need from shops, which drive demand),
-    /// wages and residential tax. Each of those systems finds its households through a query; a copy of that query that also
+    /// wages, residential tax and the household wealth chart. Each of those systems finds its households through a query; a copy of that query that also
     /// matches disabled entities takes its place. These queries only find households and citizens, so their copies add only
     /// sleepers. The two city-wide ones, the save and the clear before a load, match sleepers by type (<see cref="WithOwnSleepers"/>).
     /// </summary>
@@ -32,6 +32,10 @@ namespace BigCityPerformance.People
             wages.m_HouseholdGroup = WithSleepers(entities, wages.m_HouseholdGroup);
             var tax = world.GetOrCreateSystemManaged<TaxSystem>();
             tax.m_ResidentialTaxPayerGroup = WithSleepers(entities, tax.m_ResidentialTaxPayerGroup);
+            // The Household Wealth chart: with sleepers left out it showed a tenth of the city's money, and a player read it
+            // as everyone going broke the moment the mod loaded (20 November 2026).
+            var wealth = world.GetOrCreateSystemManaged<WealthStatisticsSystem>();
+            wealth.m_HouseholdGroup = WithSleepers(entities, wealth.m_HouseholdGroup);
             // Before another city loads, the game's ClearSystem destroys the old one through a query that skips disabled
             // entities: every sleeper survived it and woke into the next city, doubling its households (a player's log, 12
             // November 2026). With sleepers matched, they go with the rest of the old city.

@@ -31,8 +31,8 @@ namespace BigCityPerformance.People
         private uint statusFrame, autoFrame;
         private int autoFrames, autoStalled, autoTimed;
 
-        // Checks left before the automatic limit may change, after a city loads.
-        private const int SettlingChecks = 3;
+        // Checks left before the automatic limit may change, after a city loads (five minutes).
+        private const int SettlingChecks = 15;
         private int settling = SettlingChecks;
         private double autoMain, autoGpu;
 
@@ -90,8 +90,10 @@ namespace BigCityPerformance.People
                 autoTimed++;
             }
             if (now - autoStart < AutoLimitPolicy.CheckSeconds) return;
-            // The first minute after loading is the load's own rush (everyone loads awake, and their routes come at once), not
-            // a sign of too many people: it cut the limit twice before the city had settled (test run, 8 November 2026).
+            // The first minutes after loading are the load's own rush (everyone loads awake, and their routes come at once), not
+            // a sign of too many people: it cut the limit twice before the city had settled (test run, 8 November 2026). One
+            // minute wasn't enough either: a player's city ran at 0.26x for five minutes after a load, and as it recovered each
+            // cut looked like it helped, 50,000 to 26,000 in three minutes (20 November 2026).
             if (settling > 0) settling--;
             else if (Mod.Settings != null && Mod.Settings.LimitPeople && Mod.Settings.AutoLimit && dormancy.Population() > AutoLimitPolicy.Floor)
             {
