@@ -17,7 +17,13 @@ namespace BigCityPerformance.People
     /// </summary>
     public sealed partial class ClockWatch : GameSystemBase
     {
-        internal static readonly AutoLimitPolicy Auto = new AutoLimitPolicy();
+        /// <summary>The automatic limit for the speed button in use.</summary>
+        internal static AutoLimitPolicy Auto { get; private set; } = new AutoLimitPolicy();
+
+        // Each speed button has its own automatic limit: what the fastest speed needs says nothing about the others. A player's
+        // limit came down to 25,000 on the fastest speed and stayed there back on speed 1, where a cut had made no difference
+        // (21 November 2026).
+        private static readonly System.Collections.Generic.Dictionary<float, AutoLimitPolicy> bySpeed = new System.Collections.Generic.Dictionary<float, AutoLimitPolicy>();
 
         // The game slows its clock this many frames before a route deadline.
         private const long HoldFrames = DeadlinePolicy.ThrottleFrames;
@@ -77,7 +83,12 @@ namespace BigCityPerformance.People
             if (simulation.selectedSpeed != lastRunningSpeed)
             {
                 lastRunningSpeed = simulation.selectedSpeed;
+                int before = Auto.Limit;
+                if (!bySpeed.TryGetValue(lastRunningSpeed, out var policy)) bySpeed[lastRunningSpeed] = policy = new AutoLimitPolicy();
+                Auto = policy;
                 Auto.SpeedChanged();
+                if (Auto.Limit != before && Mod.Settings != null && Mod.Settings.LimitPeople && Mod.Settings.AutoLimit)
+                    Mod.Logger.Info($"Automatic limit {before:N0} -> {Auto.Limit:N0}: speed {lastRunningSpeed} has its own limit.");
             }
 
             autoFrames++;
@@ -132,8 +143,10 @@ namespace BigCityPerformance.People
         protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
-            // Each city starts from the same middle and finds its own level.
-            Auto.Reset();
+            // Each city starts from the same middle and finds its own level, at every speed.
+            bySpeed.Clear();
+            Auto = new AutoLimitPolicy();
+            lastRunningSpeed = 0f;
             settling = SettlingChecks;
             statusStart = autoStart = -1f;
         }

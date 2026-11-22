@@ -181,18 +181,6 @@ namespace BigCityPerformance.Core
             return true;
         }
 
-        public void Reset()
-        {
-            Limit = Start;
-            sinceCut = QuietChecks;
-            noCuts = 0;
-            uselessCuts = 0;
-            judging = Change.None;
-            recentCount = 0;
-            atLimit = 0;
-            stepUpWait = StepUpAfter;
-        }
-
         private bool Set(int limit)
         {
             limit = Math.Max(Floor, Math.Min(Ceiling, (limit + 500) / 1000 * 1000));

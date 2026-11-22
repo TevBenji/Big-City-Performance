@@ -43,6 +43,9 @@ namespace BigCityPerformance.People
         private static EntityQuery awakeHouseholds, shops;
         private static bool queriesMade;
 
+        // This hour's buyers and their goods at home before the sale, put back once the game has settled the sales (see Postfix).
+        private static readonly List<(Entity, int)> buyers = new List<(Entity, int)>();
+
         /// <summary>Last hour's sales and money, for the test runner.</summary>
         internal static int LastSales;
         internal static long LastSpent;
@@ -121,12 +124,42 @@ namespace BigCityPerformance.People
                         m_Resource = shop.Resource,
                         m_Amount = amount,
                     });
+                    if (entities.HasComponent<Household>(buyer)) buyers.Add((buyer, entities.GetComponentData<Household>(buyer).m_Resources));
                     sales++;
                     spent += (long)(amount * price);
                 }
             }
             LastSales = sales;
             LastSpent = spent;
+        }
+
+        /// <summary>
+        /// Sleepers use up what they buy. A sale moves its price from the buyer's money to its goods at home, and the game uses goods
+        /// up only for households awake, so every purchase a sleeper made stayed in its home: days of shopping, counted in the
+        /// Household Wealth chart (a player's chart went from 50 million to 2.4 billion, 21 November 2026). So each buyer's goods go
+        /// back to what they were before the sale: the money is spent, as an awake household's goods would have been used up. Only
+        /// what the sale added: goods count with money when the game decides whether a household can afford to stay, and taking
+        /// all of them moved out tens of thousands of households in debt in a test city (22 November 2026).
+        /// </summary>
+        private static void Postfix(ResourceBuyerSystem __instance)
+        {
+            if (buyers.Count == 0) return;
+            if (!DormancySystem.DevKeepGoods)
+            {
+                // The sales are settled by the job the system has just scheduled, not yet known to the other systems.
+                ((JobHandle)DependencyGetter.Invoke(__instance, null)).Complete();
+                var entities = __instance.EntityManager;
+                foreach (var (buyer, goodsBefore) in buyers)
+                {
+                    if (!entities.Exists(buyer) || !entities.HasComponent<Household>(buyer)) continue;
+                    var household = entities.GetComponentData<Household>(buyer);
+                    // A sale the game turned down (the shop sold out) added nothing.
+                    if (household.m_Resources <= goodsBefore) continue;
+                    household.m_Resources = goodsBefore;
+                    entities.SetComponentData(buyer, household);
+                }
+            }
+            buyers.Clear();
         }
 
         /// <summary>
