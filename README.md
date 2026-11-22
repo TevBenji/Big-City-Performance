@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.15-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.16-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -51,7 +51,7 @@ Two things, and neither is the frame rate.
 - In a city bigger than the limit, that many people are simulated one by one. The rest stay at home, asleep. They keep
   their homes and their jobs, count in the population and the household wealth chart, earn their wages, pay rent and taxes, and still buy from the shops
   (as many sales as awake households make, spread over the shops people actually use, and only with money they have).
-  They just make no trips.
+  They use up what they buy, as awake households do. They just make no trips.
 - Households go to sleep when everyone in them is indoors: nobody out walking, riding, or waiting for a bus, a taxi they
   hailed, a hearse or an ambulance, so nothing waits for someone who isn't there.
 - At overloaded stops, only the first hundred people at each place stay awake. The rest wait asleep and wake in turn as
@@ -62,8 +62,9 @@ Two things, and neither is the frame rate.
   a tenth faster, the cut comes back. Below 50,000 it tries a step back up every five minutes and keeps it unless the
   lower limit was clearly faster, so a cut that only looked useful doesn't stay, on the third speed button too. Every 20
   seconds of play it goes up a tenth when the clock keeps up with room to spare. It leaves the first five minutes after a
-  city loads alone. A slow graphics card alone doesn't lower it: fewer people wouldn't draw the city any faster. Turn it
-  off to pick the number yourself.
+  city loads alone. Each speed button has its own limit: back on speed 1, a cut made for the fastest speed doesn't stay.
+  A slow graphics card alone doesn't lower it: fewer people wouldn't draw the city any faster. Turn it off to pick the
+  number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking
   for routes at once.
 - **A count in the population box.** While the city is bigger than the limit, the population box at the bottom of the

@@ -284,15 +284,6 @@ namespace BigCityPerformance.People
         /// fresh one, ran into debt and moved out by the thousand (a player's logs and graphs, 19 November 2026). Its last real
         /// day stays as it was before it slept.
         /// </summary>
-        /// <summary>
-        /// Before a save: every sleeper's pile goes too. A save keeps sleepers as ordinary households and they load awake, where
-        /// the pile would become their "last day" just the same (code review, 19 November 2026).
-        /// </summary>
-        internal void ForgetSleepersShopping()
-        {
-            foreach (var household in sleepingHouseholds) if (EntityManager.Exists(household)) ForgetSleepShopping(household);
-        }
-
         private void ForgetSleepShopping(Entity household)
         {
             if (DevOldShopping) return;
@@ -300,6 +291,18 @@ namespace BigCityPerformance.People
             data.m_ShoppedValuePerDay = 0;
             data.m_LastDayFrameIndex = simulation.frameIndex;
             EntityManager.SetComponentData(household, data);
+        }
+
+        /// <summary>Dev only: sleepers' purchases pile up in their goods at home as before 0.3.16 (for comparing).</summary>
+        internal static bool DevKeepGoods = false;
+
+        /// <summary>
+        /// Before a save: every sleeper's pile goes too. A save keeps sleepers as ordinary households and they load awake, where
+        /// the pile would become their "last day" just the same (code review, 19 November 2026).
+        /// </summary>
+        internal void ForgetSleepersShopping()
+        {
+            foreach (var household in sleepingHouseholds) if (EntityManager.Exists(household)) ForgetSleepShopping(household);
         }
 
         /// <summary>Dev only: members out on foot sleep where they stand, with their walker, as before 0.3.12 (for comparing).</summary>
