@@ -67,6 +67,8 @@ Two things, and neither is the frame rate.
   number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking
   for routes at once.
+- When the limit goes up, or you turn it off, people wake up to 500 households at a time, not all at once, so a
+  higher limit doesn't bring a wave of route requests.
 - **A count in the population box.** While the city is bigger than the limit, the population box at the bottom of the
   screen also shows how many people are simulated in detail, like `959,129 | 48k AUTO`. Hover it for the details (the
   limit, the game speed, people waiting at stops); click it to open the settings.
