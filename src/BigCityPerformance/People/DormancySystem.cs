@@ -57,7 +57,7 @@ namespace BigCityPerformance.People
         private readonly HashSet<Entity> sleepingSet = new HashSet<Entity>();
         private int sleepingCitizens, frames;
         private bool afterSave, wokeForSave;
-        private EntityQuery households, waiting, asleep;
+        private EntityQuery households, waiting, asleep, removedAsleep;
 
         // Only in a fully loaded city in play: sleeping people while a city loads lost track of them when loading finished
         // (test run, 7 November 2026).
@@ -129,6 +129,12 @@ namespace BigCityPerformance.People
                 Any = new[] { ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Citizen>(), ComponentType.ReadOnly<Human>() },
                 Options = EntityQueryOptions.IncludeDisabledEntities,
             });
+            removedAsleep = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[] { ComponentType.ReadOnly<Disabled>(), ComponentType.ReadOnly<Deleted>() },
+                Any = new[] { ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Citizen>(), ComponentType.ReadOnly<Human>() },
+                Options = EntityQueryOptions.IncludeDisabledEntities,
+            });
             SleeperBookkeeping.Apply(World);
         }
 
@@ -162,6 +168,7 @@ namespace BigCityPerformance.People
             if (HoldClock) ReleaseClockOnceAsleep();
             if (!ready || ++frames < TopUpFrames) return;
             frames = 0;
+            if (!DevKeepRemoved) WakeRemoved();
             bool justSaved = afterSave;
             afterSave = false;
             int limit = Limit;
@@ -286,6 +293,43 @@ namespace BigCityPerformance.People
             ShopTwin.LeftTheFront(count);
             if (batch.Count == 0) return;
             using (var array = new NativeArray<Entity>(batch.ToArray(), Allocator.Temp)) endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(array);
+        }
+
+        /// <summary>Dev only: sleepers the game removed stay asleep until their turn, as before 0.3.18 (for comparing).</summary>
+        internal static bool DevKeepRemoved = false;
+
+        /// <summary>
+        /// Wakes sleepers the game has removed. It removes people while they sleep (when a citizen dies or leaves the city, their
+        /// figure in the street goes too, asleep at a stop or not), but its clean-up skips sleepers, so they stayed, and a save
+        /// left them out while keeping the rest of a group one of them led: loading it crashed the game (a player's crash log, 21
+        /// November 2026). Awake, the game finishes removing them and re-forms their group: 30 such leaders were gone within a
+        /// second, their groups re-formed (test run, 27 November 2026).
+        /// </summary>
+        private void WakeRemoved()
+        {
+            using (var removed = removedAsleep.ToEntityArray(Allocator.Temp))
+            {
+                if (removed.Length == 0) return;
+                var gone = new HashSet<Entity>();
+                foreach (var entity in removed)
+                {
+                    if (sleepingSet.Remove(entity))
+                    {
+                        gone.Add(entity);
+                        sleepingCitizens -= EntityManager.GetBuffer<HouseholdCitizen>(entity, true).Length;
+                    }
+                    // A member of a household that sleeps on: it no longer counts among the sleepers.
+                    else if (EntityManager.HasComponent<HouseholdMember>(entity))
+                    {
+                        var household = EntityManager.GetComponentData<HouseholdMember>(entity).m_Household;
+                        if (sleepingSet.Contains(household) && !EntityManager.HasComponent<Deleted>(household)) sleepingCitizens--;
+                    }
+                }
+                if (gone.Count > 0) sleepingHouseholds.RemoveAll(gone.Contains);
+                // ponytail: someone woken here from a stop's queue stays in it until their turn, skipped then as gone; the count
+                // at stops is that much high until then.
+                endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(removed);
+            }
         }
 
         /// <summary>Dev only: sleepers shop as before 0.3.13, in debt if need be and with their asleep shopping kept (for comparing).</summary>

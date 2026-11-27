@@ -71,6 +71,7 @@ namespace BigCityPerformance
                 harmony.CreateClassProcessor(typeof(People.SaveQueryPatch)).Patch();
                 People.SaveQueryPatch.Applied = true;
             });
+            Register("repairing groups in saves", () => harmony.CreateClassProcessor(typeof(People.GroupLoadRepair)).Patch());
 #if BCP_DEV
             Register("dev harness", () => Dev.DevHarness.StartIfAsked(updateSystem));
 #endif
