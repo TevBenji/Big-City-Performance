@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.16-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.17-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -67,6 +67,8 @@ Two things, and neither is the frame rate.
   number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking
   for routes at once.
+- When the limit goes up, or you turn it off, people wake up to 500 households at a time, not all at once, so a
+  higher limit doesn't bring a wave of route requests.
 - **A count in the population box.** While the city is bigger than the limit, the population box at the bottom of the
   screen also shows how many people are simulated in detail, like `959,129 | 48k AUTO`. Hover it for the details (the
   limit, the game speed, people waiting at stops); click it to open the settings.

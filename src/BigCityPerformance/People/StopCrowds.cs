@@ -23,7 +23,9 @@ namespace BigCityPerformance.People
         internal int Asleep { get; private set; }
 
         /// <param name="waiting">People out of vehicles, with the lane they stand on.</param>
-        internal void Update(EntityManager entities, EntityQuery waiting, EntityCommandBuffer commands)
+        /// <param name="sleepNew">False while the limit is off and households wake a batch at a time: the queues still move as
+        /// the crowds board, but nobody new sleeps.</param>
+        internal void Update(EntityManager entities, EntityQuery waiting, EntityCommandBuffer commands, bool sleepNew = true)
         {
             awake.Clear();
             var sleep = new List<Entity>();
@@ -38,7 +40,7 @@ namespace BigCityPerformance.People
                     var place = lanes[index].m_Lane;
                     awake.TryGetValue(place, out int count);
                     awake[place] = ++count;
-                    if (count <= Cap) continue;
+                    if (count <= Cap || !sleepNew) continue;
                     if (!asleep.TryGetValue(place, out var queue)) asleep[place] = queue = new Queue<Entity>();
                     queue.Enqueue(humans[index]);
                     sleep.Add(humans[index]);

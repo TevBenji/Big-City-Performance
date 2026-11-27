@@ -39,6 +39,17 @@ namespace BigCityPerformance.People
         /// <summary>Game days for every sleeper to have had a turn awake.</summary>
         internal static float RotationDays = 2f;
 
+        /// <summary>
+        /// The most households woken in one top-up when the limit goes up or is switched off; the rest wake in the next top-ups.
+        /// Woken all at once, tens of thousands asked for routes in the same moments and the clock stalled for minutes, with a
+        /// wave of households moving out after (a player's tests with the automatic limit jumping as he changed speed, 25 November
+        /// 2026). Several times what the turns awake wake in a top-up, so a step up still lands within minutes.
+        /// </summary>
+        internal const int MostWokenPerTopUp = 500;
+
+        /// <summary>Dev only: a higher limit wakes the whole difference at once, as before 0.3.17 (for comparing).</summary>
+        internal static bool DevWakeAtOnce = false;
+
         // A game day is 262,144 simulation frames.
         private const float FramesPerDay = 262144f;
 
@@ -158,8 +169,15 @@ namespace BigCityPerformance.People
             if (limit == 0 || people <= limit)
             {
                 // No limit, or a city under it: nobody sleeps, at stops included (code review, 8 November 2026: they can be
-                // the only sleepers).
-                if (sleepingHouseholds.Count > 0 || crowds.Asleep > 0) WakeAll();
+                // the only sleepers). Households a batch at a time, then whoever is left with the tag.
+                if (sleepingHouseholds.Count > 0 && !DevWakeAtOnce)
+                {
+                    WakeLongestAsleep(MostWokenPerTopUp);
+                    // People asleep at stops keep waking in turn as the ones in front board: left alone until the last batch,
+                    // they stood frozen for minutes (code review, 26 November 2026).
+                    crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer(), sleepNew: false);
+                }
+                else if (sleepingHouseholds.Count > 0 || crowds.Asleep > 0) WakeAll();
                 return;
             }
             float awake = (float)limit / people;
@@ -168,9 +186,9 @@ namespace BigCityPerformance.People
             Rotate();
             // A higher limit (the setting, or the automatic limit finding room) wakes only the difference, longest asleep first:
             // waking everyone for every change churned the whole city (test run, 7 November 2026). A little slack, so drift in the
-            // counts doesn't wake and re-sleep the same few households.
+            // counts doesn't wake and re-sleep the same few households. A batch at a time (MostWokenPerTopUp).
             int over = sleepingHouseholds.Count - wanted;
-            if (over > System.Math.Max(10, wanted / 50)) WakeLongestAsleep(over);
+            if (over > System.Math.Max(10, wanted / 50)) WakeLongestAsleep(DevWakeAtOnce ? over : System.Math.Min(over, MostWokenPerTopUp));
             else if (wanted > sleepingHouseholds.Count) Sleep(wanted - sleepingHouseholds.Count);
             if (justSaved) Mod.Logger.Info($"Back asleep after the save: {sleepingHouseholds.Count} households ({sleepingCitizens} people).");
             crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer());
@@ -355,7 +373,8 @@ namespace BigCityPerformance.People
             return false;
         }
 
-        /// <summary>Everyone awake: when the setting goes back up, when the mod unloads, or before a save if its patch failed.</summary>
+        /// <summary>Everyone awake at once: when the mod unloads, before a save if its patch failed, and for the last few (people
+        /// asleep at stops) once the households have woken a batch at a time.</summary>
         internal void WakeAll()
         {
             Forget();
