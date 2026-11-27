@@ -59,9 +59,23 @@ namespace BigCityPerformance.People
 
         /// <summary>
         /// The households asleep longest have woken and left the front of the list: the buyers' turn moves with it, so the
-        /// next sale goes to the household after the last buyer, not to one further along (code review, 10 November 2026).
+        /// next sale goes to the household after the last buyer, not to one further along (code review, 10 November 2026). It
+        /// can go to -1, before the first: when the last buyer itself left, the next sale goes to the new first household.
         /// </summary>
-        internal static void LeftTheFront(int count) => nextBuyer = System.Math.Max(0, nextBuyer - count);
+        internal static void LeftTheFront(int count) => nextBuyer = System.Math.Max(-1, nextBuyer - count);
+
+        /// <summary>
+        /// Households the game removed leave the list from anywhere in it (<see cref="DormancySystem"/>'s WakeRemoved): the turn
+        /// moves back by those at or before the last buyer, so the next sale still goes to the household after it (code review,
+        /// 27 November 2026). Called before they leave the list.
+        /// </summary>
+        internal static void LeaveTheList(List<Entity> sleepers, HashSet<Entity> gone)
+        {
+            int before = 0;
+            for (int index = 0; index <= nextBuyer && index < sleepers.Count; index++)
+                if (gone.Contains(sleepers[index])) before++;
+            LeftTheFront(before);
+        }
 
         private static void Prefix(ResourceBuyerSystem __instance)
         {

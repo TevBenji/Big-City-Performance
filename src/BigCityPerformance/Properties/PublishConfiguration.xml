@@ -21,7 +21,7 @@ A city of a million people in the base game runs at about a twentieth of normal 
 
 - In a city bigger than the limit, that many people are simulated one by one. The rest stay at home, asleep: they keep their homes and jobs, count in the population and the household wealth chart, earn wages, pay rent and taxes, and still buy from the shops (and use up what they buy). They just make no trips.
 - Households take turns, so everyone gets time awake about once every two game days.
-- At overloaded stops only the first hundred people stay awake; the rest wake in turn as the ones in front board.
+- At overloaded stops only the first hundred people stay awake, and anyone in a group (a family out together, or someone with their pet); the rest wake in turn as the ones in front board.
 - **The limit picks itself**: fewer people when the clock falls behind and fewer would help, more when there's room. Every few minutes it tries more people again, so a cut that didn't really help doesn't stay. Each speed button has its own limit. A slow graphics card alone doesn't lower it. Turn it off to choose the number yourself.
 - Right after a city loads, the clock waits a moment while the first households go to sleep, instead of everyone asking for routes at once.
 - **A count in the population box**: while the city is bigger than the limit, the population box at the bottom of the screen also shows how many people are simulated in detail (959,129 | 48k AUTO). Hover it for the details, click it for the settings.
@@ -81,6 +81,7 @@ The settings are in English, German, Spanish, French, Italian, Japanese, Korean,
 - Fewer people on the streets of a city over the limit: they're at home.
 - Rush hour is gentler, and coverage maps update about once a minute.
 - **Saves are ordinary saves.** Sleeping households are written as ordinary households, and a save loads without the mod. Removing the mod is safe.
+- A save that crashed the game while loading with 0.3.17 or earlier (the crash report names GroupCreatureJob) loads again.
 - Early release: expect rough edges and tell me what you find.
 
 Built for game version **1.6.***.
@@ -117,9 +118,9 @@ Ships with **Harmony 2.2.2** by Andreas Pardeike (MIT). The project layout start
 	<!--At most 10, each under 2.1 MB: Paradox Mods refuses more-->
 	<Screenshot Value="Properties/Screenshots/01.png" />
 	<Tag Value="Code Mod" />
-	<ModVersion Value="0.3.17" />
+	<ModVersion Value="0.3.18" />
 	<GameVersion Value="1.6.*" />
-	<ChangeLog Value="- When the limit goes up, or you turn it off, people wake up to 500 households at a time instead of all at once. A higher limit, from the automatic limit or a speed change, no longer stalls the clock with a wave of route requests." />
+	<ChangeLog Value="- Fixes a crash while loading a save, in the game's step that rebuilds groups of people walking together. Someone in the save could follow a group leader who wasn't in it; they now go on alone and the save loads.&#10;- People in a group (a family out together, or someone with their pet) no longer sleep at crowded stops, and anyone the game removes while asleep is woken so the game can finish. That's how a group's leader could go missing from a save." />
 	<!--The forum thread whose replies show as the Discussion on the mod page-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/mod-big-city-performance-million-person-cities-at-full-speed-discussion-feedback.1949141/" />
 	<ExternalLink Type="github" Url="https://github.com/TevBenji/Big-City-Performance" />

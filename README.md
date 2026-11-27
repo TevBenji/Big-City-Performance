@@ -3,7 +3,7 @@
 <img align="right" src="src/BigCityPerformance/Properties/Thumbnail.png" alt="Big City Performance" width="260">
 
 <a href="https://mods.paradoxplaza.com/mods/166756/Windows"><img alt="Paradox Mods: Big City Performance" src="https://img.shields.io/badge/Paradox%20Mods-Big%20City%20Performance-2ea44f"></a>
-<img alt="Version" src="https://img.shields.io/badge/version-0.3.17-1f6feb">
+<img alt="Version" src="https://img.shields.io/badge/version-0.3.18-1f6feb">
 <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-c2410c"></a>
 <img alt="Game version" src="https://img.shields.io/badge/Cities%3A%20Skylines%20II-1.6-0e7490">
 
@@ -56,7 +56,7 @@ Two things, and neither is the frame rate.
   hailed, a hearse or an ambulance, so nothing waits for someone who isn't there.
 - At overloaded stops, only the first hundred people at each place stay awake. The rest wait asleep and wake in turn as
   the ones in front board. A crowd of 1,900 at one stop is no longer 1,900 people stepping around each other and asking
-  for new routes.
+  for new routes. People in a group (a family out together, or someone with their pet) always stay awake.
 - **The limit picks itself.** It starts at 50,000 and goes down a fifth when the clock has fallen behind over the last
   minute and fewer people would help (the clock waited on routes, or the processor set the pace). If the next minute isn't
   a tenth faster, the cut comes back. Below 50,000 it tries a step back up every five minutes and keeps it unless the
@@ -186,6 +186,10 @@ sleepers are written that way: anything another mod hides with the same tag stay
 this mod. Every save is an
 ordinary save that loads without the mod. Removing the mod is safe at any time. With Turn off pollution on, a save holds
 a clean city; without the mod, pollution starts building up again from there.
+
+A save that crashed the game while loading with 0.3.17 or earlier, in its step that rebuilds groups of people walking
+together (the crash report names GroupCreatureJob), loads again with 0.3.18 on: anyone following a group leader the save
+doesn't have goes on alone.
 
 ## How it works
 
