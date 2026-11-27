@@ -325,7 +325,11 @@ namespace BigCityPerformance.People
                         if (sleepingSet.Contains(household) && !EntityManager.HasComponent<Deleted>(household)) sleepingCitizens--;
                     }
                 }
-                if (gone.Count > 0) sleepingHouseholds.RemoveAll(gone.Contains);
+                if (gone.Count > 0)
+                {
+                    ShopTwin.LeaveTheList(sleepingHouseholds, gone);
+                    sleepingHouseholds.RemoveAll(gone.Contains);
+                }
                 // ponytail: someone woken here from a stop's queue stays in it until their turn, skipped then as gone; the count
                 // at stops is that much high until then.
                 endFrame.CreateCommandBuffer().RemoveComponent<Disabled>(removed);
