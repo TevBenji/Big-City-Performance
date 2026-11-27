@@ -170,7 +170,13 @@ namespace BigCityPerformance.People
             {
                 // No limit, or a city under it: nobody sleeps, at stops included (code review, 8 November 2026: they can be
                 // the only sleepers). Households a batch at a time, then whoever is left with the tag.
-                if (sleepingHouseholds.Count > 0 && !DevWakeAtOnce) WakeLongestAsleep(MostWokenPerTopUp);
+                if (sleepingHouseholds.Count > 0 && !DevWakeAtOnce)
+                {
+                    WakeLongestAsleep(MostWokenPerTopUp);
+                    // People asleep at stops keep waking in turn as the ones in front board: left alone until the last batch,
+                    // they stood frozen for minutes (code review, 26 November 2026).
+                    crowds.Update(EntityManager, waiting, endFrame.CreateCommandBuffer(), sleepNew: false);
+                }
                 else if (sleepingHouseholds.Count > 0 || crowds.Asleep > 0) WakeAll();
                 return;
             }
